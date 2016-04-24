@@ -10,9 +10,9 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
-using P5.MVC.App.Models;
+using P5.IdentityServer3AllInOne.App.Models;
 
-namespace P5.MVC.App
+namespace P5.IdentityServer3AllInOne.App
 {
     public class EmailService : IIdentityMessageService
     {
@@ -33,7 +33,8 @@ namespace P5.MVC.App
     }
 
     // Configure the application user manager used in this application. UserManager is defined in ASP.NET Identity and is used by the application.
-   
+  
+
     // Configure the application sign-in manager which is used in this application.
-    
+   
 }

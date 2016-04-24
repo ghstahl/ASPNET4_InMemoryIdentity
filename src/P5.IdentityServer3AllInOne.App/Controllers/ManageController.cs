@@ -6,31 +6,32 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using P5.MVC.App.Models;
+using P5.IdentityServer3AllInOne.App.Models;
+using P5.InMemoryIdenity.ForSingleExternalAuthOnly;
 
-namespace P5.MVC.App.Controllers
+namespace P5.IdentityServer3AllInOne.App.Controllers
 {
     [Authorize]
     public class ManageController : Controller
     {
-        private ApplicationSignInManager _signInManager;
-        private ApplicationUserManager _userManager;
+        private CustomSignInManager _signInManager;
+        private CustomUserManager _userManager;
 
         public ManageController()
         {
         }
 
-        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        public ManageController(CustomUserManager userManager, CustomSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
         }
 
-        public ApplicationSignInManager SignInManager
+        public CustomSignInManager SignInManager
         {
             get
             {
-                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
+                return _signInManager ?? HttpContext.GetOwinContext().Get<CustomSignInManager>();
             }
             private set 
             { 
@@ -38,11 +39,11 @@ namespace P5.MVC.App.Controllers
             }
         }
 
-        public ApplicationUserManager UserManager
+        public CustomUserManager UserManager
         {
             get
             {
-                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<CustomUserManager>();
             }
             private set
             {
