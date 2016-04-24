@@ -1,0 +1,1 @@
+# ASPNET4_InMemoryIdentity
