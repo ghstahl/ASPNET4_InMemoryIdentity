@@ -6,6 +6,7 @@ namespace P5.InMemoryIdenity.ForSingleExternalAuthOnly
 {
     public class CustomUserManager : UserManager<CustomUser>
     {
+    
         public CustomUserManager(InMemoryUserStore store)
             : base(store)
         {

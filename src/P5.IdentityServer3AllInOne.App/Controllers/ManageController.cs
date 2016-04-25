@@ -1,13 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using P5.AspNet.Identity.Biggy;
 using P5.IdentityServer3AllInOne.App.Models;
-using P5.InMemoryIdenity.ForSingleExternalAuthOnly;
 
 namespace P5.IdentityServer3AllInOne.App.Controllers
 {
@@ -33,9 +32,9 @@ namespace P5.IdentityServer3AllInOne.App.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<CustomSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 

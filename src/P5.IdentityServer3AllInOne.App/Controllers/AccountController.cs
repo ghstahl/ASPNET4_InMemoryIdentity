@@ -1,15 +1,12 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using P5.AspNet.Identity.Biggy;
 using P5.IdentityServer3AllInOne.App.Models;
-using P5.InMemoryIdenity.ForSingleExternalAuthOnly;
 
 namespace P5.IdentityServer3AllInOne.App.Controllers
 {
@@ -341,33 +338,10 @@ namespace P5.IdentityServer3AllInOne.App.Controllers
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = false });
                 case SignInStatus.Failure:
                 default:
-                    var autoCreateAccount = true;
-                    if (autoCreateAccount)
-                    {
-                        var email = loginInfo.ExternalIdentity.FindFirstValue(ClaimTypes.Email);
-                        var nameIdentifier = loginInfo.ExternalIdentity.FindFirstValue(ClaimTypes.NameIdentifier);
-                        var name = loginInfo.ExternalIdentity.FindFirstValue(ClaimTypes.Name);
-                        if (email == null)
-                        {
-                            email = string.Format("{0}@{1}", name, nameIdentifier);
-                        }
-
-                        // NOTE: This bypasses the initial onboarding of a user and ust uses their nameIdentifier as an email
-                        var result2 = await ExternalLoginConfirmation(
-                            new ExternalLoginConfirmationViewModel
-                            {
-                                Email = email
-                            },
-                            returnUrl);
-                        return result2;
-                    }
-                    else
-                    {
-                        // If the user does not have an account, then prompt the user to create an account
-                        ViewBag.ReturnUrl = returnUrl;
-                        ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
-                        return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
-                    }
+                    // If the user does not have an account, then prompt the user to create an account
+                    ViewBag.ReturnUrl = returnUrl;
+                    ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
+                    return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
             }
         }
 

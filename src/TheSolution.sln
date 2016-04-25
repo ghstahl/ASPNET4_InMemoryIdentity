@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServer3AllInOne.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServerCore", "P5.IdentityServerCore\P5.IdentityServerCore.csproj", "{BD903BD0-8285-4C97-95E8-68F646432604}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.AspNet.Identity.Biggy", "P5.AspNet.Identity.Biggy\P5.AspNet.Identity.Biggy.csproj", "{EC8C86FF-227C-493A-81EB-C3CDAA7741D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServerConsole.Client", "P5.IdentityServerConsole.Client\P5.IdentityServerConsole.Client.csproj", "{B6D7B957-BC40-4917-9B6A-F246A976883B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{BD903BD0-8285-4C97-95E8-68F646432604}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD903BD0-8285-4C97-95E8-68F646432604}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD903BD0-8285-4C97-95E8-68F646432604}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC8C86FF-227C-493A-81EB-C3CDAA7741D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC8C86FF-227C-493A-81EB-C3CDAA7741D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC8C86FF-227C-493A-81EB-C3CDAA7741D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC8C86FF-227C-493A-81EB-C3CDAA7741D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6D7B957-BC40-4917-9B6A-F246A976883B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6D7B957-BC40-4917-9B6A-F246A976883B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6D7B957-BC40-4917-9B6A-F246A976883B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6D7B957-BC40-4917-9B6A-F246A976883B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
