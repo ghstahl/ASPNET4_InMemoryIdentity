@@ -66,8 +66,8 @@
     <Compile Include="Authorization\AuthorizationCodeHandle.cs" />
     <Compile Include="Authorization\AuthorizationCodeHandleExtensions.cs" />
     <Compile Include="Authorization\AuthorizationCodeHandleRecord.cs" />
-    <Compile Include="Authorization\AuthorizationHandleStore.cs" />
-    <Compile Include="BiggyStore.cs" />
+    <Compile Include="Authorization\AuthorizationCodeHandleStore.cs" />
+    <Compile Include="Biggy\BiggyStore.cs" />
     <Compile Include="Claim\ClaimIdentityRecord.cs" />
     <Compile Include="Client\ClientHandle.cs" />
     <Compile Include="Client\ClientExtensions.cs" />
@@ -76,24 +76,23 @@
     <Compile Include="Consent\ConsentExtensions.cs" />
     <Compile Include="Consent\ConsentRecord.cs" />
     <Compile Include="Consent\ConsentStore.cs" />
-    <Compile Include="GuidGenerator.cs" />
-    <Compile Include="IDeepCloneable.cs" />
+    <Compile Include="Helpers\GuidGenerator.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleExtensions.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleStore.cs" />
     <Compile Include="Scope\ScopeStore.cs" />
-    <Compile Include="StringExtensions.cs" />
+    <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Claim\ClaimExtensions.cs" />
     <Compile Include="Claim\ClaimTypeRecord.cs" />
     <Compile Include="Token\TokenHandle.cs" />
     <Compile Include="Token\TokenHandleExtensions.cs" />
     <Compile Include="Token\TokenHandleRecord.cs" />
     <Compile Include="Token\TokenHandleStore.cs" />
-    <Compile Include="WrappedRecord.cs" />
+    <Compile Include="Biggy\WrappedRecord.cs" />
     <Compile Include="Scope\ScopeExtensions.cs" />
     <Compile Include="Scope\ScopeRecord.cs" />
-    <Compile Include="StoreSettings.cs" />
+    <Compile Include="Biggy\StoreSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

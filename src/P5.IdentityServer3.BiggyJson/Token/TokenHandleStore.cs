@@ -9,23 +9,12 @@ namespace P5.IdentityServer3.BiggyJson
 {
     public class TokenHandleStore : BiggyStore<TokenHandleRecord, TokenHandle>, ITokenHandleStore
     {
-        public static TokenHandleStore NewFromDefaultSetting(string folderStorage)
-        {
-            var clientStore = ClientStore.NewFromDefaultSetting(folderStorage);
-            var store = new TokenHandleStore(
-                clientStore,
-                folderStorage, 
-                StoreSettings.DefaultSettings.Database,
-                StoreSettings.DefaultSettings.TokenHandleCollection);
-            return store;
-        }
-
         public static TokenHandleStore NewFromSetting(StoreSettings settings)
         {
             var clientStore = ClientStore.NewFromSetting(settings);
             var store = new TokenHandleStore(
                 clientStore,
-                settings.Folder, 
+                settings.Folder,
                 settings.Database,
                 settings.TokenHandleCollection);
             return store;

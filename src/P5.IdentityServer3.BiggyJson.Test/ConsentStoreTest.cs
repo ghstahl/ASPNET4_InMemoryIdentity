@@ -10,14 +10,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
+    [DeploymentItem("source", "source")]
     public class ConsentStoreTest
     {
-        static void InsertTestData(ConsentStore store)
+        static void InsertTestData(ConsentStore store, int count = 1)
         {
 
-            for (int i = 0; i < 10; ++i)
+            for (int i = 0; i < count; ++i)
             {
-                for(int sub = 0; sub < 10;++sub)
+                for (int sub = 0; sub < 10; ++sub)
                 {
                     Consent consent = new Consent() { ClientId = "CLIENTID:"+i, Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT:"+sub };
                     ConsentRecord consentRecord = new ConsentRecord(consent);
@@ -25,19 +26,26 @@ namespace P5.IdentityServer3.BiggyJson.Test
                 }
             }
         }
+        private string _targetFolder;
+        private ConsentStore _consentStore;
 
-        [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestCreateAsync()
+        [TestInitialize]
+        public void Setup()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            string testData = System.IO.File.ReadAllText(Path.Combine(targetFolder, @"clients.json"));
-            ConsentStore store = new ConsentStore(targetFolder);
+            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
+            _consentStore = ConsentStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            InsertTestData(_consentStore, 10);
+        }
+        [TestMethod]
+         public void TestCreateAsync()
+        {
+            string testData = System.IO.File.ReadAllText(Path.Combine(_targetFolder, @"clients.json"));
+
             Consent consent = new Consent() { ClientId = "CLIENTID", Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT" };
             ConsentRecord consentRecord = new ConsentRecord(consent);
-            store.CreateAsync(consentRecord.Record);
+            _consentStore.CreateAsync(consentRecord.Record);
 
-            var result = store.LoadAsync(consent.Subject, consent.ClientId);
+            var result = _consentStore.LoadAsync(consent.Subject, consent.ClientId);
             ConsentRecord consentRecordStored = new ConsentRecord(result.Result);
 
 
@@ -46,24 +54,22 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestUpdateAsync()
+         public void TestUpdateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            ConsentStore store = new ConsentStore(targetFolder);
+
             Consent consent = new Consent() { ClientId = "CLIENTID", Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT" };
             ConsentRecord consentRecord = new ConsentRecord(consent);
-            store.CreateAsync(consentRecord.Record);
+            _consentStore.CreateAsync(consentRecord.Record);
 
-            var result = store.LoadAsync(consentRecord.Record.Subject, consentRecord.Record.ClientId);
+            var result = _consentStore.LoadAsync(consentRecord.Record.Subject, consentRecord.Record.ClientId);
             ConsentRecord consentRecordStored = new ConsentRecord(result.Result);
 
 
             Assert.AreEqual(consentRecord.Id, consentRecordStored.Id);
 
             consentRecord.Record.Scopes = new List<string>() {"c", "d"};
-            store.UpdateAsync(consentRecord.Record);
-            result = store.LoadAsync(consentRecord.Record.Subject, consentRecord.Record.ClientId);
+            _consentStore.UpdateAsync(consentRecord.Record);
+            result = _consentStore.LoadAsync(consentRecord.Record.Subject, consentRecord.Record.ClientId);
             consentRecordStored = new ConsentRecord(result.Result);
 
 
@@ -77,14 +83,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestLoadAllAsync()
+         public void TestLoadAllAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            ConsentStore store = new ConsentStore(targetFolder);
-            InsertTestData(store);
 
-            var result = store.LoadAllAsync("SUBJECT:0");
+            var result = _consentStore.LoadAllAsync("SUBJECT:0");
             Assert.AreEqual(result.Result.Count(),10);
             foreach (var item in result.Result)
             {
@@ -94,22 +96,18 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestRevokeAsync()
+         public void TestRevokeAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            ConsentStore store = new ConsentStore(targetFolder);
-            InsertTestData(store);
 
-            var result = store.LoadAllAsync("SUBJECT:0");
+            var result = _consentStore.LoadAllAsync("SUBJECT:0");
             Assert.AreEqual(result.Result.Count(), 10);
             foreach (var item in result.Result)
             {
                 Assert.AreEqual(item.Subject, "SUBJECT:0");
             }
-            store.RevokeAsync("SUBJECT:0", "CLIENTID:0");
+            _consentStore.RevokeAsync("SUBJECT:0", "CLIENTID:0");
 
-            result = store.LoadAllAsync("SUBJECT:0");
+            result = _consentStore.LoadAllAsync("SUBJECT:0");
             Assert.AreEqual(result.Result.Count(), 9);
             foreach (var item in result.Result)
             {

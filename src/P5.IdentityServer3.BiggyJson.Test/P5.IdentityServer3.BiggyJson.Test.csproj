@@ -62,6 +62,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AuthorizationHandleStoreTest.cs" />
     <Compile Include="ClientStoreTest.cs" />
     <Compile Include="RefreshTokenHandleStoreTest.cs" />
     <Compile Include="TokenHandleStoreTest.cs" />

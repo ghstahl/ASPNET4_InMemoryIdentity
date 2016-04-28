@@ -12,16 +12,11 @@ namespace P5.IdentityServer3.BiggyJson
 {
     public class ClientStore : BiggyStore<ClientRecord, ClientHandle>, IClientStore
     {
-        public static ClientStore NewFromDefaultSetting(string folderStorage)
-        {
-            var store = new ClientStore(folderStorage, StoreSettings.DefaultSettings.Database,
-                StoreSettings.DefaultSettings.ClientCollection);
-            return store;
-        }
-
         public static ClientStore NewFromSetting(StoreSettings settings)
         {
-            var store = new ClientStore(settings.Folder, settings.Database,
+            var store = new ClientStore(
+                settings.Folder,
+                settings.Database,
                 settings.ClientCollection);
             return store;
         }

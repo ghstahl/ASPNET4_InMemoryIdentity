@@ -10,9 +10,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
+    [DeploymentItem("source", "source")]
     public class ScopeStoreTest
     {
-        static void InsertTestData(ScopeStore store,int count = 1)
+        public static void InsertTestData(ScopeStore store,int count = 1)
         {
 
             for (int i = 0; i < count; ++i)
@@ -49,15 +50,19 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
             }
         }
+        private string _targetFolder;
+        private ScopeStore _scopeStore;
 
+        [TestInitialize]
+        public void Setup()
+        {
+            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
+            _scopeStore = ScopeStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            InsertTestData(_scopeStore, 10);
+        }
         [TestMethod]
-        [DeploymentItem("source", "source")]
         public void TestCreateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ScopeStore store = new ScopeStore(targetFolder);
-            InsertTestData(store);
 
             Scope record = new Scope()
             {
@@ -65,7 +70,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             };
             ScopeRecord scopeRecord =new ScopeRecord(record);
             Guid id = scopeRecord.Id;
-            var result = store.RetrieveAsync(id);
+            var result = _scopeStore.RetrieveAsync(id);
             scopeRecord = new ScopeRecord(result.Result);
 
 
@@ -74,13 +79,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "source")]
         public void TestUpdateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ScopeStore store = new ScopeStore(targetFolder);
-            InsertTestData(store);
 
             Scope record = new Scope()
             {
@@ -88,69 +88,57 @@ namespace P5.IdentityServer3.BiggyJson.Test
             };
             ScopeRecord scopeRecord = new ScopeRecord(record);
             Guid id = scopeRecord.Id;
-            var result = store.RetrieveAsync(id);
+            var result = _scopeStore.RetrieveAsync(id);
             scopeRecord = new ScopeRecord(result.Result);
             string testData = Guid.NewGuid().ToString();
             scopeRecord.Record.ClaimsRule = testData;
 
-            store.UpdateAsync(scopeRecord.Record);
-            result = store.RetrieveAsync(id);
+            _scopeStore.UpdateAsync(scopeRecord.Record);
+            result = _scopeStore.RetrieveAsync(id);
 
             Assert.AreEqual(testData,result.Result.ClaimsRule);
         }
 
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestFindScopesAsync()
+         public void TestFindScopesAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
-            ScopeStore store = new ScopeStore(targetFolder);
-            InsertTestData(store,10);
             List<string> scopeNames = new List<string>();
             for (int i = 0; i < 10; ++i)
             {
                 scopeNames.Add("SCOPENAME:" + i);
             }
-            var result = store.FindScopesAsync(scopeNames);
+            var result = _scopeStore.FindScopesAsync(scopeNames);
 
             Assert.IsNotNull(result.Result);
             Assert.IsTrue(result.Result.Any());
             Assert.AreEqual(result.Result.Count(),10);
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestGetScopesAsync_publicOnly()
+         public void TestGetScopesAsync_publicOnly()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
-            ScopeStore store = new ScopeStore(targetFolder);
-            InsertTestData(store, 10);
             List<string> scopeNames = new List<string>();
             for (int i = 0; i < 10; ++i)
             {
                 scopeNames.Add("SCOPENAME:" + i);
             }
-            var result = store.GetScopesAsync(true);
+            var result = _scopeStore.GetScopesAsync(true);
 
             Assert.IsNotNull(result.Result);
             Assert.IsTrue(result.Result.Any());
             Assert.AreEqual(result.Result.Count(), 5);
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestGetScopesAsync_all()
+         public void TestGetScopesAsync_all()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
-            ScopeStore store = new ScopeStore(targetFolder);
-            InsertTestData(store, 10);
             List<string> scopeNames = new List<string>();
             for (int i = 0; i < 10; ++i)
             {
                 scopeNames.Add("SCOPENAME:" + i);
             }
-            var result = store.GetScopesAsync(false);
+            var result = _scopeStore.GetScopesAsync(false);
 
             Assert.IsNotNull(result.Result);
             Assert.IsTrue(result.Result.Any());

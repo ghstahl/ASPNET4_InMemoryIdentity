@@ -50,18 +50,22 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
             }
         }
+        private string _targetFolder;
+        private ClientStore _clientStore;
+        private TokenHandleStore _tokenHandleStore;
 
-        [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestCreateAsync()
+        [TestInitialize]
+        public void Setup()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore clientStore = ClientStore.NewFromDefaultSetting(targetFolder);
-            TokenHandleStore tokenHandleStore = TokenHandleStore.NewFromDefaultSetting(targetFolder);
-
-            TokenHandleStoreTest.InsertTestData(tokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(clientStore, 10);
+            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
+            _clientStore = ClientStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            _tokenHandleStore = TokenHandleStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            InsertTestData(_tokenHandleStore, 10);
+            ClientStoreTest.InsertTestData(_clientStore, 10);
+        }
+        [TestMethod]
+         public void TestCreateAsync()
+        {
 
             TokenHandle record = new TokenHandle()
             {
@@ -69,7 +73,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             };
             TokenHandleRecord tokenHandleRecord = new TokenHandleRecord(record);
             Guid id = tokenHandleRecord.Id;
-            var result = tokenHandleStore.RetrieveAsync(id);
+            var result = _tokenHandleStore.RetrieveAsync(id);
             tokenHandleRecord = new TokenHandleRecord(result.Result);
 
 
@@ -77,16 +81,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestUpdateAsync()
+         public void TestUpdateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore clientStore = ClientStore.NewFromDefaultSetting(targetFolder);
-            TokenHandleStore tokenHandleStore = TokenHandleStore.NewFromDefaultSetting(targetFolder);
-
-            TokenHandleStoreTest.InsertTestData(tokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(clientStore, 10);
 
             TokenHandle record = new TokenHandle()
             {
@@ -94,7 +90,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             };
             TokenHandleRecord tokenHandleRecord = new TokenHandleRecord(record);
             Guid id = tokenHandleRecord.Id;
-            var result = tokenHandleStore.RetrieveAsync(id);
+            var result = _tokenHandleStore.RetrieveAsync(id);
             tokenHandleRecord = new TokenHandleRecord(result.Result);
 
 
@@ -103,8 +99,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
             var testValue = Guid.NewGuid().ToString();
             tokenHandleRecord.Record.Type = testValue;
 
-            tokenHandleStore.UpdateAsync(tokenHandleRecord.Record);
-            result = tokenHandleStore.RetrieveAsync(id);
+            _tokenHandleStore.UpdateAsync(tokenHandleRecord.Record);
+            result = _tokenHandleStore.RetrieveAsync(id);
             tokenHandleRecord = new TokenHandleRecord(result.Result);
             Assert.AreEqual(tokenHandleRecord.Id, id);
             Assert.AreEqual(tokenHandleRecord.Record.Type, testValue);
@@ -112,16 +108,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestStoreAsync()
+         public void TestStoreAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore clientStore = ClientStore.NewFromDefaultSetting(targetFolder);
-            TokenHandleStore tokenHandleStore = TokenHandleStore.NewFromDefaultSetting(targetFolder);
-
-            TokenHandleStoreTest.InsertTestData(tokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(clientStore, 10);
 
             TokenHandle record = new TokenHandle()
             {
@@ -131,7 +119,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Guid id = tokenHandleRecord.Id;
 
             var key = "KEY:" + 0;
-            var result = tokenHandleStore.GetAsync(key);
+            var result = _tokenHandleStore.GetAsync(key);
 
             key = "KEY:" + 10;
             tokenHandleRecord = new TokenHandleRecord(new TokenHandle()
@@ -140,25 +128,16 @@ namespace P5.IdentityServer3.BiggyJson.Test
             });
             id = tokenHandleRecord.Id;
             Token token = result.Result;
-            tokenHandleStore.StoreAsync(key,token);
-            result = tokenHandleStore.GetAsync(key);
+            _tokenHandleStore.StoreAsync(key, token);
+            result = _tokenHandleStore.GetAsync(key);
             tokenHandleRecord = new TokenHandleRecord(new TokenHandle(key,result.Result));
 
             Assert.AreEqual(tokenHandleRecord.Id, id);
 
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestGetAsync()
+         public void TestGetAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore clientStore = ClientStore.NewFromDefaultSetting(targetFolder);
-            TokenHandleStore tokenHandleStore = TokenHandleStore.NewFromDefaultSetting(targetFolder);
-
-            TokenHandleStoreTest.InsertTestData(tokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(clientStore, 10);
-
 
             TokenHandle record = new TokenHandle()
             {
@@ -168,24 +147,15 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Guid id = tokenHandleRecord.Id;
 
             var key = "KEY:" + 0;
-            var result = tokenHandleStore.GetAsync(key);
+            var result = _tokenHandleStore.GetAsync(key);
 
 
             Assert.IsNotNull(result.Result);
             Assert.AreEqual(result.Result.ClientId,"CLIENTID:" + 0);
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestRemoveAsync()
+         public void TestRemoveAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore clientStore = ClientStore.NewFromDefaultSetting(targetFolder);
-            TokenHandleStore tokenHandleStore = TokenHandleStore.NewFromDefaultSetting(targetFolder);
-
-            TokenHandleStoreTest.InsertTestData(tokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(clientStore, 10);
-
 
             TokenHandle record = new TokenHandle()
             {
@@ -195,14 +165,14 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Guid id = tokenHandleRecord.Id;
 
             var key = "KEY:" + 0;
-            var result = tokenHandleStore.GetAsync(key);
+            var result = _tokenHandleStore.GetAsync(key);
 
 
             Assert.IsNotNull(result.Result);
             Assert.AreEqual(result.Result.ClientId, "CLIENTID:" + 0);
 
-            tokenHandleStore.RemoveAsync(key);
-            result = tokenHandleStore.GetAsync(key);
+            _tokenHandleStore.RemoveAsync(key);
+            result = _tokenHandleStore.GetAsync(key);
 
 
             Assert.IsNull(result.Result);
@@ -210,17 +180,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestGetAllAsync()
+         public void TestGetAllAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore clientStore = ClientStore.NewFromDefaultSetting(targetFolder);
-            TokenHandleStore tokenHandleStore = TokenHandleStore.NewFromDefaultSetting(targetFolder);
-
-            TokenHandleStoreTest.InsertTestData(tokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(clientStore, 10);
-
 
             TokenHandle record = new TokenHandle()
             {
@@ -230,28 +191,17 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Guid id = tokenHandleRecord.Id;
 
             var subject = "SUBJECT:" + 0;
-            var result = tokenHandleStore.GetAllAsync(subject);
+            var result = _tokenHandleStore.GetAllAsync(subject);
 
 
             Assert.IsNotNull(result.Result);
             Assert.AreEqual(result.Result.Count(),5);
 
-
         }
 
-
         [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestRevokeAsync()
+         public void TestRevokeAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore clientStore = ClientStore.NewFromDefaultSetting(targetFolder);
-            TokenHandleStore tokenHandleStore = TokenHandleStore.NewFromDefaultSetting(targetFolder);
-
-            TokenHandleStoreTest.InsertTestData(tokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(clientStore, 10);
-
 
             TokenHandle record = new TokenHandle()
             {
@@ -261,7 +211,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Guid id = tokenHandleRecord.Id;
 
             var key = "KEY:" + 0;
-            var result = tokenHandleStore.GetAsync(key);
+            var result = _tokenHandleStore.GetAsync(key);
 
 
             Assert.IsNotNull(result.Result);
@@ -269,8 +219,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
             var subject = "SUBJECT:"+0;
             var clientId = result.Result.ClientId;
-            tokenHandleStore.RevokeAsync(subject, clientId);
-            result = tokenHandleStore.GetAsync(key);
+            _tokenHandleStore.RevokeAsync(subject, clientId);
+            result = _tokenHandleStore.GetAsync(key);
             Assert.IsNull(result.Result);
 
         }

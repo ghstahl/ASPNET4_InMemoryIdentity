@@ -7,62 +7,66 @@ using IdentityServer3.Core.Services;
 
 namespace P5.IdentityServer3.BiggyJson
 {
-    public class RefreshTokenHandleStore : BiggyStore<RefreshTokenHandleRecord, RefreshTokenHandle>, IRefreshTokenStore
+    public class AuthorizationCodeHandleStore : BiggyStore<AuthorizationCodeHandleRecord, AuthorizationCodeHandle>, IAuthorizationCodeStore
     {
-        public static RefreshTokenHandleStore NewFromSetting(StoreSettings settings)
+        public static AuthorizationCodeHandleStore NewFromSetting(StoreSettings settings)
         {
             var clientStore = ClientStore.NewFromSetting(settings);
-            var store = new RefreshTokenHandleStore(
+            var scopeStore = ScopeStore.NewFromSetting(settings);
+            var store = new AuthorizationCodeHandleStore(
                 clientStore,
+                scopeStore,
                 settings.Folder,
                 settings.Database,
-                settings.RefreshTokenCollection);
+                settings.AuthorizationCodeCollection);
             return store;
         }
 
         private IClientStore _clientStore;
+        private IScopeStore _scopeStore;
 
-        public RefreshTokenHandleStore(
+        public AuthorizationCodeHandleStore(
             IClientStore clientStore,
+            IScopeStore scopeStore,
             string folderStorage,
             string groupName = "IdentityServer3",
-            string databaseName = "TokenHandles")
+            string databaseName = "AuthorizationCodes")
             : base(folderStorage, groupName, databaseName)
         {
             _clientStore = clientStore;
+            _scopeStore = scopeStore;
+        }
+
+        protected override Guid GetId(AuthorizationCodeHandle record)
+        {
+            return record.CreateGuid(AuthorizationCodeHandleRecord.Namespace);
+        }
+
+        protected override AuthorizationCodeHandleRecord NewWrap(AuthorizationCodeHandle record)
+        {
+            return new AuthorizationCodeHandleRecord(record);
         }
 
 
-        protected override Guid GetId(RefreshTokenHandle record)
+        public async Task StoreAsync(string key, AuthorizationCode value)
         {
-            return record.CreateGuid(RefreshTokenHandleRecord.Namespace);
-        }
-
-        protected override RefreshTokenHandleRecord NewWrap(RefreshTokenHandle record)
-        {
-            var result = new RefreshTokenHandleRecord(record);
-            return result;
-        }
-
-        public async Task StoreAsync(string key, RefreshToken value)
-        {
-            var record = new RefreshTokenHandle(key, value);
+            var record = new AuthorizationCodeHandle(key, value);
             await CreateAsync(record);
         }
 
-        public async Task<RefreshToken> GetAsync(string key)
+        public async Task<AuthorizationCode> GetAsync(string key)
         {
-            var tokenHandleRecord = new RefreshTokenHandleRecord(new RefreshTokenHandle(key, null));
+            var tokenHandleRecord = new AuthorizationCodeHandleRecord(new AuthorizationCodeHandle(key, null));
             var result = RetrieveAsync(tokenHandleRecord.Id);
             if (result.Result == null)
-                return await Task.FromResult<RefreshToken>(null);
-            var token = result.Result.ToToken(_clientStore);
+                return await Task.FromResult<AuthorizationCode>(null);
+            var token = result.Result.ToAuthorizationCode(_clientStore, _scopeStore);
             return await Task.FromResult(token);
         }
 
         public async Task RemoveAsync(string key)
         {
-            var record = new RefreshTokenHandleRecord(new RefreshTokenHandle(key, null));
+            var record = new AuthorizationCodeHandleRecord(new AuthorizationCodeHandle(key, null));
             await DeleteAsync(record.Id);
         }
 
@@ -71,7 +75,7 @@ namespace P5.IdentityServer3.BiggyJson
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                         where item.Record.SubjectId == subject
-                        select item.Record.ToToken(_clientStore);
+                        select item.Record.ToAuthorizationCode(_clientStore, _scopeStore);
 
             var list = query.ToArray();
             return await Task.FromResult(list.Cast<ITokenMetadata>());
@@ -79,6 +83,7 @@ namespace P5.IdentityServer3.BiggyJson
 
         public async Task RevokeAsync(string subject, string client)
         {
+
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                         where item.Record.SubjectId == subject && item.Record.ClientId == client

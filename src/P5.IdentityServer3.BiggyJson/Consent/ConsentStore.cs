@@ -9,6 +9,14 @@ namespace P5.IdentityServer3.BiggyJson
 {
     public class ConsentStore : BiggyStore<ConsentRecord,Consent>, IConsentStore
     {
+        public static ConsentStore NewFromSetting(StoreSettings settings)
+        {
+            var store = new ConsentStore(
+                settings.Folder,
+                settings.Database,
+                settings.ConsentCollection);
+            return store;
+        }
         public ConsentStore(string folderStorage, string groupName = "IdentityServer3", string databaseName = "Consents")
             : base(folderStorage, groupName, databaseName)
         {

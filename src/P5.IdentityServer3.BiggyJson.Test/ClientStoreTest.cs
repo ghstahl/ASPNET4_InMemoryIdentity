@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
+    [DeploymentItem("source", "source")]
     public class ClientStoreTest
     {
         public static void InsertTestData(ClientStore store,int count = 1)
@@ -63,22 +64,27 @@ namespace P5.IdentityServer3.BiggyJson.Test
             }
         }
 
+        private string _targetFolder;
+        private ClientStore _clientStore;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
+            _clientStore = ClientStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            ClientStoreTest.InsertTestData(_clientStore, 10);
+        }
+
         [TestMethod]
-        [DeploymentItem("source", "source")]
         public void TestCreateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
-            InsertTestData(store);
-
             Client record = new Client()
             {
                 ClientId = "CLIENTID:" + 0
             };
             ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
             Guid id = clientRecord.Id;
-            var result = store.RetrieveAsync(id);
+            var result = _clientStore.RetrieveAsync(id);
             clientRecord = new ClientRecord(result.Result);
 
 
@@ -86,14 +92,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
         public void TestUpdateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
-
-            InsertTestData(store);
 
             Client record = new Client()
             {
@@ -101,16 +101,16 @@ namespace P5.IdentityServer3.BiggyJson.Test
             };
             ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
             Guid id = clientRecord.Id;
-            var result = store.RetrieveAsync(id);
+            var result = _clientStore.RetrieveAsync(id);
             clientRecord = new ClientRecord(result.Result);
 
 
             Assert.AreEqual(clientRecord.Id, id);
             var testData = Guid.NewGuid().ToString();
             clientRecord.Record.ClientName = testData;
-            store.UpdateAsync(clientRecord.Record);
+            _clientStore.UpdateAsync(clientRecord.Record);
 
-            result = store.RetrieveAsync(id);
+            result = _clientStore.RetrieveAsync(id);
             clientRecord = new ClientRecord(result.Result);
 
 
@@ -118,14 +118,8 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Assert.AreEqual(clientRecord.Record.ClientName,testData);
         }
         [TestMethod]
-        [DeploymentItem("source", "source")]
         public void TestDeleteAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
-
-            InsertTestData(store);
 
             Client record = new Client()
             {
@@ -133,28 +127,22 @@ namespace P5.IdentityServer3.BiggyJson.Test
             };
             ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
             Guid id = clientRecord.Id;
-            var result = store.RetrieveAsync(id);
+            var result = _clientStore.RetrieveAsync(id);
             clientRecord = new ClientRecord(result.Result);
 
 
             Assert.AreEqual(clientRecord.Id, id);
             var testData = Guid.NewGuid().ToString();
             clientRecord.Record.ClientName = testData;
-            store.DeleteAsync(id);
+            _clientStore.DeleteAsync(id);
 
-            result = store.RetrieveAsync(id);
+            result = _clientStore.RetrieveAsync(id);
             Assert.IsNull(result.Result);
         }
 
         [TestMethod]
-        [DeploymentItem("source", "source")]
         public void TestFindClientByIdAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
-
-            InsertTestData(store);
 
             Client record = new Client()
             {
@@ -162,52 +150,11 @@ namespace P5.IdentityServer3.BiggyJson.Test
             };
             ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
             Guid id = clientRecord.Id;
-            var result = store.FindClientByIdAsync("CLIENTID:" + 0);
+            var result = _clientStore.FindClientByIdAsync("CLIENTID:" + 0);
             clientRecord = new ClientRecord(result.Result.ToClientHandle());
 
 
             Assert.AreEqual(clientRecord.Id, id);
         }
-        /*
-        [TestMethod]
-        [DeploymentItem("source", "source")]
-
-        public void TestGetScopesAsync_publicOnly()
-        {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ScopeStore store = new ScopeStore(targetFolder);
-            InsertTestData(store, 10);
-            List<string> scopeNames = new List<string>();
-            for (int i = 0; i < 10; ++i)
-            {
-                scopeNames.Add("SCOPENAME:" + i);
-            }
-            var result = store.GetScopesAsync(true);
-
-            Assert.IsNotNull(result.Result);
-            Assert.IsTrue(result.Result.Any());
-            Assert.AreEqual(result.Result.Count(), 5);
-        }
-        [TestMethod]
-        [DeploymentItem("source", "source")]
-        public void TestGetScopesAsync_all()
-        {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-
-            ScopeStore store = new ScopeStore(targetFolder);
-            InsertTestData(store, 10);
-            List<string> scopeNames = new List<string>();
-            for (int i = 0; i < 10; ++i)
-            {
-                scopeNames.Add("SCOPENAME:" + i);
-            }
-            var result = store.GetScopesAsync(false);
-
-            Assert.IsNotNull(result.Result);
-            Assert.IsTrue(result.Result.Any());
-            Assert.AreEqual(result.Result.Count(), 10);
-        }
-         * */
     }
 }

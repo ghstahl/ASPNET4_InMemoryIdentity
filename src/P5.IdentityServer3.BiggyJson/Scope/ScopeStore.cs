@@ -9,6 +9,15 @@ namespace P5.IdentityServer3.BiggyJson
 {
     public class ScopeStore : BiggyStore<ScopeRecord, Scope>, IScopeStore
     {
+        public static ScopeStore NewFromSetting(StoreSettings settings)
+        {
+            var store = new ScopeStore(
+                settings.Folder,
+                settings.Database,
+                settings.ScopeCollection);
+            return store;
+        }
+
         public ScopeStore(string folderStorage, string groupName = "IdentityServer3", string databaseName = "Scopes")
             : base(folderStorage, groupName, databaseName)
         {
@@ -43,6 +52,6 @@ namespace P5.IdentityServer3.BiggyJson
             return await Task.FromResult(query);
         }
 
-       
+
     }
 }

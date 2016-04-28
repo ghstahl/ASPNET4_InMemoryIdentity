@@ -60,7 +60,7 @@ namespace P5.IdentityServer3.BiggyJson
             }
             catch (Exception e)
             {
-//TODO: Log something                
+//TODO: Log something
             }
             return Task.FromResult<T>(null);
         }
