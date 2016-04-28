@@ -71,7 +71,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
         public void Setup()
         {
             _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _clientStore = ClientStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            _clientStore = new ClientStore(StoreSettings.UsingFolder(_targetFolder));
             ClientStoreTest.InsertTestData(_clientStore, 10);
         }
 

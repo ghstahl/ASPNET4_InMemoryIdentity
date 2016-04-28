@@ -9,17 +9,12 @@ namespace P5.IdentityServer3.BiggyJson
 {
     public class ScopeStore : BiggyStore<ScopeRecord, Scope>, IScopeStore
     {
-        public static ScopeStore NewFromSetting(StoreSettings settings)
+        public ScopeStore(StoreSettings settings)
+            : base(settings.Folder, settings.Database, settings.ScopeCollection)
         {
-            var store = new ScopeStore(
-                settings.Folder,
-                settings.Database,
-                settings.ScopeCollection);
-            return store;
         }
-
-        public ScopeStore(string folderStorage, string groupName = "IdentityServer3", string databaseName = "Scopes")
-            : base(folderStorage, groupName, databaseName)
+        public ScopeStore(string folderStorage, string database = "IdentityServer3", string databaseName = "Scopes")
+            : base(folderStorage, database, databaseName)
         {
         }
         protected override Guid GetId(Scope record)

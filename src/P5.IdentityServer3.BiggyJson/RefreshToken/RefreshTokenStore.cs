@@ -7,22 +7,22 @@ using IdentityServer3.Core.Services;
 
 namespace P5.IdentityServer3.BiggyJson
 {
-    public class RefreshTokenHandleStore : BiggyStore<RefreshTokenHandleRecord, RefreshTokenHandle>, IRefreshTokenStore
+    public class RefreshTokenStore : BiggyStore<RefreshTokenHandleRecord, RefreshTokenHandle>, IRefreshTokenStore
     {
-        public static RefreshTokenHandleStore NewFromSetting(StoreSettings settings)
-        {
-            var clientStore = ClientStore.NewFromSetting(settings);
-            var store = new RefreshTokenHandleStore(
-                clientStore,
-                settings.Folder,
-                settings.Database,
-                settings.RefreshTokenCollection);
-            return store;
-        }
-
         private IClientStore _clientStore;
-
-        public RefreshTokenHandleStore(
+        public RefreshTokenStore(StoreSettings settings)
+            : this(settings, new ClientStore(settings))
+        {
+            _clientStore = new ClientStore(settings);
+        }
+        
+        public RefreshTokenStore(
+            StoreSettings settings,
+            IClientStore clientStore)
+            : this(clientStore,settings.Folder, settings.Database, settings.RefreshTokenCollection)
+        {
+        }
+        public RefreshTokenStore(
             IClientStore clientStore,
             string folderStorage,
             string groupName = "IdentityServer3",

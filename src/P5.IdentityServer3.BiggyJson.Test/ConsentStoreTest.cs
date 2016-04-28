@@ -33,7 +33,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
         public void Setup()
         {
             _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _consentStore = ConsentStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            _consentStore = new ConsentStore(StoreSettings.UsingFolder(_targetFolder));
             InsertTestData(_consentStore, 10);
         }
         [TestMethod]

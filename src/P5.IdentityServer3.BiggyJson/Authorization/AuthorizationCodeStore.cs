@@ -7,25 +7,30 @@ using IdentityServer3.Core.Services;
 
 namespace P5.IdentityServer3.BiggyJson
 {
-    public class AuthorizationCodeHandleStore : BiggyStore<AuthorizationCodeHandleRecord, AuthorizationCodeHandle>, IAuthorizationCodeStore
+    public class AuthorizationCodeStore : BiggyStore<AuthorizationCodeHandleRecord, AuthorizationCodeHandle>,
+        IAuthorizationCodeStore
     {
-        public static AuthorizationCodeHandleStore NewFromSetting(StoreSettings settings)
-        {
-            var clientStore = ClientStore.NewFromSetting(settings);
-            var scopeStore = ScopeStore.NewFromSetting(settings);
-            var store = new AuthorizationCodeHandleStore(
-                clientStore,
-                scopeStore,
-                settings.Folder,
-                settings.Database,
-                settings.AuthorizationCodeCollection);
-            return store;
-        }
-
         private IClientStore _clientStore;
         private IScopeStore _scopeStore;
 
-        public AuthorizationCodeHandleStore(
+        public AuthorizationCodeStore(
+            StoreSettings settings)
+            : base(settings.Folder, settings.Database, settings.AuthorizationCodeCollection)
+        {
+            _clientStore = new ClientStore(settings);
+            _scopeStore = new ScopeStore(settings);
+        }
+        public AuthorizationCodeStore(
+            StoreSettings settings,
+            IClientStore clientStore,
+            IScopeStore scopeStore)
+            : base(settings.Folder, settings.Database, settings.AuthorizationCodeCollection)
+        {
+            _clientStore = clientStore;
+            _scopeStore = scopeStore;
+        }
+
+        public AuthorizationCodeStore(
             IClientStore clientStore,
             IScopeStore scopeStore,
             string folderStorage,
@@ -74,8 +79,8 @@ namespace P5.IdentityServer3.BiggyJson
         {
             var collection = this.Store.TryLoadData();
             var query = from item in collection
-                        where item.Record.SubjectId == subject
-                        select item.Record.ToAuthorizationCode(_clientStore, _scopeStore);
+                where item.Record.SubjectId == subject
+                select item.Record.ToAuthorizationCode(_clientStore, _scopeStore);
 
             var list = query.ToArray();
             return await Task.FromResult(list.Cast<ITokenMetadata>());
@@ -86,8 +91,8 @@ namespace P5.IdentityServer3.BiggyJson
 
             var collection = this.Store.TryLoadData();
             var query = from item in collection
-                        where item.Record.SubjectId == subject && item.Record.ClientId == client
-                        select item;
+                where item.Record.SubjectId == subject && item.Record.ClientId == client
+                select item;
             foreach (var record in query)
             {
                 await DeleteAsync(record.Id);

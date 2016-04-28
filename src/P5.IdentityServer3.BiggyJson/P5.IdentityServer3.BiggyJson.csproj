@@ -66,9 +66,10 @@
     <Compile Include="Authorization\AuthorizationCodeHandle.cs" />
     <Compile Include="Authorization\AuthorizationCodeHandleExtensions.cs" />
     <Compile Include="Authorization\AuthorizationCodeHandleRecord.cs" />
-    <Compile Include="Authorization\AuthorizationCodeHandleStore.cs" />
+    <Compile Include="Authorization\AuthorizationCodeStore.cs" />
     <Compile Include="Biggy\BiggyStore.cs" />
     <Compile Include="Claim\ClaimIdentityRecord.cs" />
+    <Compile Include="Services\ServiceFactory.cs" />
     <Compile Include="Client\ClientHandle.cs" />
     <Compile Include="Client\ClientExtensions.cs" />
     <Compile Include="Client\ClientRecord.cs" />
@@ -80,7 +81,7 @@
     <Compile Include="RefreshToken\RefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleExtensions.cs" />
-    <Compile Include="RefreshToken\RefreshTokenHandleStore.cs" />
+    <Compile Include="RefreshToken\RefreshTokenStore.cs" />
     <Compile Include="Scope\ScopeStore.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Claim\ClaimExtensions.cs" />
@@ -99,6 +100,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

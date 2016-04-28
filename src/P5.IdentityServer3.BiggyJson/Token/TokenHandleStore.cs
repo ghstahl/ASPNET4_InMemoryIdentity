@@ -9,25 +9,26 @@ namespace P5.IdentityServer3.BiggyJson
 {
     public class TokenHandleStore : BiggyStore<TokenHandleRecord, TokenHandle>, ITokenHandleStore
     {
-        public static TokenHandleStore NewFromSetting(StoreSettings settings)
-        {
-            var clientStore = ClientStore.NewFromSetting(settings);
-            var store = new TokenHandleStore(
-                clientStore,
-                settings.Folder,
-                settings.Database,
-                settings.TokenHandleCollection);
-            return store;
-        }
-
         private IClientStore _clientStore;
+
+        public TokenHandleStore(
+            StoreSettings settings)
+            : this(settings, new ClientStore(settings))
+        {       
+        }
+        public TokenHandleStore(
+            StoreSettings settings,
+            IClientStore clientStore)
+            : this(clientStore, settings.Folder, settings.Database, settings.TokenHandleCollection)
+        { 
+        }
 
         public TokenHandleStore(
             IClientStore clientStore,
             string folderStorage,
-            string groupName = "IdentityServer3",
-            string databaseName = "TokenHandles")
-            : base(folderStorage, groupName, databaseName)
+            string databaseName = "IdentityServer3",
+            string collectionName = "TokenHandles")
+            : base(folderStorage, databaseName, collectionName)
         {
             _clientStore = clientStore;
         }

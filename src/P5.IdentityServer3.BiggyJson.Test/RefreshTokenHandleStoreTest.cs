@@ -16,7 +16,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
     [DeploymentItem("source", "source")]
     public class RefreshTokenHandleStoreTest
     {
-        static void InsertTestData(RefreshTokenHandleStore store, int count = 1)
+        static void InsertTestData(RefreshTokenStore store, int count = 1)
         {
 
             for (int i = 0; i < count; ++i)
@@ -43,14 +43,14 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
         private string _targetFolder;
         private ClientStore _clientStore;
-        private RefreshTokenHandleStore _refreshTokenHandleStore;
+        private RefreshTokenStore _refreshTokenHandleStore;
 
         [TestInitialize]
         public void Setup()
         {
             _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _clientStore = ClientStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
-            _refreshTokenHandleStore = RefreshTokenHandleStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            _clientStore = new ClientStore(StoreSettings.UsingFolder(_targetFolder));
+            _refreshTokenHandleStore = new RefreshTokenStore(StoreSettings.UsingFolder(_targetFolder));
             InsertTestData(_refreshTokenHandleStore, 10);
             ClientStoreTest.InsertTestData(_clientStore, 10);
         }

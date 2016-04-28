@@ -1,27 +1,25 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Biggy.Data.Json;
-using IdentityServer3.Core.Models;
 
 namespace P5.IdentityServer3.BiggyJson
 {
     public abstract class BiggyStore<TWrappedRecord, T> where TWrappedRecord : WrappedRecord<T>, new() where T:class
     {
-        protected string GroupName { get; set; }
         protected string DatabaseName { get; set; }
+        protected string CollectionName { get; set; }
         protected readonly string FolderStorage = string.Empty;
         protected JsonStore<TWrappedRecord> _theStore = null;
         protected JsonStore<TWrappedRecord> Store
         {
-            get { return _theStore ?? (_theStore = new JsonStore<TWrappedRecord>(this.FolderStorage, GroupName, DatabaseName)); }
+            get { return _theStore ?? (_theStore = new JsonStore<TWrappedRecord>(this.FolderStorage, DatabaseName, CollectionName)); }
         }
-        public BiggyStore(string folderStorage,string groupName,string databaseName)
+        public BiggyStore(string folderStorage, string database, string collection)
         {
             FolderStorage = folderStorage;
-            GroupName = groupName;
-            DatabaseName = databaseName;
+            DatabaseName = database;
+            CollectionName = collection;
         }
 
         protected abstract Guid GetId(T record);

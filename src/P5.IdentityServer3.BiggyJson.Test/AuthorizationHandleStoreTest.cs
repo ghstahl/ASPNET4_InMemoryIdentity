@@ -13,7 +13,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
     [DeploymentItem("source", "source")]
     public class AuthorizationHandleStoreTest
     {
-        static void InsertTestData(AuthorizationCodeHandleStore store, int count = 1)
+        static void InsertTestData(AuthorizationCodeStore store, int count = 1)
         {
 
             for (int i = 0; i < count; ++i)
@@ -58,15 +58,15 @@ namespace P5.IdentityServer3.BiggyJson.Test
         private string _targetFolder;
         private ClientStore _clientStore;
         private ScopeStore _scopeStore;
-        private AuthorizationCodeHandleStore _authorizationCodeHandleStore;
+        private AuthorizationCodeStore _authorizationCodeHandleStore;
 
         [TestInitialize]
         public void Setup()
         {
             _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _clientStore = ClientStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
-            _scopeStore = ScopeStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
-            _authorizationCodeHandleStore = AuthorizationCodeHandleStore.NewFromSetting(StoreSettings.UsingFolder(_targetFolder));
+            _clientStore = new ClientStore(StoreSettings.UsingFolder(_targetFolder));
+            _scopeStore = new ScopeStore(StoreSettings.UsingFolder(_targetFolder));
+            _authorizationCodeHandleStore = new AuthorizationCodeStore(StoreSettings.UsingFolder(_targetFolder));
             InsertTestData(_authorizationCodeHandleStore, 10);
             ClientStoreTest.InsertTestData(_clientStore, 10);
             ScopeStoreTest.InsertTestData(_scopeStore,10);
