@@ -64,10 +64,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestCreateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
             InsertTestData(store);
@@ -86,10 +86,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
         }
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestUpdateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
 
@@ -118,10 +118,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Assert.AreEqual(clientRecord.Record.ClientName,testData);
         }
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestDeleteAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
 
@@ -147,10 +147,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestFindClientByIdAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ClientStore store = ClientStore.NewFromDefaultSetting(targetFolder);
 
@@ -170,11 +170,11 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
         /*
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
 
         public void TestGetScopesAsync_publicOnly()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ScopeStore store = new ScopeStore(targetFolder);
             InsertTestData(store, 10);
@@ -190,10 +190,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Assert.AreEqual(result.Result.Count(), 5);
         }
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestGetScopesAsync_all()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ScopeStore store = new ScopeStore(targetFolder);
             InsertTestData(store, 10);

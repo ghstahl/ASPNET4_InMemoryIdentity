@@ -45,8 +45,8 @@ namespace P5.IdentityServer3.BiggyJson
         public async Task<Client> FindClientByIdAsync(string clientId)
         {
             var cr = new ClientRecord(new ClientHandle(){ClientId = clientId});
-            var result = RetrieveAsync(cr.Id);
-            return await Task.FromResult(result.Result.ToClient());
+            var result = await RetrieveAsync(cr.Id);
+            return await Task.FromResult(result.ToClient());
         }
     }
 }

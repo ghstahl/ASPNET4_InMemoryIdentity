@@ -23,6 +23,7 @@ namespace P5.IdentityServer3.BiggyJson
                 Lifetime = tokenHandle.Lifetime,
                 Type = tokenHandle.Type,
                 Version = tokenHandle.Version
+               
             };
             return token;
 

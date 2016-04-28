@@ -27,10 +27,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestCreateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
             string testData = System.IO.File.ReadAllText(Path.Combine(targetFolder, @"clients.json"));
             ConsentStore store = new ConsentStore(targetFolder);
             Consent consent = new Consent() { ClientId = "CLIENTID", Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT" };
@@ -46,10 +46,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestUpdateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
             ConsentStore store = new ConsentStore(targetFolder);
             Consent consent = new Consent() { ClientId = "CLIENTID", Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT" };
             ConsentRecord consentRecord = new ConsentRecord(consent);
@@ -77,10 +77,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestLoadAllAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
             ConsentStore store = new ConsentStore(targetFolder);
             InsertTestData(store);
 
@@ -94,10 +94,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestRevokeAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
             ConsentStore store = new ConsentStore(targetFolder);
             InsertTestData(store);
 

@@ -51,10 +51,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestCreateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ScopeStore store = new ScopeStore(targetFolder);
             InsertTestData(store);
@@ -74,10 +74,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestUpdateAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ScopeStore store = new ScopeStore(targetFolder);
             InsertTestData(store);
@@ -100,10 +100,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestFindScopesAsync()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ScopeStore store = new ScopeStore(targetFolder);
             InsertTestData(store,10);
@@ -119,10 +119,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Assert.AreEqual(result.Result.Count(),10);
         }
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestGetScopesAsync_publicOnly()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ScopeStore store = new ScopeStore(targetFolder);
             InsertTestData(store, 10);
@@ -138,10 +138,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Assert.AreEqual(result.Result.Count(), 5);
         }
         [TestMethod]
-        [DeploymentItem("source", "targetFolder")]
+        [DeploymentItem("source", "source")]
         public void TestGetScopesAsync_all()
         {
-            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"targetFolder");
+            var targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
 
             ScopeStore store = new ScopeStore(targetFolder);
             InsertTestData(store, 10);

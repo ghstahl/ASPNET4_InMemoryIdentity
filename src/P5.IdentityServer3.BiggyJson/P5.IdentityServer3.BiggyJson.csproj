@@ -63,7 +63,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\AuthorizationCodeHandle.cs" />
+    <Compile Include="Authorization\AuthorizationCodeHandleExtensions.cs" />
+    <Compile Include="Authorization\AuthorizationCodeHandleRecord.cs" />
+    <Compile Include="Authorization\AuthorizationHandleStore.cs" />
     <Compile Include="BiggyStore.cs" />
+    <Compile Include="Claim\ClaimIdentityRecord.cs" />
     <Compile Include="Client\ClientHandle.cs" />
     <Compile Include="Client\ClientExtensions.cs" />
     <Compile Include="Client\ClientRecord.cs" />

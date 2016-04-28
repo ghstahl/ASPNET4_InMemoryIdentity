@@ -18,7 +18,7 @@ namespace P5.IdentityServer3.BiggyJson
             if (token != null)
             {
                 Audience = token.Audience;
-                Claims = token.Claims.ToClaimTypeRecords();
+                Claims = token.Claims == null?null:token.Claims.ToClaimTypeRecords();
                 ClientId = token.ClientId;
                 CreationTime = token.CreationTime;
                 Expires = token.CreationTime.AddSeconds(token.Lifetime);
