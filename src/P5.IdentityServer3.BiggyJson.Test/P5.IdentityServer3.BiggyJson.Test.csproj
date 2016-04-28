@@ -63,6 +63,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ClientStoreTest.cs" />
+    <Compile Include="RefreshTokenHandleStoreTest.cs" />
     <Compile Include="TokenHandleStoreTest.cs" />
     <Compile Include="ScopeStoreTest.cs" />
     <Compile Include="UnitTestHelpers.cs" />

@@ -9,6 +9,28 @@ namespace P5.IdentityServer3.BiggyJson
 {
     public class RefreshTokenHandleStore : BiggyStore<RefreshTokenHandleRecord, RefreshTokenHandle>, IRefreshTokenStore
     {
+        public static RefreshTokenHandleStore NewFromDefaultSetting(string folderStorage)
+        {
+            var clientStore = ClientStore.NewFromDefaultSetting(folderStorage);
+            var store = new RefreshTokenHandleStore(
+                clientStore,
+                folderStorage,
+                StoreSettings.DefaultSettings.Database,
+                StoreSettings.DefaultSettings.RefreshTokenCollection);
+            return store;
+        }
+
+        public static RefreshTokenHandleStore NewFromSetting(StoreSettings settings)
+        {
+            var clientStore = ClientStore.NewFromSetting(settings);
+            var store = new RefreshTokenHandleStore(
+                clientStore,
+                settings.Folder,
+                settings.Database,
+                settings.RefreshTokenCollection);
+            return store;
+        }
+
         private IClientStore _clientStore;
 
         public RefreshTokenHandleStore(
@@ -41,9 +63,12 @@ namespace P5.IdentityServer3.BiggyJson
 
         public async Task<RefreshToken> GetAsync(string key)
         {
-            var record = new RefreshTokenHandleRecord(new RefreshTokenHandle(key, null));
-            var result = RetrieveAsync(record.Id);
-            return await Task.FromResult(result.Result.ToToken(_clientStore));
+            var tokenHandleRecord = new RefreshTokenHandleRecord(new RefreshTokenHandle(key, null));
+            var result = RetrieveAsync(tokenHandleRecord.Id);
+            if (result.Result == null)
+                return await Task.FromResult<RefreshToken>(null);
+            var token = result.Result.ToToken(_clientStore);
+            return await Task.FromResult(token);
         }
 
         public async Task RemoveAsync(string key)

@@ -17,11 +17,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.AspNet.Identity.Biggy", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServerConsole.Client", "P5.IdentityServerConsole.Client\P5.IdentityServerConsole.Client.csproj", "{B6D7B957-BC40-4917-9B6A-F246A976883B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServer3.BiggyJson", "P5.IdentityServer3.BiggyJson\P5.IdentityServer3.BiggyJson.csproj", "{9127F21E-3C4E-4276-855C-C2BC3B44360B}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7307648D-A46C-476B-A233-BA9BA0B6D192}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServer3.BiggyJson.Test", "P5.IdentityServer3.BiggyJson.Test\P5.IdentityServer3.BiggyJson.Test.csproj", "{759FA5EA-93C5-480E-9D7D-32250DF57DFC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServer3.BiggyJson", "P5.IdentityServer3.BiggyJson\P5.IdentityServer3.BiggyJson.csproj", "{9127F21E-3C4E-4276-855C-C2BC3B44360B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,14 +57,14 @@ Global
 		{B6D7B957-BC40-4917-9B6A-F246A976883B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6D7B957-BC40-4917-9B6A-F246A976883B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6D7B957-BC40-4917-9B6A-F246A976883B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9127F21E-3C4E-4276-855C-C2BC3B44360B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9127F21E-3C4E-4276-855C-C2BC3B44360B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9127F21E-3C4E-4276-855C-C2BC3B44360B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9127F21E-3C4E-4276-855C-C2BC3B44360B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{759FA5EA-93C5-480E-9D7D-32250DF57DFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

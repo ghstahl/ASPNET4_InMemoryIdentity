@@ -14,6 +14,7 @@ namespace P5.IdentityServer3.BiggyJson
 
         public RefreshTokenHandle(string key, RefreshToken token)
         {
+            Key = key;
             if (token != null)
             {
                 AccessToken = token.AccessToken.ToTokenHandle();
@@ -21,7 +22,6 @@ namespace P5.IdentityServer3.BiggyJson
                 CreationTime = token.CreationTime;
                 Expires = token.CreationTime.AddSeconds(token.LifeTime);
                 LifeTime = token.LifeTime;
-                Key = key;
                 SubjectId = token.SubjectId;
                 Version = token.Version;
             }
