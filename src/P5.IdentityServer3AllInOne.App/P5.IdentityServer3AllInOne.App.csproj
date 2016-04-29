@@ -243,6 +243,8 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Config\Certificate.cs" />
+    <Compile Include="Config\CustomGrantValidator.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -264,6 +266,9 @@
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <EmbeddedResource Include="Config\idsrv3test.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -327,6 +332,10 @@
       <Project>{ec8c86ff-227c-493a-81eb-c3cdaa7741d2}</Project>
       <Name>P5.AspNet.Identity.Biggy</Name>
     </ProjectReference>
+    <ProjectReference Include="..\P5.IdentityServer3.BiggyJson\P5.IdentityServer3.BiggyJson.csproj">
+      <Project>{9127f21e-3c4e-4276-855c-c2bc3b44360b}</Project>
+      <Name>P5.IdentityServer3.BiggyJson</Name>
+    </ProjectReference>
     <ProjectReference Include="..\P5.IdentityServerCore\P5.IdentityServerCore.csproj">
       <Project>{bd903bd0-8285-4c97-95e8-68f646432604}</Project>
       <Name>P5.IdentityServerCore</Name>
@@ -350,7 +359,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>41031</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:41031/</IISUrl>
+          <IISUrl>http://localhost:33854/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

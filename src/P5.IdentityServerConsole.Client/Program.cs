@@ -10,7 +10,8 @@ namespace P5.IdentityServerConsole.Client
 {
     class Program
     {
-        public const string token_endpoint = "http://localhost:41031/identity/connect/token";
+        public const string domain_root = "http://localhost:33854";
+        public const string token_endpoint = domain_root + "/identity/connect/token";
         static void Main(string[] args)
         {
             string m1 = "Type a string of text then press Enter. " +
@@ -47,8 +48,13 @@ namespace P5.IdentityServerConsole.Client
                 CallApi(response);
 
                 response = GetUserToken();
-                Console.WriteLine(response.Json); 
+                Console.WriteLine(response.Json);
                 CallApi(response);
+
+                response = GetCustomGrantToken();
+                Console.WriteLine(response.Json);
+                CallApi(response);
+
             }
             catch (Exception e)
             {
@@ -61,7 +67,7 @@ namespace P5.IdentityServerConsole.Client
             var client = new HttpClient();
             client.SetBearerToken(response.AccessToken);
 
-            Console.WriteLine(client.GetStringAsync("http://localhost:41031/api/test").Result);
+            Console.WriteLine(client.GetStringAsync(domain_root+"/api/test").Result);
         }
 
         static TokenResponse GetClientToken()
@@ -82,6 +88,21 @@ namespace P5.IdentityServerConsole.Client
                 "21B5F798-BE55-42BC-8AA8-0025B903DC3B");
 
             return client.RequestResourceOwnerPasswordAsync("bob", "secret", "api1").Result;
+        }
+        static TokenResponse GetCustomGrantToken()
+        {
+            var client = new TokenClient(
+               token_endpoint,
+               "custom_grant_client",
+               "cd19ac6f-3bfa-4577-9579-da32fd15788a");
+
+            var customParams = new Dictionary<string, string>
+            {
+                { "some_custom_parameter", "some_value" }
+            };
+
+            var result = client.RequestCustomGrantAsync("custom", "read", customParams).Result;
+            return result;
         }
     }
 }

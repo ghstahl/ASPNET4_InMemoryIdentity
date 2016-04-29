@@ -13,6 +13,13 @@ namespace P5.IdentityServerCore.IdSrv
                 new Scope
                 {
                     Name = "api1"
+                },
+                new Scope
+                {
+                    Name = "read",
+                    DisplayName = "Read data",
+                    Type = ScopeType.Resource,
+                    Emphasize = false
                 }
             };
         }

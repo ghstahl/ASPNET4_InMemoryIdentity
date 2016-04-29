@@ -49,6 +49,30 @@ namespace P5.IdentityServerCore.IdSrv
                     {
                         "api1"
                     }
+                },
+                new Client
+                {
+                    ClientName = "Custom Grant Client",
+                    Enabled = true,
+
+                    ClientId = "custom_grant_client",
+                    ClientSecrets = new List<Secret>
+                    {
+                        new Secret("cd19ac6f-3bfa-4577-9579-da32fd15788a".Sha256()),
+                    },
+
+                    Flow = Flows.Custom,
+                    AllowedCustomGrantTypes = new List<string>
+                    {
+                        "custom"
+                    },
+                    AllowClientCredentialsOnly = true,
+
+                    AllowedScopes = new List<string>
+                    {
+                        "read",
+                        "write",
+                    },
                 }
             };
         }

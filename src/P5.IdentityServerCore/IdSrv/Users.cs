@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Security.Claims;
+using IdentityServer3.Core;
 using IdentityServer3.Core.Services.InMemory;
 
 namespace P5.IdentityServerCore.IdSrv
@@ -9,19 +11,25 @@ namespace P5.IdentityServerCore.IdSrv
         {
             return new List<InMemoryUser>
             {
-                new InMemoryUser
-                {
-                    Username = "bob",
-                    Password = "secret",
-                    Subject = "1"
+                
+                new InMemoryUser{Subject = "alice", Username = "alice", Password = "secret", 
+                    Claims = new Claim[]
+                    {
+                        new Claim(Constants.ClaimTypes.GivenName, "Alice"),
+                        new Claim(Constants.ClaimTypes.FamilyName, "Smith"),
+                        new Claim(Constants.ClaimTypes.Email, "AliceSmith@email.com"),
+                    }
                 },
-                new InMemoryUser
-                {
-                    Username = "alice",
-                    Password = "secret",
-                    Subject = "2"
+                new InMemoryUser{Subject = "bob", Username = "bob", Password = "secret", 
+                    Claims = new Claim[]
+                    {
+                        new Claim(Constants.ClaimTypes.GivenName, "Bob"),
+                        new Claim(Constants.ClaimTypes.FamilyName, "Smith"),
+                        new Claim(Constants.ClaimTypes.Email, "BobSmith@email.com"),
+                    }
                 }
             };
         }
     }
 }
+ 
