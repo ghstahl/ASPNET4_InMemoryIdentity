@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.Client;
@@ -47,9 +48,15 @@ namespace P5.IdentityServerConsole.Client
                 Console.WriteLine(response.Json);
                 CallApi(response);
 
-                response = GetUserToken();
+                response = GetResourceOwnerToken();
                 Console.WriteLine(response.Json);
                 CallApi(response);
+                response = GetSecondLevelToken(response);
+                Console.WriteLine(response.Json);
+                CallApi(response);
+
+                response = GetUserToken();
+                Console.WriteLine(response.Json);
 
                 response = GetCustomGrantToken();
                 Console.WriteLine(response.Json);
@@ -60,6 +67,32 @@ namespace P5.IdentityServerConsole.Client
             {
 
             }
+        }
+
+        static TokenResponse GetSecondLevelToken(TokenResponse response)
+        {
+            TokenClient tokenClient = new TokenClient(
+               token_endpoint,
+               "WebApi1",
+               "4B79A70F-3919-435C-B46C-571068F7AF37"
+           );
+
+            var customParams = new Dictionary<string, string>
+            {
+                { "token", response.AccessToken }
+            };
+
+            var tokenResponse = tokenClient.RequestCustomGrantAsync("act-as", "WebApi2", customParams).Result;
+            return tokenResponse;
+        }
+        static TokenResponse GetResourceOwnerToken()
+        {
+            var client = new TokenClient(
+                token_endpoint,
+                "ConsoleApplication",
+                "F621F470-9731-4A25-80EF-67A6F7C5F4B8");
+
+            return client.RequestResourceOwnerPasswordAsync("bob", "secret", "WebApi1").Result;
         }
 
         static void CallApi(TokenResponse response)

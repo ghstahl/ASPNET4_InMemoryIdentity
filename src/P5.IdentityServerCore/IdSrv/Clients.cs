@@ -9,7 +9,40 @@ namespace P5.IdentityServerCore.IdSrv
         {
             return new List<Client>
             {
-                // no human involved
+new Client
+                {
+                    ClientName = "Console Client Application",
+                    ClientId = "ConsoleApplication",
+                    Enabled = true,
+                    Flow = Flows.ResourceOwner,
+                    ClientSecrets = new List<Secret>
+                    {
+                        new Secret("F621F470-9731-4A25-80EF-67A6F7C5F4B8".Sha256())
+                    },
+                    AllowedScopes = new List<string>
+                    {
+                        "WebApi1"
+                    }
+                },
+                new Client
+                {
+                    ClientName = "WebApi1 Application",
+                    ClientId = "WebApi1",
+                    Enabled = true,
+                    Flow = Flows.Custom,
+                    ClientSecrets = new List<Secret>
+                    {
+                        new Secret("4B79A70F-3919-435C-B46C-571068F7AF37".Sha256())
+                    },
+                    AllowedCustomGrantTypes = new List<string>
+                    {
+                        "act-as"
+                    },
+                    AllowedScopes = new List<string>
+                    {
+                        "WebApi2"
+                    }
+                },                // no human involved
                 new Client
                 {
                     ClientName = "Silicon-only Client",

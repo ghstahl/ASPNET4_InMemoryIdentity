@@ -11,25 +11,40 @@ namespace P5.IdentityServerCore.IdSrv
         {
             return new List<InMemoryUser>
             {
-                
-                new InMemoryUser{Subject = "alice", Username = "alice", Password = "secret", 
+
+                new InMemoryUser
+                {
+                    Username = "bob",
+                    Password = "secret",
+                    Subject = "bob",
                     Claims = new Claim[]
                     {
-                        new Claim(Constants.ClaimTypes.GivenName, "Alice"),
-                        new Claim(Constants.ClaimTypes.FamilyName, "Smith"),
-                        new Claim(Constants.ClaimTypes.Email, "AliceSmith@email.com"),
+                        new Claim("name", "Bob Booker"),
+                        new Claim("given_name", "Bob"),
+                        new Claim("family_name", "Booker"),
+                        new Claim("email", "BobBooker@email.com"),
+                        new Claim("role", "Admin"),
+                        new Claim("role", "Geek"),
+                        new Claim("website", "http://bob.com")
                     }
                 },
-                new InMemoryUser{Subject = "bob", Username = "bob", Password = "secret", 
+                new InMemoryUser
+                {
+                    Username = "alice",
+                    Password = "secret",
+                    Subject = "alice",
                     Claims = new Claim[]
                     {
-                        new Claim(Constants.ClaimTypes.GivenName, "Bob"),
-                        new Claim(Constants.ClaimTypes.FamilyName, "Smith"),
-                        new Claim(Constants.ClaimTypes.Email, "BobSmith@email.com"),
+                        new Claim("name", "Alice Smith"),
+                        new Claim("given_name", "Alice"),
+                        new Claim("family_name", "Smith"),
+                        new Claim("email", "AliceSmith@email.com"),
+                        new Claim("role", "Admin"),
+                        new Claim("role", "Geek"),
+                        new Claim("website", "http://alice.com")
                     }
                 }
             };
         }
     }
 }
- 

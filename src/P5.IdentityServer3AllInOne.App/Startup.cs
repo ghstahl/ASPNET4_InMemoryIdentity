@@ -51,6 +51,8 @@ namespace P5.IdentityServer3AllInOne.App
             factory.UseInMemoryUsers(Users.Get());
             factory.CustomGrantValidators.Add(
                 new Registration<ICustomGrantValidator>(typeof(CustomGrantValidator)));
+            factory.CustomGrantValidators.Add(
+                new Registration<ICustomGrantValidator>(typeof(ActAsGrantValidator)));
 
             var options = new IdentityServerOptions
             {
@@ -59,7 +61,7 @@ namespace P5.IdentityServer3AllInOne.App
                 RequireSsl = false
             };
 
-           
+
             app.Map("/identity", idsrvApp =>
             {
                 idsrvApp.UseIdentityServer(options);
@@ -71,7 +73,9 @@ namespace P5.IdentityServer3AllInOne.App
                 Authority = "http://localhost:33854/identity",
                 ValidationMode = ValidationMode.ValidationEndpoint,
 
-                RequiredScopes = new[] { "api1" }
+                RequiredScopes = new[] { "api1", "WebApi1", "WebApi2" },
+                PreserveAccessToken = true
+
             });
 
             HttpConfiguration config = new HttpConfiguration();
