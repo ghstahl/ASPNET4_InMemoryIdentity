@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.Client;
+using IdentityModel.Extensions;
 
 namespace P5.IdentityServerConsole.Client
 {
@@ -62,6 +63,12 @@ namespace P5.IdentityServerConsole.Client
                 Console.WriteLine(response.Json);
                 CallApi(response);
 
+                response = GetCustomGrantToken();
+                Console.WriteLine(response.Json);
+                CallApi(response);
+
+
+
             }
             catch (Exception e)
             {
@@ -100,7 +107,23 @@ namespace P5.IdentityServerConsole.Client
             var client = new HttpClient();
             client.SetBearerToken(response.AccessToken);
 
-            Console.WriteLine(client.GetStringAsync(domain_root+"/api/test").Result);
+            var result = client.GetStringAsync(domain_root + "/api/test");
+
+            try
+            {
+                result.Result.ConsoleGreen();
+            }
+            catch (Exception e)
+            {
+                "\nException Caught..............".ConsoleRed();
+                "--------------------------------".ConsoleRed();
+                e.Message.ConsoleRed();
+                if(e.InnerException != null)
+                    e.InnerException.Message.ConsoleRed();
+                "--------------------------------\n".ConsoleRed();
+
+            }
+
         }
 
         static TokenResponse GetClientToken()
