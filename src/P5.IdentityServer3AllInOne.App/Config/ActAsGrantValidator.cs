@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Services;
@@ -39,7 +41,12 @@ namespace P5.IdentityServer3AllInOne.App.Config
 
             if (grantResult == null)
             {
-                grantResult = new CustomGrantValidationResult(subjectClaim.Value, "access_token");
+                var subject = subjectClaim.Value;
+
+                grantResult = new CustomGrantValidationResult(subject, "access_token", new Claim[]
+                {
+                    new Claim(P5.IdentityServerCore.Constants.ClaimTypes.AccountGuid, Guid.NewGuid().ToString()),
+                });
             }
 
             return Task.FromResult(grantResult);
@@ -50,4 +57,5 @@ namespace P5.IdentityServer3AllInOne.App.Config
             get { return "act-as"; }
         }
     }
+
 }

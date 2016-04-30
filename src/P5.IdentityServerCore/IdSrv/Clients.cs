@@ -9,7 +9,7 @@ namespace P5.IdentityServerCore.IdSrv
         {
             return new List<Client>
             {
-new Client
+                new Client
                 {
                     ClientName = "Console Client Application",
                     ClientId = "ConsoleApplication",
@@ -42,19 +42,18 @@ new Client
                     {
                         "WebApi2"
                     }
-                },                // no human involved
+                }, 
+                // no human involved
                 new Client
                 {
                     ClientName = "Silicon-only Client",
                     ClientId = "silicon",
                     Enabled = true,
-                    AccessTokenType = AccessTokenType.Reference,
-
                     Flow = Flows.ClientCredentials,
 
                     ClientSecrets = new List<Secret>
                     {
-                        new Secret("F621F470-9731-4A25-80EF-67A6F7C5F4B8".Sha256())
+                        new Secret("secret".Sha256())
                     },
 
                     AllowedScopes = new List<string>

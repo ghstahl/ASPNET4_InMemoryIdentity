@@ -44,21 +44,21 @@ namespace P5.IdentityServerConsole.Client
         {
             try
             {
-                var response = GetClientToken();
+
+                var response = GetResourceOwnerToken();
                 Console.WriteLine(response.Json);
                 CallApi(response);
 
-                response = GetResourceOwnerToken();
-                Console.WriteLine(response.Json);
-                CallApi(response);
                 response = GetSecondLevelToken(response);
                 Console.WriteLine(response.Json);
                 CallApi(response);
 
-                response = GetUserToken();
-                Console.WriteLine(response.Json);
 
-                response = GetCustomGrantToken();
+                response = GetClientToken();
+                Console.WriteLine(response.Json);
+                CallApi(response);
+
+                response = GetUserToken();
                 Console.WriteLine(response.Json);
                 CallApi(response);
 
@@ -108,7 +108,7 @@ namespace P5.IdentityServerConsole.Client
             var client = new TokenClient(
                 token_endpoint,
                 "silicon",
-                "F621F470-9731-4A25-80EF-67A6F7C5F4B8");
+                "secret");
 
             return client.RequestClientCredentialsAsync("api1").Result;
         }

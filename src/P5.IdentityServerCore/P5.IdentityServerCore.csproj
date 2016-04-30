@@ -61,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\TestController.cs" />
+    <Compile Include="Constants\ClaimTypes.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IdSrv\Clients.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IdSrv\Scopes.cs" />

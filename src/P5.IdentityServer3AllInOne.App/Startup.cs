@@ -53,6 +53,7 @@ namespace P5.IdentityServer3AllInOne.App
                 new Registration<ICustomGrantValidator>(typeof(CustomGrantValidator)));
             factory.CustomGrantValidators.Add(
                 new Registration<ICustomGrantValidator>(typeof(ActAsGrantValidator)));
+            factory.ClaimsProvider = new Registration<IClaimsProvider>(typeof(CustomClaimsProvider));
 
             var options = new IdentityServerOptions
             {
