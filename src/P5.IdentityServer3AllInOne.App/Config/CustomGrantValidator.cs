@@ -24,6 +24,7 @@ namespace P5.IdentityServer3AllInOne.App.Config
                 return Task.FromResult<CustomGrantValidationResult>(
                     new CustomGrantValidationResult("Missing parameters."));
             }
+            // bob has to exist in the user db.
             var result = new CustomGrantValidationResult("bob", "customGrant");
 
             return Task.FromResult(result);

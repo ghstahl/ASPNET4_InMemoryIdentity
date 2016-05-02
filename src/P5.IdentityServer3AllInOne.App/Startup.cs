@@ -1,4 +1,5 @@
-﻿using System.Web.Hosting;
+﻿using System.IdentityModel.Tokens;
+using System.Web.Hosting;
 using System.Web.Http;
 using IdentityServer3.AccessTokenValidation;
 using IdentityServer3.Core.Configuration;
@@ -9,7 +10,7 @@ using Owin;
 using P5.IdentityServer3.BiggyJson;
 using P5.IdentityServer3AllInOne.App.Config;
 using P5.IdentityServerCore.IdSrv;
-using AuthorizeAttribute = System.Web.Mvc.AuthorizeAttribute;
+
 
 
 [assembly: OwinStartupAttribute(typeof(P5.IdentityServer3AllInOne.App.Startup))]
@@ -20,6 +21,7 @@ namespace P5.IdentityServer3AllInOne.App
         public void Configuration(IAppBuilder app)
         {
             ConfigureAuth(app);
+
 
             var path = HostingEnvironment.MapPath("~/App_Data");
 
@@ -58,23 +60,23 @@ namespace P5.IdentityServer3AllInOne.App
             var options = new IdentityServerOptions
             {
                 Factory = factory,
+                RequireSsl = false,
                 SigningCertificate = Certificate.Get(),
-                RequireSsl = false
+                SiteName = "P5 IdentityServer3"
             };
 
 
-            app.Map("/identity", idsrvApp =>
+            app.Map("/idsrv3core", idsrvApp =>
             {
                 idsrvApp.UseIdentityServer(options);
 
             });
-
             app.UseIdentityServerBearerTokenAuthentication(new IdentityServerBearerTokenAuthenticationOptions
             {
-                Authority = "http://localhost:33854/identity",
+                Authority = "http://localhost:33854/idsrv3core",
                 ValidationMode = ValidationMode.ValidationEndpoint,
 
-                RequiredScopes = new[] { "api1", "WebApi1", "WebApi2" },
+                RequiredScopes = new[] { "CustomWebApi1", "api1", "WebApi1", "WebApi2", "read" },
                 PreserveAccessToken = true
 
             });

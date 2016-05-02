@@ -12,8 +12,10 @@ namespace P5.IdentityServerConsole.Client
 {
     class Program
     {
+
         public const string domain_root = "http://localhost:33854";
-        public const string token_endpoint = domain_root + "/identity/connect/token";
+        public const string idsrv_root = domain_root+"/idsrv3core";
+        public const string token_endpoint = idsrv_root + "/connect/token";
         static void Main(string[] args)
         {
             string m1 = "Type a string of text then press Enter. " +
@@ -45,8 +47,21 @@ namespace P5.IdentityServerConsole.Client
         {
             try
             {
+                TokenResponse response;
 
-                var response = GetResourceOwnerToken();
+                response = GetClientToken();
+                Console.WriteLine(response.Json);
+                CallApi(response);
+
+                response = GetTokenFor_CustomWebApi1();
+                Console.WriteLine(response.Json);
+                CallApi(response);
+
+                response = GetCustomGrantToken();
+                Console.WriteLine(response.Json);
+                CallApi(response);
+
+                response = GetResourceOwnerToken();
                 Console.WriteLine(response.Json);
                 CallApi(response);
 
@@ -55,18 +70,14 @@ namespace P5.IdentityServerConsole.Client
                 CallApi(response);
 
 
-                response = GetClientToken();
-                Console.WriteLine(response.Json);
-                CallApi(response);
+
 
                 response = GetUserToken();
                 Console.WriteLine(response.Json);
                 CallApi(response);
 
-                response = GetCustomGrantToken();
-                Console.WriteLine(response.Json);
-                CallApi(response);
-
+                /*
+*/
 
 
             }
@@ -75,7 +86,37 @@ namespace P5.IdentityServerConsole.Client
 
             }
         }
+        static TokenResponse GetCustomGrantToken()
+        {
+            var client = new TokenClient(
+               token_endpoint,
+               "custom_grant_client",
+               "secret");
 
+            var customParams = new Dictionary<string, string>
+            {
+                { "some_custom_parameter", "some_value" }
+            };
+
+            var result = client.RequestCustomGrantAsync("custom", "read", customParams).Result;
+            return result;
+        }
+
+        static TokenResponse GetTokenFor_CustomWebApi1()
+        {
+            var client = new TokenClient(
+               token_endpoint,
+               "CustomWebApi1",
+               "secret");
+
+            var customParams = new Dictionary<string, string>
+            {
+                { "some_custom_parameter", "some_value" }
+            };
+
+            var result = client.RequestCustomGrantAsync("custom", "CustomWebApi1", customParams).Result;
+            return result;
+        }
         static TokenResponse GetSecondLevelToken(TokenResponse response)
         {
             TokenClient tokenClient = new TokenClient(
@@ -107,7 +148,7 @@ namespace P5.IdentityServerConsole.Client
             var client = new HttpClient();
             client.SetBearerToken(response.AccessToken);
 
-            var result = client.GetStringAsync(domain_root + "/api/test");
+            var result = client.GetStringAsync(domain_root + "/api/identity");
 
             try
             {
@@ -132,8 +173,11 @@ namespace P5.IdentityServerConsole.Client
                 token_endpoint,
                 "silicon",
                 "secret");
-
-            return client.RequestClientCredentialsAsync("api1").Result;
+            var customParams = new Dictionary<string, string>
+            {
+                { "some_custom_parameter", "some_value" }
+            };
+            return client.RequestClientCredentialsAsync("api1", customParams).Result;
         }
 
         static TokenResponse GetUserToken()
@@ -145,20 +189,6 @@ namespace P5.IdentityServerConsole.Client
 
             return client.RequestResourceOwnerPasswordAsync("bob", "secret", "api1").Result;
         }
-        static TokenResponse GetCustomGrantToken()
-        {
-            var client = new TokenClient(
-               token_endpoint,
-               "custom_grant_client",
-               "cd19ac6f-3bfa-4577-9579-da32fd15788a");
 
-            var customParams = new Dictionary<string, string>
-            {
-                { "some_custom_parameter", "some_value" }
-            };
-
-            var result = client.RequestCustomGrantAsync("custom", "read", customParams).Result;
-            return result;
-        }
     }
 }

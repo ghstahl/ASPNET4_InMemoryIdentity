@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\IdentityController.cs" />
     <Compile Include="Api\TestController.cs" />
     <Compile Include="Constants\ClaimTypes.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />

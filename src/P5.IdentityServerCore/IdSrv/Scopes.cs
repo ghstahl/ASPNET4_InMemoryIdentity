@@ -17,6 +17,15 @@ namespace P5.IdentityServerCore.IdSrv
                 StandardScopes.OfflineAccess,
                 StandardScopes.RolesAlwaysInclude,
                 StandardScopes.AllClaims,
+                 new Scope
+                {
+                    Name = "CustomWebApi1",
+                    Type = ScopeType.Resource,
+                    Claims = new List<ScopeClaim>
+                    {
+                        new ScopeClaim("name", true)
+                    }
+                },
                 new Scope
                 {
                     Name = "api1"
@@ -25,6 +34,13 @@ namespace P5.IdentityServerCore.IdSrv
                 {
                     Name = "read",
                     DisplayName = "Read data",
+                    Type = ScopeType.Resource,
+                    Emphasize = false
+                },
+                new Scope
+                {
+                    Name = "write",
+                    DisplayName = "write data",
                     Type = ScopeType.Resource,
                     Emphasize = false
                 },
