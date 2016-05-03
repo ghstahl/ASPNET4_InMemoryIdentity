@@ -1,4 +1,5 @@
-﻿using System.Web.Hosting;
+﻿using System.Collections.Generic;
+using System.Web.Hosting;
 using System.Web.Http;
 using CustomClientCredentialHost.Config;
 using IdentityServer3.AccessTokenValidation;
@@ -46,10 +47,25 @@ namespace CustomClientCredentialHost
 
             // Create the BiggyIdentityService factory
             var factory = new ServiceFactory(userService, settings);
+            factory.Register(new Registration<IDictionary<string,IClaimsProvider>>(resolver =>
+            {
+                var result = new Dictionary<string, IClaimsProvider>
+                {
+                    {
+                        CustomClaimsProviderHub.WellKnown_DefaultProviderName,
+                        new DefaultClaimsProvider(resolver.Resolve<IUserService>())
+                    },
+                    {
+                        "openid-provider",new CustomOpenIdClaimsProvider(resolver.Resolve<IUserService>())
+                    }
+
+                };
+                return result;
+            }));
 
             factory.UseInMemoryUsers(Users.Get());
 
-            factory.ClaimsProvider = new Registration<IClaimsProvider>(typeof (CustomClaimsProvider));
+            factory.ClaimsProvider = new Registration<IClaimsProvider>(typeof(CustomClaimsProviderHub));
 
             var options = new IdentityServerOptions
             {

@@ -1,21 +1,67 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web.Services.Protocols;
 using IdentityServer3.Core.Logging;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
 using IdentityServer3.Core.Validation;
+using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
 using P5.IdentityServerCore.Extensions;
 
 namespace CustomClientCredentialHost.Config
 {
-    class CustomClaimsProvider : DefaultClaimsProvider
+    public static class CustomClaimsProviderHubExtension
     {
-        private static List<string> _p5ClaimTypes;
+        public static bool Validate(this NameValueCollection nvc, IList<string> againstList)
+        {
+            if (againstList.Any(item => nvc[item] == null))
+            {
+                return false;
+            }
+            return true;
+        }
+    }
 
+    public class CustomClaimsProviderHub : DefaultClaimsProvider
+    {
+        public const string WellKnown_DefaultProviderName = "default-provider";
+        private IDictionary<string, IClaimsProvider> _mapClaimsProviders;
+        public CustomClaimsProviderHub(IUserService users, IDictionary<string, IClaimsProvider> mapClaimsProviders)
+            : base(users)
+        {
+            _mapClaimsProviders = mapClaimsProviders;
+        }
+
+        public override Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, Client client, IEnumerable<Scope> scopes, ValidatedRequest request)
+        {
+            var handler = request.Raw["handler"] ?? WellKnown_DefaultProviderName;
+            handler = handler.ToLower();
+            var provider = _mapClaimsProviders[handler];
+            return provider.GetAccessTokenClaimsAsync(subject, client, scopes, request);
+        }
+    }
+
+    class CustomOpenIdClaimsProvider : DefaultClaimsProvider
+    {
+        private static List<string> _requiredArguments;
+
+        private static List<string> RequiredArgument
+        {
+            get
+            {
+                return _requiredArguments ?? (_requiredArguments = new List<string>
+                {
+                    "openid-connect-token"
+                });
+            }
+        } 
+        private static List<string> _p5ClaimTypes;
         private static List<string> P5ClaimTypes
         {
             get
@@ -29,15 +75,21 @@ namespace CustomClientCredentialHost.Config
                 return _p5ClaimTypes;
             }
         }
-        private static readonly ILog Logger = LogProvider.For<CustomClaimsProvider>();
+        private static readonly ILog Logger = LogProvider.For<CustomOpenIdClaimsProvider>();
 
-        public CustomClaimsProvider(IUserService users)
+        public CustomOpenIdClaimsProvider(IUserService users)
             : base(users)
-        { }
+        {
+        }
 
         public override Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, Client client,
             IEnumerable<Scope> scopes, ValidatedRequest request)
         {
+            if (!request.Raw.Validate(RequiredArgument))
+            {
+                throw new Exception(string.Format("RequiredArgument failed need the following [{0}]", string.Join(",", RequiredArgument.ToArray())));
+            }
+
             var result = base.GetAccessTokenClaimsAsync(subject, client, scopes, request);
             var rr = request.Raw.AllKeys.ToDictionary(k => k, k => request.Raw[k]);
             List<Claim> finalClaims = new List<Claim>(result.Result);
@@ -48,7 +100,7 @@ namespace CustomClientCredentialHost.Config
             {
                 // Extra claims that came in from an upstream ICustomGrantValidator, but only those that match the ones in our know
                 // ClaimTypes
-                // look for claims in subject.Claims that match those in P5ClaimTypes 
+                // look for claims in subject.Claims that match those in P5ClaimTypes
                 /*
                 var query = from item in subject.Claims
                             join name in P5ClaimTypes

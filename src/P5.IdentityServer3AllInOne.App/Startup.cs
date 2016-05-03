@@ -61,7 +61,7 @@ namespace P5.IdentityServer3AllInOne.App
             {
                 Factory = factory,
                 RequireSsl = false,
-                SigningCertificate = Certificate.Get(),
+      //          SigningCertificate = Certificate.Get(),
                 SiteName = "P5 IdentityServer3"
             };
 

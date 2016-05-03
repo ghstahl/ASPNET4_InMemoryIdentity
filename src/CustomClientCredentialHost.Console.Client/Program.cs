@@ -49,11 +49,25 @@ namespace CustomClientCredentialHost.Console.Client
 
                 TokenResponse response;
 
-                response = GetClientToken();
-                System.Console.WriteLine(response.Json);
-                for (int i = 0; i < 5; ++i)
+                response = GetClientToken_error();
+                if (response.IsError)
                 {
-                    CallApi(response);
+                    response.HttpErrorReason.ConsoleRed();
+                }
+
+                response = GetClientToken();
+                if (response.IsError)
+                {
+                    response.HttpErrorReason.ConsoleRed();
+                }
+                else
+                {
+                    System.Console.WriteLine(response.Json);
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        CallApi(response);
+                    }
+
                 }
             }
             catch (Exception e)
@@ -114,7 +128,21 @@ namespace CustomClientCredentialHost.Console.Client
                 "secret");
             var customParams = new Dictionary<string, string>
             {
-                { "some_custom_parameter", "some_value" }
+                { "handler", "openid-provider" },
+                { "openid-connect-token", "myOpenId" }
+            };
+            return client.RequestClientCredentialsAsync("api1", customParams).Result;
+        }
+        static TokenResponse GetClientToken_error()
+        {
+            var client = new TokenClient(
+                token_endpoint,
+                "sdfdsf",
+                "secsdfdsfret");
+            var customParams = new Dictionary<string, string>
+            {
+                { "handler", "openid-provider" },
+                { "openid-connect-token", "myOpenId" }
             };
             return client.RequestClientCredentialsAsync("api1", customParams).Result;
         }
