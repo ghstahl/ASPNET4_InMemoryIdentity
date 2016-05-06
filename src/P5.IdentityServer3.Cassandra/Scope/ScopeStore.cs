@@ -18,9 +18,10 @@ namespace P5.IdentityServer3.Cassandra
             return await Task.FromResult(scopeRecords.Result);
         }
 
-        public Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> GetScopesAsync(bool publicOnly = true)
+        public async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> GetScopesAsync(bool publicOnly = true)
         {
-            throw new NotImplementedException();
+            var scopeRecords = IdentityServer3CassandraDao.FindScopesAsync(publicOnly);
+            return await Task.FromResult(scopeRecords.Result);
         }
     }
 }

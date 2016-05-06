@@ -88,6 +88,19 @@ namespace P5.IdentityServer3.Cassandra.Test
             base.Setup();
         }
 
+
+        [TestMethod]
+        public async Task TestGetScopesAsync()
+        {
+            var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
+            var queryNames = from item in insertResult
+                select item.Record.Name;
+            var nameList = queryNames.ToList();
+            var result = await IdentityServer3CassandraDao.FindScopesAsync(true);
+            Assert.IsTrue(result.Any());
+        }
+
+
         [TestMethod]
         public async Task TestFindScopesAsync()
         {

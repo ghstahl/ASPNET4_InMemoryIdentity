@@ -368,7 +368,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
                 var inValues = string.Join(",", queryInValues);
                 var query = string.Format("SELECT * FROM scopes_by_name WHERE name IN ({0})", inValues);
-        
+
 
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
@@ -389,5 +389,30 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
+        public static async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> FindScopesAsync(bool publicOnly = true,
+         CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var query = string.Format("SELECT * FROM scopes_by_id WHERE ShowInDiscoveryDocument = {0}", publicOnly?"true":"false");
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                var scopeMappedRecords = (await mapper.FetchAsync<ScopeMappedRecord>(query)).ToList();
+
+                foreach (var scopeMappedRecord in scopeMappedRecords)
+                {
+                    scopeMappedRecord.Claims = JsonConvert.DeserializeObject<List<ScopeClaim>>(scopeMappedRecord.ClaimsDocument);
+                }
+                var queryFinal = from item in scopeMappedRecords
+                    select (Scope) item;
+                return queryFinal;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
     }
 }
