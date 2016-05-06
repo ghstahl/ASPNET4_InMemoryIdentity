@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 namespace P5.IdentityServer3.BiggyJson
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public abstract class WrappedRecord<T>  where T : class
+    public abstract class WrappedRecord2<T>  where T : class
     {
         private Guid _id = Guid.Empty;
         [PrimaryKey(false)]
@@ -29,16 +29,16 @@ namespace P5.IdentityServer3.BiggyJson
             set { Record = (T)value; }
         }
 
-       
+
 
         [JsonProperty]
         public T Record { get; set; }
-        public WrappedRecord()
+        public WrappedRecord2()
         {
         }
 
         private Func<T, Guid> GetIdFunc;
-        public WrappedRecord(T value, Func<T, Guid> getId)
+        public WrappedRecord2(T value, Func<T, Guid> getId)
         {
             Record = value;
             GetIdFunc = getId;

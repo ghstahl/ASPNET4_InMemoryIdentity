@@ -69,6 +69,7 @@
     <Compile Include="Authorization\AuthorizationCodeStore.cs" />
     <Compile Include="Biggy\BiggyStore.cs" />
     <Compile Include="Claim\ClaimIdentityRecord.cs" />
+    <Compile Include="Scope\ScopeStore.cs" />
     <Compile Include="Services\ServiceFactory.cs" />
     <Compile Include="Client\ClientHandle.cs" />
     <Compile Include="Client\ClientExtensions.cs" />
@@ -77,13 +78,10 @@
     <Compile Include="Consent\ConsentExtensions.cs" />
     <Compile Include="Consent\ConsentRecord.cs" />
     <Compile Include="Consent\ConsentStore.cs" />
-    <Compile Include="Helpers\GuidGenerator.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleExtensions.cs" />
     <Compile Include="RefreshToken\RefreshTokenStore.cs" />
-    <Compile Include="Scope\ScopeStore.cs" />
-    <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Claim\ClaimExtensions.cs" />
     <Compile Include="Claim\ClaimTypeRecord.cs" />
     <Compile Include="Token\TokenHandle.cs" />
@@ -91,8 +89,6 @@
     <Compile Include="Token\TokenHandleRecord.cs" />
     <Compile Include="Token\TokenHandleStore.cs" />
     <Compile Include="Biggy\WrappedRecord.cs" />
-    <Compile Include="Scope\ScopeExtensions.cs" />
-    <Compile Include="Scope\ScopeRecord.cs" />
     <Compile Include="Biggy\StoreSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -100,7 +96,16 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\P5.IdentityServer3.Common\P5.IdentityServer3.Common.csproj">
+      <Project>{cbef1303-a168-4860-8537-2b23a3ccb844}</Project>
+      <Name>P5.IdentityServer3.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\P5.IdentityServer3.Stores\P5.IdentityServer3.Stores.csproj">
+      <Project>{e2c054d4-96a0-460b-bc20-d17260ab72d6}</Project>
+      <Name>P5.IdentityServer3.Stores</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

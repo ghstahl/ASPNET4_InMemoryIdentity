@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Biggy.Data.Json;
+using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.BiggyJson
 {

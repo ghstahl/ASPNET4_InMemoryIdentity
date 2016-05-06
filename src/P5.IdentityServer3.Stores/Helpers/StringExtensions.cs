@@ -1,9 +1,8 @@
 ﻿using System;
-using IdentityServer3.Core.Models;
 
-namespace P5.IdentityServer3.BiggyJson
+namespace P5.IdentityServer3.Stores
 {
-    static class StringExtensions
+    public static class StringExtensions
     {
         public static Guid CreateGuid(this string key, Guid @namespace)
         {

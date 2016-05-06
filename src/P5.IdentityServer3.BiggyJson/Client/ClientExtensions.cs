@@ -1,5 +1,7 @@
 ﻿using System;
 using IdentityServer3.Core.Models;
+using P5.IdentityServer3.Stores;
+
 
 namespace P5.IdentityServer3.BiggyJson
 {

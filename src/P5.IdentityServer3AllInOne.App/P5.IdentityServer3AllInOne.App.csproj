@@ -338,6 +338,14 @@
       <Project>{9127f21e-3c4e-4276-855c-c2bc3b44360b}</Project>
       <Name>P5.IdentityServer3.BiggyJson</Name>
     </ProjectReference>
+    <ProjectReference Include="..\P5.IdentityServer3.Common\P5.IdentityServer3.Common.csproj">
+      <Project>{cbef1303-a168-4860-8537-2b23a3ccb844}</Project>
+      <Name>P5.IdentityServer3.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\P5.IdentityServer3.Stores\P5.IdentityServer3.Stores.csproj">
+      <Project>{e2c054d4-96a0-460b-bc20-d17260ab72d6}</Project>
+      <Name>P5.IdentityServer3.Stores</Name>
+    </ProjectReference>
     <ProjectReference Include="..\P5.IdentityServerCore\P5.IdentityServerCore.csproj">
       <Project>{bd903bd0-8285-4c97-95e8-68f646432604}</Project>
       <Name>P5.IdentityServerCore</Name>

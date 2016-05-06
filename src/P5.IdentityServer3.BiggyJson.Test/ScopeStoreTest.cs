@@ -6,12 +6,14 @@ using System.Reflection;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.IdentityServer3.Stores;
+using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
     [DeploymentItem("source", "source")]
-    public class ScopeStoreTest
+    public class ScopeStoreTest:TestBase
     {
         public static void InsertTestData(ScopeStore store,int count = 1)
         {
@@ -50,14 +52,14 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
             }
         }
-        private string _targetFolder;
+
         private ScopeStore _scopeStore;
 
         [TestInitialize]
         public void Setup()
         {
-            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _scopeStore = new ScopeStore(StoreSettings.UsingFolder(_targetFolder));
+            base.Setup();
+            _scopeStore = new ScopeStore(StoreSettings.UsingFolder(TargetFolder));
             InsertTestData(_scopeStore, 10);
         }
         [TestMethod]

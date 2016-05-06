@@ -16,6 +16,10 @@ using P5.IdentityServerCore.Extensions;
 
 namespace CustomClientCredentialHost.Config
 {
+    public interface IOptionalParams
+    {
+        void SetOptionalParams(IDictionary<string, string> optionalParams);
+    }
     public static class CustomClaimsProviderHubExtension
     {
         public static bool Validate(this NameValueCollection nvc, IList<string> againstList)
@@ -47,7 +51,7 @@ namespace CustomClientCredentialHost.Config
         }
     }
 
-    class CustomOpenIdClaimsProvider : DefaultClaimsProvider
+    class CustomOpenIdClaimsProvider : DefaultClaimsProvider, IOptionalParams
     {
         private static List<string> _requiredArguments;
 
@@ -60,7 +64,7 @@ namespace CustomClientCredentialHost.Config
                     "openid-connect-token"
                 });
             }
-        } 
+        }
         private static List<string> _p5ClaimTypes;
         private static List<string> P5ClaimTypes
         {
@@ -129,6 +133,12 @@ namespace CustomClientCredentialHost.Config
             Logger.Warn("--- Some custom warning !!!!!!!!!!!!!!!");
 
             return base.GetIdentityTokenClaimsAsync(subject, client, scopes, includeAllIdentityClaims, request);
+        }
+
+        private IDictionary<string, string> _optionalParams;
+        public void SetOptionalParams(IDictionary<string, string> optionalParams)
+        {
+            _optionalParams = optionalParams;
         }
     }
 }

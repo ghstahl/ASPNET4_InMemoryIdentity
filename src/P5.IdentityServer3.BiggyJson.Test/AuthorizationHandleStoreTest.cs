@@ -6,12 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
     [DeploymentItem("source", "source")]
-    public class AuthorizationHandleStoreTest
+    public class AuthorizationHandleStoreTest : TestBase
     {
         static void InsertTestData(AuthorizationCodeStore store, int count = 1)
         {
@@ -55,7 +56,6 @@ namespace P5.IdentityServer3.BiggyJson.Test
             }
         }
 
-        private string _targetFolder;
         private ClientStore _clientStore;
         private ScopeStore _scopeStore;
         private AuthorizationCodeStore _authorizationCodeHandleStore;
@@ -63,10 +63,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
         [TestInitialize]
         public void Setup()
         {
-            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _clientStore = new ClientStore(StoreSettings.UsingFolder(_targetFolder));
-            _scopeStore = new ScopeStore(StoreSettings.UsingFolder(_targetFolder));
-            _authorizationCodeHandleStore = new AuthorizationCodeStore(StoreSettings.UsingFolder(_targetFolder));
+            base.Setup();
+            _clientStore = new ClientStore(StoreSettings.UsingFolder(TargetFolder));
+            _scopeStore = new ScopeStore(StoreSettings.UsingFolder(TargetFolder));
+            _authorizationCodeHandleStore = new AuthorizationCodeStore(StoreSettings.UsingFolder(TargetFolder));
             InsertTestData(_authorizationCodeHandleStore, 10);
             ClientStoreTest.InsertTestData(_clientStore, 10);
             ScopeStoreTest.InsertTestData(_scopeStore,10);

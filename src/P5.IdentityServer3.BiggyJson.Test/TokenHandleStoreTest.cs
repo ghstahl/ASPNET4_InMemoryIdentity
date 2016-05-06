@@ -9,11 +9,12 @@ using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Caching;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
-    public class TokenHandleStoreTest
+    public class TokenHandleStoreTest:TestBase
     {
         public static TokenHandle MakeTokenHandle(int i)
         {
@@ -50,16 +51,17 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
             }
         }
-        private string _targetFolder;
+
         private ClientStore _clientStore;
         private TokenHandleStore _tokenHandleStore;
 
         [TestInitialize]
         public void Setup()
         {
-            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _clientStore = new ClientStore(StoreSettings.UsingFolder(_targetFolder));
-            _tokenHandleStore = new TokenHandleStore(StoreSettings.UsingFolder(_targetFolder));
+            base.Setup();
+
+            _clientStore = new ClientStore(StoreSettings.UsingFolder(TargetFolder));
+            _tokenHandleStore = new TokenHandleStore(StoreSettings.UsingFolder(TargetFolder));
             InsertTestData(_tokenHandleStore, 10);
             ClientStoreTest.InsertTestData(_clientStore, 10);
         }

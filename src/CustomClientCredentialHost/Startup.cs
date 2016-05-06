@@ -26,10 +26,6 @@ namespace CustomClientCredentialHost
 
             var userService = new Registration<IUserService>(new UserServiceBase());
 
-            var inMemoryFactory = new IdentityServerServiceFactory()
-                .UseInMemoryClients(Clients.Get())
-                .UseInMemoryScopes(Scopes.Get())
-                .UseInMemoryUsers(Users.Get());
             // Create and modify default settings
             StoreSettings settings = StoreSettings.DefaultSettings;
             settings.Folder = path;
@@ -62,8 +58,6 @@ namespace CustomClientCredentialHost
                 };
                 return result;
             }));
-
-            factory.UseInMemoryUsers(Users.Get());
 
             factory.ClaimsProvider = new Registration<IClaimsProvider>(typeof(CustomClaimsProviderHub));
 

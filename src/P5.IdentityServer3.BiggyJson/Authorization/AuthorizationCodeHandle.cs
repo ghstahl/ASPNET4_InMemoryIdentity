@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
-using IdentityServer3.Core.Models;
+using P5.IdentityServer3.Stores;
 
 namespace P5.IdentityServer3.BiggyJson
 {
@@ -24,7 +23,7 @@ namespace P5.IdentityServer3.BiggyJson
             doc.SetIfNotNull("nonce", code.Nonce);
             doc["subject"] = SerializeIdentities(code);
          */
-        public AuthorizationCodeHandle(string key, AuthorizationCode code)
+        public AuthorizationCodeHandle(string key, global::IdentityServer3.Core.Models.AuthorizationCode code)
         {
             Key = key;
             if (code != null)

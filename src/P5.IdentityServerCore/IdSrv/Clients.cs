@@ -98,7 +98,8 @@ namespace P5.IdentityServerCore.IdSrv
                     AllowedScopes = new List<string>
                     {
                         "api1"
-                    }
+                    },
+                    AccessTokenType = AccessTokenType.Reference
                 },
 
                 // human is involved

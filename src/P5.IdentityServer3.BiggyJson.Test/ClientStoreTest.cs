@@ -7,12 +7,13 @@ using System.Security.Claims;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
     [DeploymentItem("source", "source")]
-    public class ClientStoreTest
+    public class ClientStoreTest : TestBase
     {
         public static void InsertTestData(ClientStore store,int count = 1)
         {
@@ -64,14 +65,15 @@ namespace P5.IdentityServer3.BiggyJson.Test
             }
         }
 
-        private string _targetFolder;
+
         private ClientStore _clientStore;
 
         [TestInitialize]
         public void Setup()
         {
-            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _clientStore = new ClientStore(StoreSettings.UsingFolder(_targetFolder));
+            base.Setup();
+
+            _clientStore = new ClientStore(StoreSettings.UsingFolder(TargetFolder));
             ClientStoreTest.InsertTestData(_clientStore, 10);
         }
 

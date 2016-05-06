@@ -9,12 +9,13 @@ using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Caching;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
     [DeploymentItem("source", "source")]
-    public class RefreshTokenHandleStoreTest
+    public class RefreshTokenHandleStoreTest:TestBase
     {
         static void InsertTestData(RefreshTokenStore store, int count = 1)
         {
@@ -41,16 +42,17 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
             }
         }
-        private string _targetFolder;
+
         private ClientStore _clientStore;
         private RefreshTokenStore _refreshTokenHandleStore;
 
         [TestInitialize]
         public void Setup()
         {
-            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _clientStore = new ClientStore(StoreSettings.UsingFolder(_targetFolder));
-            _refreshTokenHandleStore = new RefreshTokenStore(StoreSettings.UsingFolder(_targetFolder));
+            base.Setup();
+
+            _clientStore = new ClientStore(StoreSettings.UsingFolder(TargetFolder));
+            _refreshTokenHandleStore = new RefreshTokenStore(StoreSettings.UsingFolder(TargetFolder));
             InsertTestData(_refreshTokenHandleStore, 10);
             ClientStoreTest.InsertTestData(_clientStore, 10);
         }

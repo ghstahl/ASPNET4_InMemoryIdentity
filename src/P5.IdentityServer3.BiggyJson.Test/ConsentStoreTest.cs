@@ -6,12 +6,13 @@ using System.Reflection;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
     [DeploymentItem("source", "source")]
-    public class ConsentStoreTest
+    public class ConsentStoreTest:TestBase
     {
         static void InsertTestData(ConsentStore store, int count = 1)
         {
@@ -26,20 +27,20 @@ namespace P5.IdentityServer3.BiggyJson.Test
                 }
             }
         }
-        private string _targetFolder;
+
         private ConsentStore _consentStore;
 
         [TestInitialize]
         public void Setup()
         {
-            _targetFolder = Path.Combine(UnitTestHelpers.BaseDir, @"source");
-            _consentStore = new ConsentStore(StoreSettings.UsingFolder(_targetFolder));
+            base.Setup();
+            _consentStore = new ConsentStore(StoreSettings.UsingFolder(TargetFolder));
             InsertTestData(_consentStore, 10);
         }
         [TestMethod]
          public void TestCreateAsync()
         {
-            string testData = System.IO.File.ReadAllText(Path.Combine(_targetFolder, @"clients.json"));
+            string testData = System.IO.File.ReadAllText(Path.Combine(TargetFolder, @"clients.json"));
 
             Consent consent = new Consent() { ClientId = "CLIENTID", Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT" };
             ConsentRecord consentRecord = new ConsentRecord(consent);

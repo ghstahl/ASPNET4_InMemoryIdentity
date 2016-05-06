@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace P5.IdentityServer3.BiggyJson.Test
+namespace P5.MSTest.Common
 {
-
-    internal class UnitTestHelpers
+    public class UnitTestHelpers
     {
         private static string _baseDir;
         public static string BaseDir
