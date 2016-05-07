@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS scopes_by_name (
     PRIMARY KEY (Name)
 );
 
-CREATE TABLE IF NOT EXISTS tokenhandle_by_key (
+CREATE TABLE IF NOT EXISTS TokenHandle_By_Key (
     Audience text,
     Claims text,
     ClientId text,
@@ -68,6 +68,20 @@ CREATE TABLE IF NOT EXISTS tokenhandle_by_key (
     Type text,
     Version int,
     PRIMARY KEY (Key)
+);
+CREATE TABLE IF NOT EXISTS TokenHandle_By_ClientId (
+    Audience text,
+    Claims text,
+    ClientId text,
+    CreationTime timestamp,
+    Expires timestamp,
+    Issuer text,
+    Key text,
+    Lifetime int,
+    SubjectId text,
+    Type text,
+    Version int,
+    PRIMARY KEY (ClientId,Key)
 );
 
 CREATE TABLE IF NOT EXISTS clients_by_id (
@@ -111,7 +125,11 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
     PRIMARY KEY (id)
 );
 
+CREATE INDEX IF NOT EXISTS
+ON TokenHandle_By_ClientId (SubjectId);
 
+CREATE INDEX IF NOT EXISTS
+ON TokenHandle_By_ClientId (Key);
 
 CREATE INDEX IF NOT EXISTS
 ON scopes_by_id (ShowInDiscoveryDocument);
