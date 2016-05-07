@@ -1,7 +1,6 @@
 using System;
-using P5.IdentityServer3.Common;
 
-namespace P5.IdentityServer3.Stores
+namespace P5.IdentityServer3.Common
 {
     public class ScopeRecord : WrappedRecord<global::IdentityServer3.Core.Models.Scope>
     {

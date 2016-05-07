@@ -20,7 +20,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace P5.IdentityServer3.Stores
+namespace P5.IdentityServer3.Common
 {
     public static class GuidGenerator
     {

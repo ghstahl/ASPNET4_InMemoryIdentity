@@ -1,7 +1,8 @@
 ﻿using System;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
-using P5.IdentityServer3.Stores;
+using P5.IdentityServer3.Common;
+
 
 
 namespace P5.IdentityServer3.BiggyJson
@@ -16,7 +17,7 @@ namespace P5.IdentityServer3.BiggyJson
         {
             var token = new RefreshToken()
             {
-                AccessToken = handle.AccessToken == null ? null : handle.AccessToken.ToToken(store),
+                AccessToken = handle.AccessToken == null ? null : handle.AccessToken.MakeIdentityServerToken(store),
                 CreationTime = handle.CreationTime,
                 LifeTime = handle.LifeTime,
                 Version = handle.Version

@@ -9,6 +9,7 @@ using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Caching;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.IdentityServer3.Common;
 using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test

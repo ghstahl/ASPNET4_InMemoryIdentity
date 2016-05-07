@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using P5.IdentityServer3.Stores;
+using P5.IdentityServer3.Common;
+
 
 namespace P5.IdentityServer3.BiggyJson
 {

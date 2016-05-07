@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using IdentityServer3.Core.Models;
+using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.BiggyJson
 {

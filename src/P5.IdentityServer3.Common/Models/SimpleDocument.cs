@@ -10,9 +10,12 @@ namespace P5.IdentityServer3.Common.Models
         {
             _document = document;
         }
+        public SimpleDocument(string documentJson)
+        {
+            _document = JsonConvert.DeserializeObject<T>(documentJson);
+        }
 
-
-        public object Document { get; set; }
+        public object Document { get { return _document; } }
 
         public string DocumentJson
         {

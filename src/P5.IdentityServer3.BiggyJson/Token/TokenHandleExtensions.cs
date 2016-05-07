@@ -1,19 +1,15 @@
 ﻿using System;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
-using P5.IdentityServer3.Stores;
+using P5.IdentityServer3.Common;
+
 
 
 namespace P5.IdentityServer3.BiggyJson
 {
-    static class TokenHandleExtensions
+    public static class TokenHandleExtensions
     {
-        public static Guid CreateGuid(this TokenHandle tokenHandle, Guid @namespace)
-        {
-            return GuidGenerator.CreateGuid(@namespace, tokenHandle.Key);
-        }
-
-        public static Token ToToken(this TokenHandle tokenHandle, IClientStore store)
+        public static Token ToToken3(this TokenHandle tokenHandle, IClientStore store)
         {
             var token = new Token(tokenHandle.Type)
             {
@@ -25,15 +21,10 @@ namespace P5.IdentityServer3.BiggyJson
                 Lifetime = tokenHandle.Lifetime,
                 Type = tokenHandle.Type,
                 Version = tokenHandle.Version
-               
             };
             return token;
+        }
 
-        }
-        public static TokenHandle ToTokenHandle(this Token token)
-        {
-            var tokenHandle = new TokenHandle("",token);
-            return tokenHandle;
-        }
+
     }
 }

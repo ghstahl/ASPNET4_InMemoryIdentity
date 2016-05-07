@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace P5.IdentityServer3.Stores
+namespace P5.IdentityServer3.Common
 {
     public static class ScopeExtensions
     {

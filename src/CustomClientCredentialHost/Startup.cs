@@ -9,6 +9,7 @@ using IdentityServer3.Core.Services.Default;
 using Microsoft.Owin;
 using Owin;
 using P5.IdentityServer3.BiggyJson;
+using P5.IdentityServer3.Common;
 using P5.IdentityServerCore.IdSrv;
 
 [assembly: OwinStartupAttribute(typeof(CustomClientCredentialHost.Startup))]

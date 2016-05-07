@@ -35,8 +35,7 @@ CREATE TABLE IF NOT EXISTS scopes_by_id (
     ScopeType int,
     PRIMARY KEY (id)
 );
-CREATE INDEX IF NOT EXISTS
-ON scopes_by_id (ShowInDiscoveryDocument);
+
 
 CREATE TABLE IF NOT EXISTS scopes_by_name (
     id uuid,
@@ -56,4 +55,63 @@ CREATE TABLE IF NOT EXISTS scopes_by_name (
     PRIMARY KEY (Name)
 );
 
+CREATE TABLE IF NOT EXISTS tokenhandle_by_key (
+    Audience text,
+    Claims text,
+    ClientId text,
+    CreationTime timestamp,
+    Expires timestamp,
+    Issuer text,
+    Key text,
+    Lifetime int,
+    SubjectId text,
+    Type text,
+    Version int,
+    PRIMARY KEY (Key)
+);
 
+CREATE TABLE IF NOT EXISTS clients_by_id (
+    id uuid,
+    AbsoluteRefreshTokenLifetime int,
+    AccessTokenLifetime int,
+    AccessTokenType int,
+    AllowAccessToAllCustomGrantTypes boolean,
+    AllowAccessToAllScopes boolean,
+    AllowAccessTokensViaBrowser boolean,
+    AllowClientCredentialsOnly boolean,
+    AllowedCorsOrigins text,
+    AllowedCustomGrantTypes text,
+    AllowedScopes text,
+    AllowRememberConsent boolean,
+    AlwaysSendClientClaims boolean,
+    AuthorizationCodeLifetime int,
+ 	Claims text,
+    ClientId text,
+    ClientName text,
+    ClientSecrets text,
+    ClientUri text,
+    Enabled boolean,
+    EnableLocalLogin boolean,
+    Flow int,
+ 	IdentityProviderRestrictions text,
+    IdentityTokenLifetime int,
+    IncludeJwtId boolean,
+    LogoUri text,
+    LogoutSessionRequired boolean,
+    LogoutUri text,
+    PostLogoutRedirectUris text,
+    PrefixClientClaims boolean,
+ 	RedirectUris text,
+    RefreshTokenExpiration int,
+    RefreshTokenUsage int,
+    RequireConsent boolean,
+    RequireSignOutPrompt boolean,
+    SlidingRefreshTokenLifetime int,
+    UpdateAccessTokenClaimsOnRefresh boolean,
+    PRIMARY KEY (id)
+);
+
+
+
+CREATE INDEX IF NOT EXISTS
+ON scopes_by_id (ShowInDiscoveryDocument);

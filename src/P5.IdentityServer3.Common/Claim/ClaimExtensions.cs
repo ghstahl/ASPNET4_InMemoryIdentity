@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+ 
 
-namespace P5.IdentityServer3.BiggyJson
+namespace P5.IdentityServer3.Common
 {
-    static class ClaimExtensions
+    public static class ClaimExtensions
     {
-        public static Claim ToClaim(this ClaimTypeRecord record)
+        public static System.Security.Claims.Claim ToClaim(this ClaimTypeRecord record)
         {
-            return new Claim(record.Type, record.Value, record.ValueType);
+            return new System.Security.Claims.Claim(record.Type, record.Value, record.ValueType);
         }
-        public static List<Claim> ToClaims(this List<ClaimTypeRecord> records)
+        public static List<System.Security.Claims.Claim> ToClaims(this List<ClaimTypeRecord> records)
         {
             var query = from item in records
                 select item.ToClaim();
@@ -46,7 +47,7 @@ namespace P5.IdentityServer3.BiggyJson
             return query.ToList();
         }
 
-        public static ClaimTypeRecord ToClaimTypeRecord(this Claim claim)
+        public static ClaimTypeRecord ToClaimTypeRecord(this System.Security.Claims.Claim claim)
         {
             return new ClaimTypeRecord()
             {
@@ -56,7 +57,7 @@ namespace P5.IdentityServer3.BiggyJson
 
             };
         }
-        public static List<ClaimTypeRecord> ToClaimTypeRecords(this List<Claim> claims)
+        public static List<ClaimTypeRecord> ToClaimTypeRecords(this List<System.Security.Claims.Claim> claims)
         {
             var query = from item in claims
                         select item.ToClaimTypeRecord();

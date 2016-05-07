@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Biggy.Core;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
+using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.BiggyJson
 {
@@ -34,9 +35,9 @@ namespace P5.IdentityServer3.BiggyJson
 
         public async Task<Client> FindClientByIdAsync(string clientId)
         {
-            var cr = new ClientRecord(new ClientHandle(){ClientId = clientId});
+            var cr = new ClientRecord(record: new ClientHandle(){ClientId = clientId});
             var result = await RetrieveAsync(cr.Id);
-            return await Task.FromResult(result.ToClient());
+            return await Task.FromResult(result.MakeClient());
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace P5.IdentityServer3.Stores
+namespace P5.IdentityServer3.Common
 {
     public static class StringExtensions
     {

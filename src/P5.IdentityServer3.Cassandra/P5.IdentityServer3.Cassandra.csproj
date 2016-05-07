@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLazy.cs" />
+    <Compile Include="Client\ClientStore.cs" />
     <Compile Include="CommonStore\CassandraStore.cs" />
     <Compile Include="CommonStore\StoreSettings.cs" />
     <Compile Include="DAO\IdentityServer3CassandraDao.cs" />
@@ -71,8 +72,10 @@
     <Compile Include="Scope\ScopeClaimRecord.cs" />
     <Compile Include="Scope\ScopeMappedRecord.cs" />
     <Compile Include="Scope\ScopeStore.cs" />
+    <Compile Include="Token\TokenHandleStore.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CQL\Setup.cql" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

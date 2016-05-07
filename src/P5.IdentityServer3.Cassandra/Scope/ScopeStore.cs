@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using IdentityServer3.Core.Services;
 using P5.IdentityServer3.Cassandra.CommonStore;
 using P5.IdentityServer3.Cassandra.DAO;
-using P5.IdentityServer3.Stores;
 using System.Linq;
+using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.Cassandra
 {
-    public class ScopeStore : CassandraStore<ScopeRecord, global::IdentityServer3.Core.Models.Scope>, IScopeStore
+    public class ScopeStore :  IScopeStore
     {
         public async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> FindScopesAsync(
             IEnumerable<string> scopeNames)

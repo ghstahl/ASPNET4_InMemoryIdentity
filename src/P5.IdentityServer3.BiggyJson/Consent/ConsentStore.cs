@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
-using P5.IdentityServer3.Stores;
+using P5.IdentityServer3.Common;
+
 
 
 namespace P5.IdentityServer3.BiggyJson

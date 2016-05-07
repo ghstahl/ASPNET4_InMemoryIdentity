@@ -1,7 +1,6 @@
 using System;
-using P5.IdentityServer3.Common;
 
-namespace P5.IdentityServer3.BiggyJson
+namespace P5.IdentityServer3.Common
 {
     public class TokenHandleRecord : WrappedRecord<TokenHandle>
     {

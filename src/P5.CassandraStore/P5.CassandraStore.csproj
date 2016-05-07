@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="DAO\CassandraDAO.cs" />
     <Compile Include="DAO\ICassandraDAO.cs" />
+    <Compile Include="Extensions\CassandraExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\CassandraConfig.cs" />
   </ItemGroup>

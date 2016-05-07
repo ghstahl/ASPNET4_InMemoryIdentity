@@ -68,12 +68,8 @@
     <Compile Include="Authorization\AuthorizationCodeHandleRecord.cs" />
     <Compile Include="Authorization\AuthorizationCodeStore.cs" />
     <Compile Include="Biggy\BiggyStore.cs" />
-    <Compile Include="Claim\ClaimIdentityRecord.cs" />
     <Compile Include="Scope\ScopeStore.cs" />
     <Compile Include="Services\ServiceFactory.cs" />
-    <Compile Include="Client\ClientHandle.cs" />
-    <Compile Include="Client\ClientExtensions.cs" />
-    <Compile Include="Client\ClientRecord.cs" />
     <Compile Include="Client\ClientStore.cs" />
     <Compile Include="Consent\ConsentExtensions.cs" />
     <Compile Include="Consent\ConsentRecord.cs" />
@@ -82,11 +78,7 @@
     <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleExtensions.cs" />
     <Compile Include="RefreshToken\RefreshTokenStore.cs" />
-    <Compile Include="Claim\ClaimExtensions.cs" />
-    <Compile Include="Claim\ClaimTypeRecord.cs" />
-    <Compile Include="Token\TokenHandle.cs" />
     <Compile Include="Token\TokenHandleExtensions.cs" />
-    <Compile Include="Token\TokenHandleRecord.cs" />
     <Compile Include="Token\TokenHandleStore.cs" />
     <Compile Include="Biggy\WrappedRecord.cs" />
     <Compile Include="Biggy\StoreSettings.cs" />

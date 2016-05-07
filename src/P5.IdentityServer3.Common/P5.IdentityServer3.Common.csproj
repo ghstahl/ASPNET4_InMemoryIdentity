@@ -51,6 +51,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Claim\ClaimExtensions.cs" />
+    <Compile Include="Claim\ClaimIdentityRecord.cs" />
+    <Compile Include="Claim\ClaimTypeRecord.cs" />
+    <Compile Include="Client\AbstractClientHandle.cs" />
+    <Compile Include="Client\ClientExtensions.cs" />
+    <Compile Include="Client\ClientHandle.cs" />
+    <Compile Include="Client\ClientRecord.cs" />
+    <Compile Include="Client\FlattenedClientHandle.cs" />
+    <Compile Include="Client\FlattenedClientRecord.cs" />
+    <Compile Include="Client\IClientHandle.cs" />
+    <Compile Include="Helpers\GuidGenerator.cs" />
+    <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Models\DocumentMetaData.cs" />
     <Compile Include="Models\DocumentRecord.cs" />
     <Compile Include="Models\IDocumentMetaData.cs" />
@@ -59,6 +71,14 @@
     <Compile Include="Models\SimpleDocument.cs" />
     <Compile Include="ScopeClaimComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scope\ScopeExtensions.cs" />
+    <Compile Include="Scope\ScopeRecord.cs" />
+    <Compile Include="Token\AbstractTokenHandle.cs" />
+    <Compile Include="Token\FlattenedTokenHandle.cs" />
+    <Compile Include="Token\ITokenHandle.cs" />
+    <Compile Include="Token\TokenHandle.cs" />
+    <Compile Include="Token\TokenHandleExtensions.cs" />
+    <Compile Include="Token\TokenHandleRecord.cs" />
     <Compile Include="WrappedRecord.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+ 
 
-namespace P5.IdentityServer3.BiggyJson
+namespace P5.IdentityServer3.Common
 {
     public class ClaimIdentityRecord
     {
