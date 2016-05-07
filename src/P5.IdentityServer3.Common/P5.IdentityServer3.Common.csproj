@@ -63,9 +63,10 @@
     <Compile Include="Client\IClientHandle.cs" />
     <Compile Include="Consent\AbstractConsentExtensions.cs" />
     <Compile Include="Consent\AbstractConsentHandle.cs" />
-    <Compile Include="Consent\ConsentExtensions.cs" />
     <Compile Include="Consent\ConsentHandle.cs" />
     <Compile Include="Consent\ConsentRecord.cs" />
+    <Compile Include="Consent\FlattenedConsentHandle.cs" />
+    <Compile Include="Consent\FlattenedConsentRecord.cs" />
     <Compile Include="Consent\IConsentHandle.cs" />
     <Compile Include="Helpers\GuidGenerator.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
