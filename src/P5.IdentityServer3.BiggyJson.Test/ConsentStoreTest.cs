@@ -6,6 +6,7 @@ using System.Reflection;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using P5.IdentityServer3.Common;
 using P5.MSTest.Common;
 
 namespace P5.IdentityServer3.BiggyJson.Test
@@ -22,7 +23,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
                 for (int sub = 0; sub < 10; ++sub)
                 {
                     Consent consent = new Consent() { ClientId = "CLIENTID:"+i, Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT:"+sub };
-                    ConsentRecord consentRecord = new ConsentRecord(consent);
+                    ConsentRecord consentRecord = new ConsentRecord(new ConsentHandle(consent));
                     store.CreateAsync(consentRecord.Record);
                 }
             }
@@ -43,11 +44,11 @@ namespace P5.IdentityServer3.BiggyJson.Test
             string testData = System.IO.File.ReadAllText(Path.Combine(TargetFolder, @"clients.json"));
 
             Consent consent = new Consent() { ClientId = "CLIENTID", Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT" };
-            ConsentRecord consentRecord = new ConsentRecord(consent);
+            ConsentRecord consentRecord = new ConsentRecord(new ConsentHandle(consent));
             _consentStore.CreateAsync(consentRecord.Record);
 
             var result = _consentStore.LoadAsync(consent.Subject, consent.ClientId);
-            ConsentRecord consentRecordStored = new ConsentRecord(result.Result);
+            ConsentRecord consentRecordStored = new ConsentRecord(new ConsentHandle(result.Result));
 
 
             Assert.AreEqual(consentRecord.Id,consentRecordStored.Id);
@@ -59,11 +60,11 @@ namespace P5.IdentityServer3.BiggyJson.Test
         {
 
             Consent consent = new Consent() { ClientId = "CLIENTID", Scopes = new List<string>() { "a", "b" }, Subject = "SUBJECT" };
-            ConsentRecord consentRecord = new ConsentRecord(consent);
+            ConsentRecord consentRecord = new ConsentRecord(new ConsentHandle(consent));
             _consentStore.CreateAsync(consentRecord.Record);
 
             var result = _consentStore.LoadAsync(consentRecord.Record.Subject, consentRecord.Record.ClientId);
-            ConsentRecord consentRecordStored = new ConsentRecord(result.Result);
+            ConsentRecord consentRecordStored = new ConsentRecord(new ConsentHandle(result.Result));
 
 
             Assert.AreEqual(consentRecord.Id, consentRecordStored.Id);
@@ -71,7 +72,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             consentRecord.Record.Scopes = new List<string>() {"c", "d"};
             _consentStore.UpdateAsync(consentRecord.Record);
             result = _consentStore.LoadAsync(consentRecord.Record.Subject, consentRecord.Record.ClientId);
-            consentRecordStored = new ConsentRecord(result.Result);
+            consentRecordStored = new ConsentRecord(new ConsentHandle(result.Result));
 
 
             Assert.AreEqual(consentRecord.Id, consentRecordStored.Id);

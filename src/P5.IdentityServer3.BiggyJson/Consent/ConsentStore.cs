@@ -10,7 +10,7 @@ using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.BiggyJson
 {
-    public class ConsentStore : BiggyStore<ConsentRecord,Consent>, IConsentStore
+    public class ConsentStore : BiggyStore<ConsentRecord, ConsentHandle>, IConsentStore
     {
         public ConsentStore(StoreSettings settings)
             : base(settings.Folder, settings.Database, settings.ConsentCollection)
@@ -21,12 +21,12 @@ namespace P5.IdentityServer3.BiggyJson
         {
         }
 
-        protected override Guid GetId(Consent record)
+        protected override Guid GetId(ConsentHandle record)
         {
             return record.CreateGuid(ConsentRecord.Namespace);
         }
 
-        protected override ConsentRecord NewWrap(Consent record)
+        protected override ConsentRecord NewWrap(ConsentHandle record)
         {
             return new ConsentRecord(record);
         }
@@ -36,7 +36,7 @@ namespace P5.IdentityServer3.BiggyJson
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                 where subject == item.Record.Subject
-                select (Consent)item.Record;
+                select  item.Record.MakeConsent();
             return await Task.FromResult(query);
         }
 
@@ -49,9 +49,13 @@ namespace P5.IdentityServer3.BiggyJson
         public async Task<Consent> LoadAsync(string subject, string client)
         {
             var id = GuidGenerator.CreateGuid(ConsentRecord.Namespace, client, subject);
-            return await RetrieveAsync(id);
+            var result = await RetrieveAsync(id);
+            return result.MakeConsent();
         }
 
-
+        public async Task UpdateAsync(Consent consent)
+        {
+            await base.UpdateAsync(new ConsentHandle(consent));
+        }
     }
 }

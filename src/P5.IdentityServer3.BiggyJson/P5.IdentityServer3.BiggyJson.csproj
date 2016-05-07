@@ -71,8 +71,6 @@
     <Compile Include="Scope\ScopeStore.cs" />
     <Compile Include="Services\ServiceFactory.cs" />
     <Compile Include="Client\ClientStore.cs" />
-    <Compile Include="Consent\ConsentExtensions.cs" />
-    <Compile Include="Consent\ConsentRecord.cs" />
     <Compile Include="Consent\ConsentStore.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
