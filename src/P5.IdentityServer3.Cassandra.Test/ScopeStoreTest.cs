@@ -101,7 +101,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                     }
                 }
             };
-            ScopeRecord scopeRecord = new ScopeRecord(record);
+            var scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(record));
             Guid id = scopeRecord.Id;
 
             var result = await IdentityServer3CassandraDao.CreateScopeAsync(scopeRecord);
@@ -110,13 +110,13 @@ namespace P5.IdentityServer3.Cassandra.Test
             var result2 = await IdentityServer3CassandraDao.FindScopeByIdAsync(id);
             Assert.IsNotNull(result2);
 
-            scopeRecord = new ScopeRecord(result2);
+            scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(result2));
 
             Assert.AreEqual(scopeRecord.Record.Name, name);
             Assert.AreEqual(scopeRecord.Id, id);
-            Assert.AreEqual(record.Claims.Count, scopeRecord.Record.Claims.Count);
+            Assert.AreEqual(record.Claims.Count, scopeRecord.Record.GetScope().Claims.Count);
 
-            var differences = record.Claims.Except(scopeRecord.Record.Claims, new ScopeClaimComparer());
+            var differences = record.Claims.Except(scopeRecord.Record.GetScope().Claims, new ScopeClaimComparer());
             Assert.IsTrue(differences.Count() == 0);
 
         }

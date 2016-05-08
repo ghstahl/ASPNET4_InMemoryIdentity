@@ -69,6 +69,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CassandraTestHelper.cs" />
+    <Compile Include="ConsentHandleStoreTest.cs" />
     <Compile Include="TokenHandleStoreTest.cs" />
     <Compile Include="ClientStoreTest.cs" />
     <Compile Include="ScopeStoreTest.cs" />
@@ -88,10 +89,6 @@
     <ProjectReference Include="..\P5.IdentityServer3.Common\P5.IdentityServer3.Common.csproj">
       <Project>{CBEF1303-A168-4860-8537-2B23A3CCB844}</Project>
       <Name>P5.IdentityServer3.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\P5.IdentityServer3.Stores\P5.IdentityServer3.Stores.csproj">
-      <Project>{E2C054D4-96A0-460B-BC20-D17260AB72D6}</Project>
-      <Name>P5.IdentityServer3.Stores</Name>
     </ProjectReference>
     <ProjectReference Include="..\P5.MSTest.Common\P5.MSTest.Common.csproj">
       <Project>{3c4f40c1-a2b3-4cfc-b634-e188efdbd247}</Project>

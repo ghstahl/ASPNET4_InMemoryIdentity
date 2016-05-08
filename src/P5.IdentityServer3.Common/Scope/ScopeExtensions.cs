@@ -1,25 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using IdentityServer3.Core.Models;
 
 namespace P5.IdentityServer3.Common
 {
     public static class ScopeExtensions
     {
-        public static Guid CreateGuid(this global::IdentityServer3.Core.Models.Scope scope, Guid @namespace)
+        public static Guid CreateGuid<TScopeClaims, TScecrets>(this AbstractScopeHandle<TScopeClaims, TScecrets> scope,
+            Guid @namespace)
+            where TScopeClaims : class
+            where TScecrets : class
         {
             return GuidGenerator.CreateGuid(@namespace, scope.Name);
         }
-        public static string ToName(this global::IdentityServer3.Core.Models.Scope scope)
+
+        public static string ToName<TScopeClaims, TScecrets>(this AbstractScopeHandle<TScopeClaims, TScecrets> scope)
+            where TScopeClaims : class
+            where TScecrets : class
         {
             return scope.Name;
         }
-        public static List<string> ToNames(this List<global::IdentityServer3.Core.Models.Scope> scopes)
+        public static List<string> ToNames<TScopeClaims, TScecrets>(this List<AbstractScopeHandle<TScopeClaims, TScecrets>> scopes)
+            where TScopeClaims : class
+            where TScecrets : class
         {
             List<string> scopeNames = scopes.Select(scope => scope.Name).ToList();
             return scopeNames;
         }
-        public static List<string> ToNames(this IEnumerable<global::IdentityServer3.Core.Models.Scope> scopes)
+        public static List<string> ToNames<TScopeClaims, TScecrets>(this IEnumerable<AbstractScopeHandle<TScopeClaims, TScecrets>> scopes)
+            where TScopeClaims : class
+            where TScecrets : class
         {
             List<string> scopeNames = scopes.Select(scope => scope.Name).ToList();
             return scopeNames;

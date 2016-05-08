@@ -42,7 +42,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
     }
 
-    public class IdentityServer3CassandraDao
+    public partial class IdentityServer3CassandraDao
     {
         static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -86,7 +86,10 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         private static AsyncLazy<PreparedStatement> _DeleteTokenByClientIdAndKey { get; set; }
         private static AsyncLazy<PreparedStatement> _DeleteTokenByKey { get; set; }
-
+        //-----------------------------------------------
+        // PREPARED STATEMENTS for Consent
+        //-----------------------------------------------
+        private static AsyncLazy<PreparedStatement> _CreateConsentById { get; set; }
 
 
         public static ISession CassandraSession
@@ -295,7 +298,24 @@ namespace P5.IdentityServer3.Cassandra.DAO
                                   return result;
                               });
 
-
+                        /*
+                         ************************************************
+                            id uuid,
+                            ClientId text,
+                            Scopes text,
+                            Subject text,
+                         ************************************************
+                         */
+                        _CreateConsentById =
+                         new AsyncLazy<PreparedStatement>(
+                             () =>
+                             {
+                                 var result = _cassandraSession.PrepareAsync(
+                                     @"INSERT INTO " +
+                                     @"consent_by_id(id,ClientId,Scopes,Subject) " +
+                                     @"VALUES(?,?,?.?)");
+                                 return result;
+                             });
                     }
                 }
                 catch (Exception e)
@@ -304,6 +324,23 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 }
                 return _cassandraSession;
             }
+        }
+
+        private static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(IList<FlattenedConsentRecord> flattenedConsentRecords)
+        {
+            var result = new List<BoundStatement>();
+            foreach (var record in flattenedConsentRecords)
+            {
+                var consent = record.Record;
+                PreparedStatement prepared = await _CreateConsentById;
+                BoundStatement bound = prepared.Bind(
+                    record.Id,
+                    consent.ClientId,
+                    consent.Scopes,
+                    consent.Subject);
+                result.Add(bound);
+            }
+            return result;
         }
 
         public static async Task<List<BoundStatement>> BuildBoundStatements_ForTokenHandleDelete(string clientId,
@@ -447,15 +484,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
         public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
-            IEnumerable<ScopeRecord> scopeRecords)
+            IEnumerable<FlattenedScopeRecord> scopeRecords)
         {
             var result = new List<BoundStatement>();
             foreach (var scopeRecord in scopeRecords)
             {
                 PreparedStatement[] prepared = await _CreateScope;
                 var scope = scopeRecord.Record;
-                var scopeSecretsDocument = new SimpleDocument<List<Secret>>(scope.ScopeSecrets);
-                var claimsDocument = new SimpleDocument<List<ScopeClaim>>(scope.Claims);
+             //   var scopeSecretsDocument = new SimpleDocument<List<Secret>>(scope.ScopeSecrets);
+             //   var claimsDocument = new SimpleDocument<List<ScopeClaim>>(scope.Claims);
                 int scopeType = (int) scope.Type;
                 var preparedById = prepared[0];
                 var preparedByName = prepared[1];
@@ -477,7 +514,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 BoundStatement boundById = preparedById.Bind(
                     scopeRecord.Id,
                     scope.AllowUnrestrictedIntrospection,
-                    claimsDocument.DocumentJson,
+                    scope.Claims,
                     scope.ClaimsRule,
                     scope.Description,
                     scope.DisplayName,
@@ -486,7 +523,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     scope.IncludeAllClaimsForUser,
                     scope.Name,
                     scope.Required,
-                    scopeSecretsDocument.DocumentJson,
+                    scope.ScopeSecrets,
                     scope.ShowInDiscoveryDocument,
                     scopeType);
 
@@ -494,7 +531,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 BoundStatement boundByName = preparedByName.Bind(
                     scopeRecord.Id,
                     scope.AllowUnrestrictedIntrospection,
-                    claimsDocument.DocumentJson,
+                    scope.Claims,
                     scope.ClaimsRule,
                     scope.Description,
                     scope.DisplayName,
@@ -503,7 +540,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     scope.IncludeAllClaimsForUser,
                     scope.Name,
                     scope.Required,
-                    scopeSecretsDocument.DocumentJson,
+                    scope.ScopeSecrets,
                     scope.ShowInDiscoveryDocument,
                     scopeType);
 
@@ -511,9 +548,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 result.Add(boundById);
                 result.Add(boundByName);
 
-
-                var claimsQuery = from scopeClaim in scope.Claims
-                    select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
+                var claimsQuery = from scopeClaim in scopeRecord.Record.GetScope().Claims
+                                  select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
 
                 var scopeClaimBoundStatements = await BuildBoundStatements_ForCreate(claimsQuery);
                 result.AddRange(scopeClaimBoundStatements);
@@ -542,12 +578,12 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return true;
         }
 
-        public static async Task<bool> CreateScopeAsync(ScopeRecord scopeRecord,
+        public static async Task<bool> CreateScopeAsync(FlattenedScopeRecord scopeRecord,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
-                IList<ScopeRecord> scopeRecords = new List<ScopeRecord>();
+                var scopeRecords = new List<FlattenedScopeRecord>();
                 scopeRecords.Add(scopeRecord);
                 return await CreateManyScopeAsync(scopeRecords, cancellationToken);
             }
@@ -558,7 +594,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task<bool> CreateManyScopeAsync(IList<ScopeRecord> scopeRecords,
+        public static async Task<bool> CreateManyScopeAsync(IList<FlattenedScopeRecord> scopeRecords,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -701,7 +737,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
                 var batch = new BatchStatement();
                 var boundStatements = await BuildBoundStatements_ForCreate(clients);
-                batch.AddRange(boundStatements); 
+                batch.AddRange(boundStatements);
                 await session.ExecuteAsync(batch).ConfigureAwait(false);
                 return true;
             }
@@ -789,7 +825,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                  return null;
              }
          }
- 
+
         public static async Task<bool> DeleteTokensByClientId (string client,
            CancellationToken cancellationToken = default(CancellationToken))
          {
@@ -822,7 +858,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                  return false;
              }
          }
-         
+
         public static async Task<bool> DeleteTokensByClientIdAndSubjectId(string client, string subject,
           CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -922,7 +958,50 @@ namespace P5.IdentityServer3.Cassandra.DAO
             {
                 return false;
             }
+        }
+
+        public static async Task<bool> CreateConsentHandleAsync(FlattenedConsentHandle flat,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var list = new List<FlattenedConsentHandle> { flat };
+                return await CreateManyConsentHandleAsync(list, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public static async Task<bool> CreateManyConsentHandleAsync(IList<FlattenedConsentHandle> flatteneds,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                if (flatteneds == null)
+                    throw new ArgumentNullException("flattened");
+                if (flatteneds.Count == 0)
+                    throw new ArgumentException("flattened is empty");
+
+                var session = CassandraSession;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var batch = new BatchStatement();
+                var query = from item in flatteneds
+                    select new FlattenedConsentRecord(item);
+                var boundStatements = await BuildBoundStatements_ForCreate(query.ToList());
+                batch.AddRange(boundStatements);
+
+                await session.ExecuteAsync(batch).ConfigureAwait(false);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
 
         }
+
     }
 }

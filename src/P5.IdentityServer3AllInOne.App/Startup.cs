@@ -45,7 +45,7 @@ namespace P5.IdentityServer3AllInOne.App
             ScopeStore myScopeStore = new ScopeStore(settings);
             foreach (var scope in Scopes.Get())
             {
-                myScopeStore.CreateAsync(scope);
+                myScopeStore.CreateAsync(new ScopeHandle(scope));
             }
 
             // Create the BiggyIdentityService factory

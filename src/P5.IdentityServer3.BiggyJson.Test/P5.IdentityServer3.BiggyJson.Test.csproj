@@ -88,10 +88,6 @@
       <Project>{CBEF1303-A168-4860-8537-2B23A3CCB844}</Project>
       <Name>P5.IdentityServer3.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\P5.IdentityServer3.Stores\P5.IdentityServer3.Stores.csproj">
-      <Project>{e2c054d4-96a0-460b-bc20-d17260ab72d6}</Project>
-      <Name>P5.IdentityServer3.Stores</Name>
-    </ProjectReference>
     <ProjectReference Include="..\P5.MSTest.Common\P5.MSTest.Common.csproj">
       <Project>{3c4f40c1-a2b3-4cfc-b634-e188efdbd247}</Project>
       <Name>P5.MSTest.Common</Name>

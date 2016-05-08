@@ -38,7 +38,9 @@ namespace P5.IdentityServer3.BiggyJson
                 WasConsentShown = code.WasConsentShown;
                 Nonce = code.Nonce;
                 ClaimIdentityRecords = code.Subject.Identities.ToList().ToClaimIdentityRecords();
-                RequestedScopes = code.RequestedScopes.ToNames();
+                var query = from item in code.RequestedScopes
+                    select new ScopeHandle(item);
+                RequestedScopes = query.ToNames();
             }
         }
         public string Key { get; set; }

@@ -11,9 +11,9 @@ namespace P5.IdentityServer3.Cassandra.Test
 {
     public static class CassandraTestHelper
     {
-        public static async Task<List<ScopeRecord>> InsertTestData_Scopes(int count = 1)
+        public static async Task<List<FlattenedScopeRecord>> InsertTestData_Scopes(int count = 1)
         {
-            List<ScopeRecord> result = new List<ScopeRecord>();
+            var result = new List<FlattenedScopeRecord>();
             for (int i = 0; i < count; ++i)
             {
                 var name = "ScopeName:" + Guid.NewGuid();
@@ -63,7 +63,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                         }
                     }
                 };
-                ScopeRecord scopeRecord = new ScopeRecord(record);
+                var scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(record));
                 result.Add(scopeRecord);
             }
             await IdentityServer3CassandraDao.CreateManyScopeAsync(result);
@@ -194,6 +194,32 @@ namespace P5.IdentityServer3.Cassandra.Test
             await IdentityServer3CassandraDao.CreateManyTokenHandleAsync(result);
             return result;
         }
+        public static async Task<List<FlattenedConsentHandle>> InsertTestData_Consents(int count = 1)
+        {
+            var insertClients = await CassandraTestHelper.InsertTestData_Clients(1); // only add one client
+            // we are going to associate a bunch of tokens to this one client
 
+            var client = insertClients[0];
+            var subject = Guid.NewGuid().ToString();
+
+
+            List<FlattenedConsentHandle> result = new List<FlattenedConsentHandle>();
+            for (int i = 0; i < count; ++i)
+            {
+                var flat = new FlattenedConsentHandle(new Consent()
+                {
+                    ClientId = client.Record.ClientId,
+                    Scopes = new List<string>()
+                    {
+                        "Scope 0:",
+                        "Scope 1:"
+                    },
+                    Subject = subject
+                });
+                result.Add(flat);
+            }
+            await IdentityServer3CassandraDao.CreateManyConsentHandleAsync(result);
+            return result;
+        }
     }
 }

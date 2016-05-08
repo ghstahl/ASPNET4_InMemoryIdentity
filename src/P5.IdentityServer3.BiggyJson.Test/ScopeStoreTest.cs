@@ -47,7 +47,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
 
 
                 };
-                var scopeRecord = new ScopeRecord(record);
+                var scopeRecord = new ScopeRecord(new ScopeHandle(record));
                 store.CreateAsync(scopeRecord.Record);
 
             }
@@ -70,7 +70,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             {
                 Name = "SCOPENAME:" + 0
             };
-            ScopeRecord scopeRecord =new ScopeRecord(record);
+            ScopeRecord scopeRecord =new ScopeRecord(new ScopeHandle(record));
             Guid id = scopeRecord.Id;
             var result = _scopeStore.RetrieveAsync(id);
             scopeRecord = new ScopeRecord(result.Result);
@@ -88,7 +88,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
             {
                 Name = "SCOPENAME:" + 0
             };
-            ScopeRecord scopeRecord = new ScopeRecord(record);
+            ScopeRecord scopeRecord = new ScopeRecord(new ScopeHandle(record));
             Guid id = scopeRecord.Id;
             var result = _scopeStore.RetrieveAsync(id);
             scopeRecord = new ScopeRecord(result.Result);
