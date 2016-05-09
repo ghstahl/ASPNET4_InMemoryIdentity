@@ -33,12 +33,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
 
         }
+
         public MyMappings()
         {
             // Define mappings in the constructor of your class
             // that inherits from Mappings
             For<FlattenedTokenHandle>()
                 .TableName("tokenhandle_by_key");
+            For<FlattenedConsentHandle>()
+                .TableName("consent_by_clientid");
         }
     }
 
@@ -90,6 +93,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         // PREPARED STATEMENTS for Consent
         //-----------------------------------------------
         private static AsyncLazy<PreparedStatement> _CreateConsentById { get; set; }
+        private static AsyncLazy<PreparedStatement> _CreateConsentByClientId { get; set; }
 
 
         public static ISession CassandraSession
@@ -258,45 +262,45 @@ namespace P5.IdentityServer3.Cassandra.DAO
                          ************************************************
                          */
                         _CreateTokenByClientId =
-                          new AsyncLazy<PreparedStatement>(
-                              () =>
-                              {
-                                  var result = _cassandraSession.PrepareAsync(
-                                      @"INSERT INTO " +
-                                      @"TokenHandle_By_ClientId(Audience,Claims,ClientId,CreationTime,Expires,Issuer,Key,Lifetime,SubjectId,Type,Version) " +
-                                      @"VALUES(?,?,?,?,?,?,?,?,?,?,?)");
-                                  return result;
-                              });
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"INSERT INTO " +
+                                        @"TokenHandle_By_ClientId(Audience,Claims,ClientId,CreationTime,Expires,Issuer,Key,Lifetime,SubjectId,Type,Version) " +
+                                        @"VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+                                    return result;
+                                });
                         _CreateTokenByKey =
-                          new AsyncLazy<PreparedStatement>(
-                              () =>
-                              {
-                                  var result = _cassandraSession.PrepareAsync(
-                                      @"INSERT INTO " +
-                                      @"TokenHandle_By_Key(Audience,Claims,ClientId,CreationTime,Expires,Issuer,Key,Lifetime,SubjectId,Type,Version) " +
-                                      @"VALUES(?,?,?,?,?,?,?,?,?,?,?)");
-                                  return result;
-                              });
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"INSERT INTO " +
+                                        @"TokenHandle_By_Key(Audience,Claims,ClientId,CreationTime,Expires,Issuer,Key,Lifetime,SubjectId,Type,Version) " +
+                                        @"VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+                                    return result;
+                                });
 
                         _DeleteTokenByClientIdAndKey =
-                          new AsyncLazy<PreparedStatement>(
-                              () =>
-                              {
-                                  var result = _cassandraSession.PrepareAsync(
-                                      @"Delete FROM tokenhandle_by_clientid " +
-                                      @"WHERE clientid = ? " +
-                                      @"AND key = ?");
-                                  return result;
-                              });
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"Delete FROM tokenhandle_by_clientid " +
+                                        @"WHERE clientid = ? " +
+                                        @"AND key = ?");
+                                    return result;
+                                });
                         _DeleteTokenByKey =
-                          new AsyncLazy<PreparedStatement>(
-                              () =>
-                              {
-                                  var result = _cassandraSession.PrepareAsync(
-                                      @"Delete FROM tokenhandle_by_key " +
-                                      @"WHERE key = ?");
-                                  return result;
-                              });
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"Delete FROM tokenhandle_by_key " +
+                                        @"WHERE key = ?");
+                                    return result;
+                                });
 
                         /*
                          ************************************************
@@ -307,15 +311,27 @@ namespace P5.IdentityServer3.Cassandra.DAO
                          ************************************************
                          */
                         _CreateConsentById =
-                         new AsyncLazy<PreparedStatement>(
-                             () =>
-                             {
-                                 var result = _cassandraSession.PrepareAsync(
-                                     @"INSERT INTO " +
-                                     @"consent_by_id(id,ClientId,Scopes,Subject) " +
-                                     @"VALUES(?,?,?.?)");
-                                 return result;
-                             });
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"INSERT INTO " +
+                                        @"consent_by_id(id,ClientId,Scopes,Subject) " +
+                                        @"VALUES(?,?,?,?)");
+                                    return result;
+                                });
+                        _CreateConsentByClientId =
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"INSERT INTO " +
+                                        @"consent_by_clientid(id,ClientId,Scopes,Subject) " +
+                                        @"VALUES(?,?,?,?)");
+                                    return result;
+                                });
+
+
                     }
                 }
                 catch (Exception e)
@@ -326,21 +342,40 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        private static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(IList<FlattenedConsentRecord> flattenedConsentRecords)
+
+        private static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+            IList<FlattenedConsentRecord> flattenedConsentRecords)
         {
-            var result = new List<BoundStatement>();
-            foreach (var record in flattenedConsentRecords)
+            try
             {
-                var consent = record.Record;
-                PreparedStatement prepared = await _CreateConsentById;
-                BoundStatement bound = prepared.Bind(
-                    record.Id,
-                    consent.ClientId,
-                    consent.Scopes,
-                    consent.Subject);
-                result.Add(bound);
+                var result = new List<BoundStatement>();
+                foreach (var record in flattenedConsentRecords)
+                {
+                    var consent = record.Record;
+                    PreparedStatement prepared = await _CreateConsentById;
+                    BoundStatement bound = prepared.Bind(
+                        record.Id,
+                        consent.ClientId,
+                        consent.Scopes,
+                        consent.Subject);
+                    result.Add(bound);
+
+                    prepared = await _CreateConsentByClientId;
+                    bound = prepared.Bind(
+                        record.Id,
+                        consent.ClientId,
+                        consent.Scopes,
+                        consent.Subject);
+                    result.Add(bound);
+
+                }
+                return result;
+
             }
-            return result;
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         public static async Task<List<BoundStatement>> BuildBoundStatements_ForTokenHandleDelete(string clientId,
@@ -443,7 +478,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
         public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
-        IEnumerable<FlattenedTokenHandle> flattenedTokenHandles)
+            IEnumerable<FlattenedTokenHandle> flattenedTokenHandles)
         {
 
             var result = new List<BoundStatement>();
@@ -465,18 +500,18 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     flattenedTokenHandle.Version
                     );
                 BoundStatement bound_CreateTokenByKey = prepared_CreateTokenByKey.Bind(
-                     flattenedTokenHandle.Audience,
-                     flattenedTokenHandle.Claims,
-                     flattenedTokenHandle.ClientId,
-                     flattenedTokenHandle.CreationTime,
-                     flattenedTokenHandle.Expires,
-                     flattenedTokenHandle.Issuer,
-                     flattenedTokenHandle.Key,
-                     flattenedTokenHandle.Lifetime,
-                     flattenedTokenHandle.SubjectId,
-                     flattenedTokenHandle.Type,
-                     flattenedTokenHandle.Version
-                     );
+                    flattenedTokenHandle.Audience,
+                    flattenedTokenHandle.Claims,
+                    flattenedTokenHandle.ClientId,
+                    flattenedTokenHandle.CreationTime,
+                    flattenedTokenHandle.Expires,
+                    flattenedTokenHandle.Issuer,
+                    flattenedTokenHandle.Key,
+                    flattenedTokenHandle.Lifetime,
+                    flattenedTokenHandle.SubjectId,
+                    flattenedTokenHandle.Type,
+                    flattenedTokenHandle.Version
+                    );
                 result.Add(bound_CreateTokenByClientId);
                 result.Add(bound_CreateTokenByKey);
             }
@@ -491,8 +526,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
             {
                 PreparedStatement[] prepared = await _CreateScope;
                 var scope = scopeRecord.Record;
-             //   var scopeSecretsDocument = new SimpleDocument<List<Secret>>(scope.ScopeSecrets);
-             //   var claimsDocument = new SimpleDocument<List<ScopeClaim>>(scope.Claims);
+                //   var scopeSecretsDocument = new SimpleDocument<List<Secret>>(scope.ScopeSecrets);
+                //   var claimsDocument = new SimpleDocument<List<ScopeClaim>>(scope.Claims);
                 int scopeType = (int) scope.Type;
                 var preparedById = prepared[0];
                 var preparedByName = prepared[1];
@@ -549,7 +584,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 result.Add(boundByName);
 
                 var claimsQuery = from scopeClaim in scopeRecord.Record.GetScope().Claims
-                                  select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
+                    select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
 
                 var scopeClaimBoundStatements = await BuildBoundStatements_ForCreate(claimsQuery);
                 result.AddRange(scopeClaimBoundStatements);
@@ -785,8 +820,9 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-         public static async Task<global::IdentityServer3.Core.Models.Token> FindTokenByKey(string key,IClientStore clientStore,
-          CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<global::IdentityServer3.Core.Models.Token> FindTokenByKey(string key,
+            IClientStore clientStore,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -795,7 +831,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
-                    await mapper.SingleAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_key WHERE key = ?", key);
+                    await
+                        mapper.SingleAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_key WHERE key = ?", key);
                 ITokenHandle ch = record;
                 var result = ch.MakeIdentityServerToken(clientStore);
                 return result;
@@ -805,62 +842,68 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 return null;
             }
         }
-         public static async Task<IEnumerable<ITokenMetadata>> FindTokenMetadataBySubject(string subject, IClientStore clientStore,
-          CancellationToken cancellationToken = default(CancellationToken))
-         {
-             try
-             {
-                 MyMappings.Init();
-                 var session = CassandraSession;
-                 IMapper mapper = new Mapper(session);
-                 cancellationToken.ThrowIfCancellationRequested();
-                 var record =
-                     await mapper.FetchAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_clientid WHERE subjectid = ?", subject);
-                 var query = from item in record
-                     select item.MakeIdentityServerToken(clientStore);
-                 return query;
-             }
-             catch (Exception e)
-             {
-                 return null;
-             }
-         }
 
-        public static async Task<bool> DeleteTokensByClientId (string client,
-           CancellationToken cancellationToken = default(CancellationToken))
-         {
-             try
-             {
-                 MyMappings.Init();
-                 var session = CassandraSession;
-                 IMapper mapper = new Mapper(session);
-                 cancellationToken.ThrowIfCancellationRequested();
+        public static async Task<IEnumerable<ITokenMetadata>> FindTokenMetadataBySubject(string subject,
+            IClientStore clientStore,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                MyMappings.Init();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await
+                        mapper.FetchAsync<FlattenedTokenHandle>(
+                            "SELECT * FROM tokenhandle_by_clientid WHERE subjectid = ?", subject);
+                var query = from item in record
+                    select item.MakeIdentityServerToken(clientStore);
+                return query;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
 
-                 // first find all the keys that are associated with this client
-                 var record_find =
-                   await mapper.FetchAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_clientid WHERE ClientId = ?",client);
-                 cancellationToken.ThrowIfCancellationRequested();
+        public static async Task<bool> DeleteTokensByClientId(string client,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                MyMappings.Init();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
 
-                 // now that we gots ourselves the record, we have the primary key
-                 // we can now build a big batch delete
-                 var batch = new BatchStatement();
-                 foreach (var rFind in record_find)
-                 {
+                // first find all the keys that are associated with this client
+                var record_find =
+                    await
+                        mapper.FetchAsync<FlattenedTokenHandle>(
+                            "SELECT * FROM tokenhandle_by_clientid WHERE ClientId = ?", client);
+                cancellationToken.ThrowIfCancellationRequested();
 
-                     var boundStatements = await BuildBoundStatements_ForTokenHandleDelete(rFind.ClientId, rFind.Key);
-                     batch.AddRange(boundStatements);
-                 }
-                 await session.ExecuteAsync(batch).ConfigureAwait(false);
-                 return true;
-             }
-             catch (Exception e)
-             {
-                 return false;
-             }
-         }
+                // now that we gots ourselves the record, we have the primary key
+                // we can now build a big batch delete
+                var batch = new BatchStatement();
+                foreach (var rFind in record_find)
+                {
+
+                    var boundStatements = await BuildBoundStatements_ForTokenHandleDelete(rFind.ClientId, rFind.Key);
+                    batch.AddRange(boundStatements);
+                }
+                await session.ExecuteAsync(batch).ConfigureAwait(false);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
 
         public static async Task<bool> DeleteTokensByClientIdAndSubjectId(string client, string subject,
-          CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -870,8 +913,10 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 cancellationToken.ThrowIfCancellationRequested();
                 // first find all the keys that are associated with this client and subject
                 var record_find =
-                  await mapper.FetchAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_clientid WHERE ClientId = ? AND subjectId = ?",
-                  client,subject);
+                    await
+                        mapper.FetchAsync<FlattenedTokenHandle>(
+                            "SELECT * FROM tokenhandle_by_clientid WHERE ClientId = ? AND subjectId = ?",
+                            client, subject);
                 cancellationToken.ThrowIfCancellationRequested();
 
                 // now that we gots ourselves the record, we have the primary key
@@ -893,7 +938,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
         public static async Task<bool> DeleteTokenByKey(string key,
-          CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -902,14 +947,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record_find =
-                  await mapper.SingleAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_key WHERE key = ?", key);
+                    await
+                        mapper.SingleAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_key WHERE key = ?", key);
 
                 // now that we gots ourselves the record, we have the primary key
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var batch = new BatchStatement();
-                var boundStatements = await BuildBoundStatements_ForTokenHandleDelete(record_find.ClientId,key);
+                var boundStatements = await BuildBoundStatements_ForTokenHandleDelete(record_find.ClientId, key);
                 batch.AddRange(boundStatements);
 
                 await session.ExecuteAsync(batch).ConfigureAwait(false);
@@ -920,11 +966,13 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 return false;
             }
         }
+
         public static async Task<bool> CreateTokenHandleAsync(FlattenedTokenHandle tokenHandle,
-             CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
+                MyMappings.Init();
                 var list = new List<FlattenedTokenHandle> {tokenHandle};
                 return await CreateManyTokenHandleAsync(list, cancellationToken);
             }
@@ -935,10 +983,11 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
         public static async Task<bool> CreateManyTokenHandleAsync(IList<FlattenedTokenHandle> flattenedTokenHandles,
-           CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
+                MyMappings.Init();
                 if (flattenedTokenHandles == null)
                     throw new ArgumentNullException("flattenedTokenHandles");
                 if (flattenedTokenHandles.Count == 0)
@@ -961,11 +1010,12 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
         public static async Task<bool> CreateConsentHandleAsync(FlattenedConsentHandle flat,
-           CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
-                var list = new List<FlattenedConsentHandle> { flat };
+                MyMappings.Init();
+                var list = new List<FlattenedConsentHandle> {flat};
                 return await CreateManyConsentHandleAsync(list, cancellationToken);
             }
             catch (Exception e)
@@ -979,6 +1029,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
+                MyMappings.Init();
                 if (flatteneds == null)
                     throw new ArgumentNullException("flattened");
                 if (flatteneds.Count == 0)
@@ -1001,6 +1052,117 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 return false;
             }
 
+        }
+
+        public static async Task<global::IdentityServer3.Core.Models.Consent> FindConsentByIdAsync(Guid id,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                MyMappings.Init();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await mapper.SingleAsync<FlattenedConsentHandle>("SELECT * FROM consent_by_id WHERE id = ?", id);
+                var result = record.MakeConsent();
+                return result;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        public static async Task<global::IdentityServer3.Core.Models.Consent> FindConsentBySubjectAndClientIdAsync(
+            string subject, string clientId,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                MyMappings.Init();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await
+                        mapper.SingleAsync<FlattenedConsentHandle>(
+                            "SELECT * FROM consent_by_clientid WHERE clientid = ? AND subject = ?", clientId, subject);
+                var result = record.MakeConsent();
+                return result;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        public static async Task<bool> DeleteConsentBySubjectAndClientIdAsync(
+            string subject, string clientId,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                MyMappings.Init();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                await
+                    mapper.DeleteAsync<FlattenedConsentHandle>("WHERE clientid = ? AND subject = ?", clientId, subject);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public static async Task<IEnumerable<global::IdentityServer3.Core.Models.Consent>> FindConsentsBySubjectAsync(
+            string subject,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                MyMappings.Init();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await
+                        mapper.FetchAsync<FlattenedConsentHandle>(
+                            "SELECT * FROM consent_by_clientid WHERE subject = ?", subject);
+                var query = from item in record
+                    select item.MakeConsent();
+                return query;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        public static async Task<IEnumerable<global::IdentityServer3.Core.Models.Consent>> FindConsentsByClientIdAsync(
+            string clientId,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                MyMappings.Init();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await
+                        mapper.FetchAsync<FlattenedConsentHandle>(
+                            "SELECT * FROM consent_by_clientid WHERE clientid = ?", clientId);
+                var query = from item in record
+                    select item.MakeConsent();
+                return query;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
     }

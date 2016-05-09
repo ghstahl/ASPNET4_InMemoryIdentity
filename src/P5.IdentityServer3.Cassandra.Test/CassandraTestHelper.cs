@@ -194,6 +194,7 @@ namespace P5.IdentityServer3.Cassandra.Test
             await IdentityServer3CassandraDao.CreateManyTokenHandleAsync(result);
             return result;
         }
+
         public static async Task<List<FlattenedConsentHandle>> InsertTestData_Consents(int count = 1)
         {
             var insertClients = await CassandraTestHelper.InsertTestData_Clients(1); // only add one client
@@ -201,14 +202,16 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             var client = insertClients[0];
             var subject = Guid.NewGuid().ToString();
-
-
+            return await InsertTestData_Consents(client.Record.ClientId,subject, count);
+        }
+        public static async Task<List<FlattenedConsentHandle>> InsertTestData_Consents(string clientId,string subject,int count = 1)
+        {
             List<FlattenedConsentHandle> result = new List<FlattenedConsentHandle>();
             for (int i = 0; i < count; ++i)
             {
                 var flat = new FlattenedConsentHandle(new Consent()
                 {
-                    ClientId = client.Record.ClientId,
+                    ClientId = clientId,
                     Scopes = new List<string>()
                     {
                         "Scope 0:",

@@ -67,7 +67,7 @@
     <Compile Include="Client\ClientStore.cs" />
     <Compile Include="CommonStore\CassandraStore.cs" />
     <Compile Include="CommonStore\StoreSettings.cs" />
-    <Compile Include="Consent\TokenHandleStore.cs" />
+    <Compile Include="Consent\ConsentStore.cs" />
     <Compile Include="DAO\IdentityServer3CassandraDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scope\ScopeClaimRecord.cs" />
