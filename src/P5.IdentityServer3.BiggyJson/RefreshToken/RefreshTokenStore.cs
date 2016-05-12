@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
+using P5.IdentityServer3.Common.RefreshToken;
 
 namespace P5.IdentityServer3.BiggyJson
 {
@@ -56,7 +57,7 @@ namespace P5.IdentityServer3.BiggyJson
             var result = RetrieveAsync(tokenHandleRecord.Id);
             if (result.Result == null)
                 return await Task.FromResult<RefreshToken>(null);
-            var token = result.Result.ToToken(_clientStore);
+            var token = result.Result.ToRefreshToken(_clientStore);
             return await Task.FromResult(token);
         }
 
@@ -71,7 +72,7 @@ namespace P5.IdentityServer3.BiggyJson
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                         where item.Record.SubjectId == subject
-                        select item.Record.ToToken(_clientStore);
+                        select item.Record.ToRefreshToken(_clientStore);
 
             var list = query.ToArray();
             return await Task.FromResult(list.Cast<ITokenMetadata>());

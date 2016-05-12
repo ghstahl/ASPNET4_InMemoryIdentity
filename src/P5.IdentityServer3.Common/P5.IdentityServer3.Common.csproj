@@ -76,6 +76,12 @@
     <Compile Include="Models\IDocumentRecord.cs" />
     <Compile Include="Models\ISimpleDocument.cs" />
     <Compile Include="Models\SimpleDocument.cs" />
+    <Compile Include="RefreshToken\AbstractRefreshTokenHandle.cs" />
+    <Compile Include="RefreshToken\FlattenedRefreshTokenHandle.cs" />
+    <Compile Include="RefreshToken\IRefreshTokenHandle.cs" />
+    <Compile Include="RefreshToken\RefreshTokenHandle.cs" />
+    <Compile Include="RefreshToken\RefreshTokenHandleExtensions.cs" />
+    <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
     <Compile Include="ScopeClaimComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scope\AbstractScopeHandle.cs" />

@@ -1,24 +1,21 @@
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
 using IdentityServer3.Core.Models;
-using P5.IdentityServer3.Common;
+using IdentityServer3.Core.Services;
 
-namespace P5.IdentityServer3.BiggyJson
+namespace P5.IdentityServer3.Common.RefreshToken
 {
-
-    public class RefreshTokenHandle
+    public abstract class AbstractRefreshTokenHandle<TTokenHandle> : IRefreshTokenHandle where TTokenHandle : class
     {
-        public RefreshTokenHandle()
+        public AbstractRefreshTokenHandle()
         {
         }
 
-        public RefreshTokenHandle(string key, RefreshToken token)
+        public AbstractRefreshTokenHandle(string key, global::IdentityServer3.Core.Models.RefreshToken token)
         {
             Key = key;
             if (token != null)
             {
-                AccessToken = token.AccessToken.ToTokenHandle();
+                AccessToken = Serialize(token.AccessToken);
                 ClientId = token.ClientId;
                 CreationTime = token.CreationTime;
                 Expires = token.CreationTime.AddSeconds(token.LifeTime);
@@ -28,16 +25,20 @@ namespace P5.IdentityServer3.BiggyJson
             }
         }
 
-
-        public TokenHandle AccessToken { get; set; }
+        protected abstract TTokenHandle Serialize(Token accessToken);
+        public abstract Token DeserializeTokenHandle(TTokenHandle obj, IClientStore clientStore);
+        public TTokenHandle AccessToken { get; set; }
         public string ClientId { get; set; }
+        public Token MakeAccessToken(IClientStore clientStore)
+        {
+            return DeserializeTokenHandle(AccessToken, clientStore);
+        }
+
         public DateTimeOffset CreationTime { get; set; }
         public DateTimeOffset Expires { get; set; }
         public string Key { get; set; }
         public int LifeTime { get; set; }
         public string SubjectId { get; set; }
         public int Version { get; set; }
-
     }
 }
-

@@ -72,9 +72,6 @@
     <Compile Include="Services\ServiceFactory.cs" />
     <Compile Include="Client\ClientStore.cs" />
     <Compile Include="Consent\ConsentStore.cs" />
-    <Compile Include="RefreshToken\RefreshTokenHandle.cs" />
-    <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
-    <Compile Include="RefreshToken\RefreshTokenHandleExtensions.cs" />
     <Compile Include="RefreshToken\RefreshTokenStore.cs" />
     <Compile Include="Token\TokenHandleExtensions.cs" />
     <Compile Include="Token\TokenHandleStore.cs" />
