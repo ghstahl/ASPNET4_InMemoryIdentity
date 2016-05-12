@@ -68,7 +68,13 @@
     <Compile Include="CommonStore\CassandraStore.cs" />
     <Compile Include="CommonStore\StoreSettings.cs" />
     <Compile Include="Consent\ConsentStore.cs" />
+    <Compile Include="DAO\Client\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\Consent\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\MyMappings.cs" />
+    <Compile Include="DAO\RefreshToken\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\Scope\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\Token\IdentityServer3CassandraDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scope\ScopeClaimRecord.cs" />
     <Compile Include="Scope\ScopeMappedRecord.cs" />

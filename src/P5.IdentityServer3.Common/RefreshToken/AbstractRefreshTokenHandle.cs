@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 
@@ -32,6 +33,16 @@ namespace P5.IdentityServer3.Common.RefreshToken
         public Token MakeAccessToken(IClientStore clientStore)
         {
             return DeserializeTokenHandle(AccessToken, clientStore);
+        }
+
+        public global::IdentityServer3.Core.Models.RefreshToken MakeRefreshToken(IClientStore clientStore)
+        {
+            var token = new global::IdentityServer3.Core.Models.RefreshToken();
+            token.AccessToken = MakeAccessToken(clientStore);
+            token.CreationTime = CreationTime;
+            token.LifeTime = LifeTime;
+            token.Version = Version;
+            return token;
         }
 
         public DateTimeOffset CreationTime { get; set; }

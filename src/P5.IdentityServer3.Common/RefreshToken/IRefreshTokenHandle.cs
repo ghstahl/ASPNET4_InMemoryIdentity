@@ -8,6 +8,7 @@ namespace P5.IdentityServer3.Common.RefreshToken
     {
         string Key { get; set; }
         Token MakeAccessToken(IClientStore clientStore);
+        global::IdentityServer3.Core.Models.RefreshToken MakeRefreshToken(IClientStore clientStore);
         DateTimeOffset CreationTime { get; set; }
         int LifeTime { get; set; }
         int Version { get; set; }
