@@ -86,7 +86,9 @@
     <None Include="CQL\Setup.cql" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Authorization\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
       <Project>{51566eae-2937-41d2-a6c8-d055a74a6209}</Project>

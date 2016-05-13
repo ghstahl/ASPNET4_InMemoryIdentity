@@ -51,6 +51,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\AbstractAuthorizationCodeHandle.cs" />
+    <Compile Include="Authorization\AbstractAuthorizationCodeHandleExtensions.cs" />
+    <Compile Include="Authorization\AuthorizationCodeHandle.cs" />
+    <Compile Include="Authorization\AuthorizationCodeHandleRecord.cs" />
+    <Compile Include="Authorization\FlattenedAuthorizationCodeHandle.cs" />
+    <Compile Include="Authorization\FlattenedAuthorizationCodeHandleRecord.cs" />
+    <Compile Include="Authorization\IAuthorizationCodeHandle.cs" />
     <Compile Include="Claim\ClaimExtensions.cs" />
     <Compile Include="Claim\ClaimIdentityRecord.cs" />
     <Compile Include="Claim\ClaimTypeRecord.cs" />
@@ -102,9 +109,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Authorization\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
