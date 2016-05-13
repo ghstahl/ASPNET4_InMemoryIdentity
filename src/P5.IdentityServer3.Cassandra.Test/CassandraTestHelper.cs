@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
+using IdentityServer3.Core.Services;
 using Newtonsoft.Json;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
+using P5.IdentityServer3.Common.RefreshToken;
 
 namespace P5.IdentityServer3.Cassandra.Test
 {
@@ -155,6 +158,27 @@ namespace P5.IdentityServer3.Cassandra.Test
             return result;
         }
 
+        public static async Task<List<FlattenedRefreshTokenHandle>> InsertTestData_RefreshTokens(IClientStore store, int count = 1)
+        {
+            var tokenInsert = InsertTestData_Tokens(count);
+            var result = new List<FlattenedRefreshTokenHandle>();
+            foreach (var token in tokenInsert.Result)
+            {
+                var rt = new RefreshToken
+                {
+                    AccessToken = token.MakeIdentityServerToken(store),
+                    CreationTime = DateTimeOffset.UtcNow,
+                    LifeTime = 5,
+                    Version = 1
+                };
+                var rth = new FlattenedRefreshTokenHandle(token.Key,rt);
+                result.Add(rth);
+            }
+            await IdentityServer3CassandraDao.CreateManyRefreshTokenHandleAsync(result);
+
+            return result;
+        }
+
         public static async Task<List<FlattenedTokenHandle>> InsertTestData_Tokens(int count = 1)
         {
             var insertClients = await CassandraTestHelper.InsertTestData_Clients(1); // only add one client
@@ -168,9 +192,8 @@ namespace P5.IdentityServer3.Cassandra.Test
 
                 var claims = new List<Claim>()
                 {
-                    new Claim("Type 0:" + i, "Value 0:" + i),
-                    new Claim("Type 1:" + i, "Value 1:" + i)
-
+                    new Claim(Constants.ClaimTypes.Subject, subjectId),
+                    new Claim(Constants.ClaimTypes.Name, "Name:" + i)
                 };
                 var json = JsonConvert.SerializeObject(claims);
 

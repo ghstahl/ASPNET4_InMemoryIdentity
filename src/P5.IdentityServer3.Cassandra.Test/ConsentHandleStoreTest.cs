@@ -28,7 +28,6 @@ namespace P5.IdentityServer3.Cassandra.Test
             base.Setup();
         }
 
-
         [TestMethod]
         public async Task TestUpdateAsync()
         {

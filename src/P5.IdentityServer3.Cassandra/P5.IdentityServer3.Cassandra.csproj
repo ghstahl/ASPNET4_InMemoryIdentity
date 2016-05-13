@@ -79,6 +79,7 @@
     <Compile Include="Scope\ScopeClaimRecord.cs" />
     <Compile Include="Scope\ScopeMappedRecord.cs" />
     <Compile Include="Scope\ScopeStore.cs" />
+    <Compile Include="RefreshToken\RefreshTokenHandleStore.cs" />
     <Compile Include="Token\TokenHandleStore.cs" />
   </ItemGroup>
   <ItemGroup>

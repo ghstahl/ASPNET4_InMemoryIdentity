@@ -113,6 +113,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 var session = CassandraSession;
                 cancellationToken.ThrowIfCancellationRequested();
 
+
                 var batch = new BatchStatement();
                 var boundStatements = await BuildBoundStatements_ForCreate(flattenedTokenHandles);
                 batch.AddRange(boundStatements);

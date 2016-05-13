@@ -281,6 +281,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                             Version int,
                          ************************************************
                          */
+
                         _CreateRefreshTokenByClientId =
                             new AsyncLazy<PreparedStatement>(
                                 () =>
@@ -291,13 +292,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
                                         @"VALUES(?,?,?,?,?,?,?,?)");
                                     return result;
                                 });
+
                         _CreateRefreshTokenByKey =
                             new AsyncLazy<PreparedStatement>(
                                 () =>
                                 {
                                     var result = _cassandraSession.PrepareAsync(
                                         @"INSERT INTO " +
-                                        @"RefreshTokenHandle_By_ClientId(AccessToken, ClientId,CreationTime,Expires,Key,Lifetime,SubjectId,Version) " +
+                                        @"RefreshTokenHandle_By_Key(AccessToken, ClientId,CreationTime,Expires,Key,Lifetime,SubjectId,Version) " +
                                         @"VALUES(?,?,?,?,?,?,?,?)");
                                     return result;
                                 });

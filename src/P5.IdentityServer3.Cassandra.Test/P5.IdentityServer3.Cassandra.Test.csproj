@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="CassandraTestHelper.cs" />
     <Compile Include="ConsentHandleStoreTest.cs" />
+    <Compile Include="RefreshTokenHandleStoreTest.cs" />
     <Compile Include="TokenHandleStoreTest.cs" />
     <Compile Include="ClientStoreTest.cs" />
     <Compile Include="ScopeStoreTest.cs" />

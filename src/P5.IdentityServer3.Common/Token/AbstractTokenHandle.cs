@@ -41,6 +41,7 @@ namespace P5.IdentityServer3.Common
                 Lifetime = this.Lifetime,
                 Type = this.Type,
                 Version = this.Version
+                
             };
             return token;
         }
