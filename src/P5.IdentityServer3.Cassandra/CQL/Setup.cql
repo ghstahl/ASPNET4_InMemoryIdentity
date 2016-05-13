@@ -55,6 +55,30 @@ CREATE TABLE IF NOT EXISTS scopes_by_name (
     PRIMARY KEY (Name)
 );
 
+CREATE TABLE IF NOT EXISTS RefreshTokenHandle_By_Key (
+    AccessToken text,
+    ClientId text,
+    CreationTime timestamp,
+    Expires timestamp,
+    Key text,
+    Lifetime int,
+    SubjectId text,
+    Version int,
+    PRIMARY KEY (Key)
+);
+CREATE TABLE IF NOT EXISTS RefreshTokenHandle_By_ClientId (
+    AccessToken text,
+    ClientId text,
+    CreationTime timestamp,
+    Expires timestamp,
+    Key text,
+    Lifetime int,
+    SubjectId text,
+    Version int,
+    PRIMARY KEY (ClientId,Key)
+);
+
+
 CREATE TABLE IF NOT EXISTS TokenHandle_By_Key (
     Audience text,
     Claims text,
@@ -124,6 +148,37 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
     UpdateAccessTokenClaimsOnRefresh boolean,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS consent_by_id (
+    id uuid,
+    ClientId text,
+    Scopes text,
+    Subject text,
+    PRIMARY KEY (id,Subject)
+);
+
+CREATE TABLE IF NOT EXISTS consent_by_clientid (
+    id uuid,
+    ClientId text,
+    Scopes text,
+    Subject text,
+    PRIMARY KEY (ClientId,Subject)
+);
+
+CREATE INDEX IF NOT EXISTS
+ON RefreshTokenHandle_By_ClientId (SubjectId);
+
+CREATE INDEX IF NOT EXISTS
+ON RefreshTokenHandle_By_ClientId (Key);
+
+CREATE INDEX IF NOT EXISTS
+ON consent_by_clientid (Subject);
+
+CREATE INDEX IF NOT EXISTS
+ON consent_by_id (ClientId);
+
+CREATE INDEX IF NOT EXISTS
+ON consent_by_id (Subject);
 
 CREATE INDEX IF NOT EXISTS
 ON TokenHandle_By_ClientId (SubjectId);
