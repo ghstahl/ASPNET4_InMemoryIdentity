@@ -15,9 +15,9 @@ namespace P5.IdentityServer3.BiggyJson.Test
     [DeploymentItem("source", "source")]
     public class ScopeStoreTest:TestBase
     {
-        public static void InsertTestData(ScopeStore store,int count = 1)
+        public static List<ScopeRecord> InsertTestData(ScopeStore store, int count = 1)
         {
-
+            List<ScopeRecord> scopeRecords = new List<ScopeRecord>();
             for (int i = 0; i < count; ++i)
             {
 
@@ -49,8 +49,9 @@ namespace P5.IdentityServer3.BiggyJson.Test
                 };
                 var scopeRecord = new ScopeRecord(new ScopeHandle(record));
                 store.CreateAsync(scopeRecord.Record);
-
+                scopeRecords.Add(scopeRecord);
             }
+            return scopeRecords;
         }
 
         private ScopeStore _scopeStore;

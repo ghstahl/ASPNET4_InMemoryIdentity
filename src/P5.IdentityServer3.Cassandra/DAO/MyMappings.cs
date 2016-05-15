@@ -6,6 +6,10 @@ namespace P5.IdentityServer3.Cassandra.DAO
 {
     public class MyMappings : Mappings
     {
+        public const string WellKnownTokenhandleByKey = "tokenhandle_by_key";
+        public const string WellKnownAuthorizationCodeHandleByKey = "authorizationcodehandle_by_key";
+        public const string WellKnownRefreshTokenHandleByKey = "refreshtokenhandle_by_key";
+        public const string WellKnownConsentByClientId = "consent_by_clientid";
         private static bool _init { get; set; }
 
         public static void Init()
@@ -24,13 +28,16 @@ namespace P5.IdentityServer3.Cassandra.DAO
             // that inherits from Mappings
 
             For<FlattenedTokenHandle>()
-                .TableName("tokenhandle_by_key");
+                .TableName(WellKnownTokenhandleByKey);
+
+            For<FlattenedAuthorizationCodeHandle>()
+                .TableName(WellKnownAuthorizationCodeHandleByKey);
 
             For<FlattenedRefreshTokenHandle>()
-                .TableName("refreshtokenhandle_by_key");
+                .TableName(WellKnownRefreshTokenHandleByKey);
 
             For<FlattenedConsentHandle>()
-                .TableName("consent_by_clientid");
+                .TableName(WellKnownConsentByClientId);
         }
     }
 }

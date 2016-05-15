@@ -51,13 +51,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\AbstractAuthorizationCodeHandle.cs" />
-    <Compile Include="Authorization\AbstractAuthorizationCodeHandleExtensions.cs" />
-    <Compile Include="Authorization\AuthorizationCodeHandle.cs" />
-    <Compile Include="Authorization\AuthorizationCodeHandleRecord.cs" />
-    <Compile Include="Authorization\FlattenedAuthorizationCodeHandle.cs" />
-    <Compile Include="Authorization\FlattenedAuthorizationCodeHandleRecord.cs" />
-    <Compile Include="Authorization\IAuthorizationCodeHandle.cs" />
+    <Compile Include="AuthorizationCode\AbstractAuthorizationCodeHandle.cs" />
+    <Compile Include="AuthorizationCode\AbstractAuthorizationCodeHandleExtensions.cs" />
+    <Compile Include="AuthorizationCode\AuthorizationCodeHandle.cs" />
+    <Compile Include="AuthorizationCode\AuthorizationCodeHandleRecord.cs" />
+    <Compile Include="AuthorizationCode\FlattenedAuthorizationCodeHandle.cs" />
+    <Compile Include="AuthorizationCode\FlattenedAuthorizationCodeHandleRecord.cs" />
+    <Compile Include="AuthorizationCode\IAuthorizationCodeHandle.cs" />
     <Compile Include="Claim\ClaimExtensions.cs" />
     <Compile Include="Claim\ClaimIdentityRecord.cs" />
     <Compile Include="Claim\ClaimTypeRecord.cs" />

@@ -64,10 +64,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLazy.cs" />
+    <Compile Include="AuthorizationCode\AuthorizationCodeStore.cs" />
     <Compile Include="Client\ClientStore.cs" />
     <Compile Include="CommonStore\CassandraStore.cs" />
     <Compile Include="CommonStore\StoreSettings.cs" />
     <Compile Include="Consent\ConsentStore.cs" />
+    <Compile Include="DAO\AuthorizationCode\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\Client\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\Consent\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\IdentityServer3CassandraDao.cs" />
@@ -86,9 +88,7 @@
     <None Include="CQL\Setup.cql" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Authorization\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
       <Project>{51566eae-2937-41d2-a6c8-d055a74a6209}</Project>

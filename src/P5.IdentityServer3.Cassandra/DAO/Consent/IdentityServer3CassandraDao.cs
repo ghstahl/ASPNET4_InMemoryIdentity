@@ -22,7 +22,42 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private static AsyncLazy<PreparedStatement> _CreateConsentByClientId { get; set; }
 
         #endregion
+        public static void PrepareConsentStatements()
+        {
+            #region PREPARED STATEMENTS for Consent
 
+            /*
+                         ************************************************
+                            id uuid,
+                            ClientId text,
+                            Scopes text,
+                            Subject text,
+                         ************************************************
+                         */
+            _CreateConsentById =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"consent_by_id(id,ClientId,Scopes,Subject) " +
+                            @"VALUES(?,?,?,?)");
+                        return result;
+                    });
+            _CreateConsentByClientId =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"consent_by_clientid(id,ClientId,Scopes,Subject) " +
+                            @"VALUES(?,?,?,?)");
+                        return result;
+                    });
+
+            #endregion
+
+        }
         private static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
           IList<FlattenedConsentRecord> flattenedConsentRecords)
         {

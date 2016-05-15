@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using P5.IdentityServer3.Common;
@@ -12,54 +13,68 @@ using P5.MSTest.Common;
 namespace P5.IdentityServer3.BiggyJson.Test
 {
     [TestClass]
-    [DeploymentItem("source", "source")]
+
     public class AuthorizationHandleStoreTest : TestBase
     {
-        static void InsertTestData(AuthorizationCodeStore store, int count = 1)
+        static List<AuthorizationCodeHandleRecord> InsertTestData(ClientStore clientStore,
+            ScopeStore scopeStore,
+            AuthorizationCodeStore authorizationCodeStore,
+            TokenHandleStore ths,int count = 1)
         {
+            var tokenInsert = TokenHandleStoreTest.InsertTestData(clientStore, scopeStore, ths,10);
 
-            for (int i = 0; i < count; ++i)
+            var clientId = tokenInsert[0].Record.ClientId;
+            string subjectSeed = Guid.NewGuid().ToString();
+            List<AuthorizationCodeHandleRecord> result = new List<AuthorizationCodeHandleRecord>();
+            int i = 0;
+            foreach (var tokenRecord in tokenInsert)
             {
+
+                var client = clientStore.FindClientByIdAsync(tokenRecord.Record.ClientId);
 
                 AuthorizationCodeHandle handle = new AuthorizationCodeHandle
                 {
-                    ClientId = "CLIENTID:" + i,
-                    SubjectId = "SUBJECTID:" + i%2,
-                    Expires = DateTimeOffset.UtcNow.AddSeconds(5),
+                    ClientId = tokenRecord.Record.ClientId,
+                    SubjectId = tokenRecord.Record.SubjectId,
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5),
                     CreationTime = DateTimeOffset.UtcNow,
                     IsOpenId = true,
                     RedirectUri = "REDIRECTURI/" + i,
                     WasConsentShown = true,
                     Nonce = "NONCE:" + i,
+
                     ClaimIdentityRecords = new List<ClaimIdentityRecord>()
                     {
                         new ClaimIdentityRecord()
                         {
-                            AuthenticationType = "AuthenticationType:" + i,
+                            AuthenticationType = Constants.PrimaryAuthenticationType,
                             ClaimTypeRecords = new List<ClaimTypeRecord>()
                             {
                                 new ClaimTypeRecord()
                                 {
-                                    Type = "TYPE:" + 1,
-                                    Value = "VALUE:" + i,
+                                    Type = Constants.ClaimTypes.Subject,
+                                    Value = tokenRecord.Record.SubjectId,
                                     ValueType = "VALUETYPE:" + i
                                 }
                             }
                         }
                     },
-                    RequestedScopes = new List<string>() {"REQUESTEDSCOPES:" + i},
-                    Key = "KEY:" + i,
+                    RequestedScopes = client.Result.AllowedScopes,
+                    Key = Guid.NewGuid().ToString(),
                 };
 
                 var  handleRecord = new AuthorizationCodeHandleRecord(handle);
-                store.CreateAsync(handleRecord.Record);
-
+                authorizationCodeStore.CreateAsync(handleRecord.Record);
+                result.Add(handleRecord);
+                ++i;
             }
+            return result;
         }
 
         private ClientStore _clientStore;
         private ScopeStore _scopeStore;
         private AuthorizationCodeStore _authorizationCodeHandleStore;
+        private TokenHandleStore _tokenHandleStore;
 
         [TestInitialize]
         public void Setup()
@@ -68,115 +83,85 @@ namespace P5.IdentityServer3.BiggyJson.Test
             _clientStore = new ClientStore(StoreSettings.UsingFolder(TargetFolder));
             _scopeStore = new ScopeStore(StoreSettings.UsingFolder(TargetFolder));
             _authorizationCodeHandleStore = new AuthorizationCodeStore(StoreSettings.UsingFolder(TargetFolder));
-            InsertTestData(_authorizationCodeHandleStore, 10);
-            ClientStoreTest.InsertTestData(_clientStore, 10);
-            ScopeStoreTest.InsertTestData(_scopeStore,10);
+            _tokenHandleStore = new TokenHandleStore(StoreSettings.UsingFolder(TargetFolder));
         }
 
         [TestMethod]
+        [DeploymentItem("source", "source")]
         public void TestCreateAsync()
         {
-            AuthorizationCodeHandle handle = new AuthorizationCodeHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            AuthorizationCodeHandleRecord handleRecord = new AuthorizationCodeHandleRecord(handle);
-            Guid id = handleRecord.Id;
-            var result = _authorizationCodeHandleStore.RetrieveAsync(id);
-            handleRecord = new AuthorizationCodeHandleRecord(result.Result);
-            Assert.AreEqual(handleRecord.Id, id);
+            var insert = InsertTestData(_clientStore, _scopeStore, _authorizationCodeHandleStore, _tokenHandleStore, 10);
+            var key = insert[0].Record.Key;
+            var result = _authorizationCodeHandleStore.GetAsync(key);
+            Assert.IsNotNull(result.Result);
+            Assert.AreEqual(result.Result.ClientId, insert[0].Record.ClientId);
+
         }
 
         [TestMethod]
+        [DeploymentItem("source", "source")]
         public void TestUpdateAsync()
         {
+            var insert = InsertTestData(_clientStore, _scopeStore, _authorizationCodeHandleStore, _tokenHandleStore, 1);
+            var key = insert[0].Record.Key;
+            var result = _authorizationCodeHandleStore.GetAsync(key);
+            Assert.IsNotNull(result.Result);
+            Assert.AreEqual(result.Result.ClientId, insert[0].Record.ClientId);
+            var nonce = Guid.NewGuid().ToString();
 
-            AuthorizationCodeHandle handle = new AuthorizationCodeHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            AuthorizationCodeHandleRecord tokenHandleRecord = new AuthorizationCodeHandleRecord(handle);
-            Guid id = tokenHandleRecord.Id;
-            var result = _authorizationCodeHandleStore.RetrieveAsync(id);
-            tokenHandleRecord = new AuthorizationCodeHandleRecord(result.Result);
-
-
-            Assert.AreEqual(tokenHandleRecord.Id, id);
-
-            var testValue = Guid.NewGuid().ToString();
-            tokenHandleRecord.Record.SubjectId = testValue;
-
-            _authorizationCodeHandleStore.UpdateAsync(tokenHandleRecord.Record);
-            result = _authorizationCodeHandleStore.RetrieveAsync(id);
-            tokenHandleRecord = new AuthorizationCodeHandleRecord(result.Result);
-            Assert.AreEqual(tokenHandleRecord.Id, id);
-            Assert.AreEqual(tokenHandleRecord.Record.SubjectId, testValue);
-
+            insert[0].Record.Nonce = nonce;
+            _authorizationCodeHandleStore.UpdateAsync(insert[0].Record);
+            result = _authorizationCodeHandleStore.GetAsync(key);
+            Assert.IsNotNull(result.Result);
+            Assert.AreEqual(result.Result.Nonce, nonce);
         }
 
         [TestMethod]
+        [DeploymentItem("source", "source")]
         public void TestStoreAsync()
         {
+            var insert = InsertTestData(_clientStore, _scopeStore, _authorizationCodeHandleStore, _tokenHandleStore, 10);
 
-            AuthorizationCodeHandle record = new AuthorizationCodeHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            AuthorizationCodeHandleRecord tokenHandleRecord = new AuthorizationCodeHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
 
-            var key = "KEY:" + 0;
+            var key = insert[0].Record.Key;
             var result = _authorizationCodeHandleStore.GetAsync(key);
+            Assert.IsNotNull(result.Result);
 
-            key = "KEY:" + 10;
-            tokenHandleRecord = new AuthorizationCodeHandleRecord(new AuthorizationCodeHandle()
+            key = Guid.NewGuid().ToString();
+            var tokenHandleRecord = new AuthorizationCodeHandleRecord(new AuthorizationCodeHandle()
             {
                 Key = key
             });
-            id = tokenHandleRecord.Id;
+            var id = tokenHandleRecord.Id;
             AuthorizationCode token = result.Result;
             _authorizationCodeHandleStore.StoreAsync(key, token);
             result = _authorizationCodeHandleStore.GetAsync(key);
-            tokenHandleRecord = new AuthorizationCodeHandleRecord(new AuthorizationCodeHandle(key, result.Result));
+            Assert.IsNotNull(result.Result);
 
-            Assert.AreEqual(tokenHandleRecord.Id, id);
         }
 
         [TestMethod]
+        [DeploymentItem("source", "source")]
         public void TestGetAsync()
         {
 
-            AuthorizationCodeHandle record = new AuthorizationCodeHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            var tokenHandleRecord = new AuthorizationCodeHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
-
-            var key = "KEY:" + 0;
+            var insert = InsertTestData(_clientStore, _scopeStore, _authorizationCodeHandleStore, _tokenHandleStore, 10);
+            var key = insert[0].Record.Key;
             var result = _authorizationCodeHandleStore.GetAsync(key);
-
-
             Assert.IsNotNull(result.Result);
-            Assert.AreEqual(result.Result.ClientId, "CLIENTID:" + 0);
+            Assert.AreEqual(result.Result.ClientId, insert[0].Record.ClientId);
         }
         [TestMethod]
+        [DeploymentItem("source", "source")]
         public void TestRemoveAsync()
         {
 
-            AuthorizationCodeHandle record = new AuthorizationCodeHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            var tokenHandleRecord = new AuthorizationCodeHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
-
-            var key = "KEY:" + 0;
+            var insert = InsertTestData(_clientStore, _scopeStore, _authorizationCodeHandleStore, _tokenHandleStore, 10);
+            var key = insert[0].Record.Key;
             var result = _authorizationCodeHandleStore.GetAsync(key);
-
-
             Assert.IsNotNull(result.Result);
-            Assert.AreEqual(result.Result.ClientId, "CLIENTID:" + 0);
+            Assert.AreEqual(result.Result.ClientId, insert[0].Record.ClientId);
+
 
             _authorizationCodeHandleStore.RemoveAsync(key);
             result = _authorizationCodeHandleStore.GetAsync(key);
@@ -185,45 +170,41 @@ namespace P5.IdentityServer3.BiggyJson.Test
             Assert.IsNull(result.Result);
         }
         [TestMethod]
+        [DeploymentItem("source", "source")]
         public void TestGetAllAsync()
         {
 
-            AuthorizationCodeHandle record = new AuthorizationCodeHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            var tokenHandleRecord = new AuthorizationCodeHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
-
-            var subject = "SUBJECTID:" + 0;
-            var result = _authorizationCodeHandleStore.GetAllAsync(subject);
-
-
+            var insert = InsertTestData(_clientStore, _scopeStore, _authorizationCodeHandleStore, _tokenHandleStore, 10);
+            var key = insert[0].Record.Key;
+            var result = _authorizationCodeHandleStore.GetAsync(key);
             Assert.IsNotNull(result.Result);
-            Assert.AreEqual(result.Result.Count(), 5);
+            Assert.AreEqual(result.Result.ClientId, insert[0].Record.ClientId);
+
+            var subject = insert[0].Record.SubjectId;
+            var allResult = _authorizationCodeHandleStore.GetAllAsync(subject);
+
+
+            Assert.IsNotNull(allResult.Result);
+            Assert.AreEqual(allResult.Result.Count(), 5);
         }
 
         [TestMethod]
+        [DeploymentItem("source", "source")]
         public void TestRevokeAsync()
         {
 
-            AuthorizationCodeHandle record = new AuthorizationCodeHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            var tokenHandleRecord = new AuthorizationCodeHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
+            var insert = InsertTestData(_clientStore, _scopeStore, _authorizationCodeHandleStore, _tokenHandleStore, 10);
+            var key = insert[0].Record.Key;
+            var clientId = insert[0].Record.ClientId;
 
-            var key = "KEY:" + 0;
             var result = _authorizationCodeHandleStore.GetAsync(key);
-
-
             Assert.IsNotNull(result.Result);
-            Assert.AreEqual(result.Result.ClientId, "CLIENTID:" + 0);
+            Assert.AreEqual(result.Result.ClientId, clientId);
+            var subjectId = result.Result.SubjectId;
 
-            var subject = "SUBJECTID:" + 0;
-            var clientId = result.Result.ClientId;
-            _authorizationCodeHandleStore.RevokeAsync(subject, clientId);
+
+
+            _authorizationCodeHandleStore.RevokeAsync(subjectId, clientId);
             result = _authorizationCodeHandleStore.GetAsync(key);
             Assert.IsNull(result.Result);
 

@@ -207,7 +207,9 @@ namespace P5.IdentityServer3.Cassandra.DAO
                         //-----------------------------------------------
                         // PREPARED STATEMENTS for Token
                         //-----------------------------------------------
+
                         #region PREPARED STATEMENTS for Token
+
                         /*
                          ************************************************
                             Audience text,
@@ -263,12 +265,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
                                         @"WHERE key = ?");
                                     return result;
                                 });
+
                         #endregion
 
                         //-----------------------------------------------
                         // PREPARED STATEMENTS for RefreshToken
                         //-----------------------------------------------
+
                         #region PREPARED STATEMENTS for RefreshToken
+
                         /*
                          ************************************************
                             AccessToken text,
@@ -323,42 +328,20 @@ namespace P5.IdentityServer3.Cassandra.DAO
                                         @"WHERE key = ?");
                                     return result;
                                 });
+
                         #endregion
 
                         //-----------------------------------------------
                         // PREPARED STATEMENTS for Consent
                         //-----------------------------------------------
-                        #region PREPARED STATEMENTS for Consent
-                        /*
-                         ************************************************
-                            id uuid,
-                            ClientId text,
-                            Scopes text,
-                            Subject text,
-                         ************************************************
-                         */
-                        _CreateConsentById =
-                            new AsyncLazy<PreparedStatement>(
-                                () =>
-                                {
-                                    var result = _cassandraSession.PrepareAsync(
-                                        @"INSERT INTO " +
-                                        @"consent_by_id(id,ClientId,Scopes,Subject) " +
-                                        @"VALUES(?,?,?,?)");
-                                    return result;
-                                });
-                        _CreateConsentByClientId =
-                            new AsyncLazy<PreparedStatement>(
-                                () =>
-                                {
-                                    var result = _cassandraSession.PrepareAsync(
-                                        @"INSERT INTO " +
-                                        @"consent_by_clientid(id,ClientId,Scopes,Subject) " +
-                                        @"VALUES(?,?,?,?)");
-                                    return result;
-                                });
+                        PrepareConsentStatements();
 
-                        #endregion
+                        //-----------------------------------------------
+                        // PREPARED STATEMENTS for AuthorizationCode
+                        //-----------------------------------------------
+                        PrepareAuthorizationCodeStatements();
+
+
                     }
                 }
                 catch (Exception e)
@@ -368,9 +351,5 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 return _cassandraSession;
             }
         }
-
-
-
-
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
+using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.BiggyJson
 {
@@ -65,8 +66,8 @@ namespace P5.IdentityServer3.BiggyJson
             var result = RetrieveAsync(tokenHandleRecord.Id);
             if (result.Result == null)
                 return await Task.FromResult<AuthorizationCode>(null);
-            var token = result.Result.ToAuthorizationCode(_clientStore, _scopeStore);
-            return await Task.FromResult(token);
+            var code = await result.Result.MakeAuthorizationCodeAsync(_clientStore, _scopeStore);
+            return code;
         }
 
         public async Task RemoveAsync(string key)
@@ -80,10 +81,15 @@ namespace P5.IdentityServer3.BiggyJson
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                 where item.Record.SubjectId == subject
-                select item.Record.ToAuthorizationCode(_clientStore, _scopeStore);
+                select item;
+            List<global::IdentityServer3.Core.Models.AuthorizationCode> authCodes = new List<global::IdentityServer3.Core.Models.AuthorizationCode>();
+            foreach (var rec in query)
+            {
+                var authCode = await rec.Record.MakeAuthorizationCodeAsync(_clientStore, _scopeStore);
+                authCodes.Add(authCode);
+            }
 
-            var list = query.ToArray();
-            return await Task.FromResult(list.Cast<ITokenMetadata>());
+            return authCodes;
         }
 
         public async Task RevokeAsync(string subject, string client)

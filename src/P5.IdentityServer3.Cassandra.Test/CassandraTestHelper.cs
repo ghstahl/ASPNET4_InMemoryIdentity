@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Newtonsoft.Json;
+using P5.IdentityServer3.Cassandra.Client;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.RefreshToken;
@@ -177,6 +180,56 @@ namespace P5.IdentityServer3.Cassandra.Test
             await IdentityServer3CassandraDao.CreateManyRefreshTokenHandleAsync(result);
 
             return result;
+        }
+
+        public static async Task<List<FlattenedAuthorizationCodeHandle>> InsertTestData_AuthorizationCode(int count = 1)
+        {
+            IClientStore clientStore = new ClientStore();
+            var insertTokens = await CassandraTestHelper.InsertTestData_Tokens(count); // only add one client
+            var clientId = insertTokens[0].ClientId;
+            var clientRecord = await clientStore.FindClientByIdAsync(clientId);
+
+            List<FlattenedAuthorizationCodeHandle> result = new List<FlattenedAuthorizationCodeHandle>();
+            int i = 0;
+            foreach (var insertToken in insertTokens)
+            {
+                var claimIdentityRecords = new List<ClaimIdentityRecord>()
+                {
+                    new ClaimIdentityRecord()
+                    {
+                        AuthenticationType = Constants.PrimaryAuthenticationType,
+                        ClaimTypeRecords = new List<ClaimTypeRecord>()
+                        {
+                            new ClaimTypeRecord()
+                            {
+                                Type = Constants.ClaimTypes.Subject,
+                                Value = "Value:" + i,
+                                ValueType = "VALUETYPE:" + i
+                            }
+                        }
+                    }
+                };
+                FlattenedAuthorizationCodeHandle handle = new FlattenedAuthorizationCodeHandle
+                {
+                    ClientId = clientId,
+                    SubjectId = insertToken.SubjectId,
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5),
+                    CreationTime = DateTimeOffset.UtcNow,
+                    IsOpenId = true,
+                    RedirectUri = "REDIRECTURI/" + i,
+                    WasConsentShown = true,
+                    Nonce = "NONCE:" + i,
+
+                    ClaimIdentityRecords = new FlattenedAuthorizationCodeHandle().SerializeClaimsIdentityRecords(claimIdentityRecords),
+                    RequestedScopes = new FlattenedAuthorizationCodeHandle().SerializeRequestScopes(clientRecord.AllowedScopes),
+                    Key = Guid.NewGuid().ToString()
+                };
+                ++i;
+                result.Add(handle);
+            }
+            await IdentityServer3CassandraDao.CreateManyAuthorizationCodeHandleAsync(result);
+            return result;
+
         }
 
         public static async Task<List<FlattenedTokenHandle>> InsertTestData_Tokens(int count = 1)

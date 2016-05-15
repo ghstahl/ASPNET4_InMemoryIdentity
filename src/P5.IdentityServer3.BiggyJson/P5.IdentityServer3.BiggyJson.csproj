@@ -63,9 +63,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\AuthorizationCodeHandle.cs" />
-    <Compile Include="Authorization\AuthorizationCodeHandleExtensions.cs" />
-    <Compile Include="Authorization\AuthorizationCodeHandleRecord.cs" />
     <Compile Include="Authorization\AuthorizationCodeStore.cs" />
     <Compile Include="Biggy\BiggyStore.cs" />
     <Compile Include="Scope\ScopeStore.cs" />

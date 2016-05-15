@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
- 
+
 
 namespace P5.IdentityServer3.Common
 {
@@ -49,13 +49,7 @@ namespace P5.IdentityServer3.Common
 
         public static ClaimTypeRecord ToClaimTypeRecord(this System.Security.Claims.Claim claim)
         {
-            return new ClaimTypeRecord()
-            {
-                Type = claim.Type,
-                Value = claim.Value,
-                ValueType = claim.ValueType
-
-            };
+            return new ClaimTypeRecord(claim);
         }
         public static List<ClaimTypeRecord> ToClaimTypeRecords(this List<System.Security.Claims.Claim> claims)
         {

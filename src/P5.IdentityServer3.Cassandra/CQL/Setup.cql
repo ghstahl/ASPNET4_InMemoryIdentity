@@ -55,6 +55,36 @@ CREATE TABLE IF NOT EXISTS scopes_by_name (
     PRIMARY KEY (Name)
 );
 
+CREATE TABLE IF NOT EXISTS AuthorizationCodeHandle_By_Key (
+    ClaimIdentityRecords text,
+    ClientId text,
+    CreationTime timestamp,
+    Expires timestamp,
+    IsOpenId boolean,
+    Key text,
+    Nonce text,
+    RedirectUri text,
+    RequestedScopes text,
+    SubjectId text,
+    WasConsentShown boolean,
+    PRIMARY KEY (Key)
+);
+
+CREATE TABLE IF NOT EXISTS AuthorizationCodeHandle_By_ClientId (
+    ClaimIdentityRecords text,
+    ClientId text,
+    CreationTime timestamp,
+    Expires timestamp,
+    IsOpenId boolean,
+    Key text,
+    Nonce text,
+    RedirectUri text,
+    RequestedScopes text,
+    SubjectId text,
+    WasConsentShown boolean,
+    PRIMARY KEY (ClientId,Key)
+);
+
 CREATE TABLE IF NOT EXISTS RefreshTokenHandle_By_Key (
     AccessToken text,
     ClientId text,
@@ -164,6 +194,12 @@ CREATE TABLE IF NOT EXISTS consent_by_clientid (
     Subject text,
     PRIMARY KEY (ClientId,Subject)
 );
+
+CREATE INDEX IF NOT EXISTS
+ON AuthorizationCodeHandle_By_ClientId (SubjectId);
+
+CREATE INDEX IF NOT EXISTS
+ON AuthorizationCodeHandle_By_ClientId (Key);
 
 CREATE INDEX IF NOT EXISTS
 ON RefreshTokenHandle_By_ClientId (SubjectId);

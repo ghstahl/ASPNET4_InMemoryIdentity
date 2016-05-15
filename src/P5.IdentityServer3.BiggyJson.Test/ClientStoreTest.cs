@@ -16,15 +16,18 @@ namespace P5.IdentityServer3.BiggyJson.Test
     [DeploymentItem("source", "source")]
     public class ClientStoreTest : TestBase
     {
-        public static void InsertTestData(ClientStore store,int count = 1)
+        public static List<ClientRecord> InsertTestData(ClientStore store, ScopeStore scopeStore, int count = 1)
         {
-
+            var scopeInsert = ScopeStoreTest.InsertTestData(scopeStore,10);
+            List<ClientRecord> result = new List<ClientRecord>();
             for (int i = 0; i < count; ++i)
             {
+                var scopes = from item in scopeInsert
+                    select item.Record.Name;
 
                 Client record = new Client()
                 {
-                   ClientId = "CLIENTID:"+i,
+                   ClientId = Guid.NewGuid().ToString(),
                    AbsoluteRefreshTokenLifetime = 5,
                    AccessTokenLifetime = 5,
                    AccessTokenType = AccessTokenType.Jwt,
@@ -35,7 +38,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
                    AllowRememberConsent = true,
                    AllowedCorsOrigins = new List<string>() { "www.google,com", "www.microsoft.com" },
                    AllowedCustomGrantTypes = new List<string>() { "AllowedCustomGrantTypes" + i },
-                   AllowedScopes = new List<string>() { "AllowedScopes" + i },
+                   AllowedScopes = scopes.ToList(),
                    AlwaysSendClientClaims = true,
                    AuthorizationCodeLifetime = 5,
                    Claims = new List<Claim>() { new Claim("Type:"+i,"Value:"+i)},
@@ -63,32 +66,31 @@ namespace P5.IdentityServer3.BiggyJson.Test
                 };
                 var clientRecord = new ClientRecord(record.ToClientHandle());
                 store.CreateAsync(clientRecord.Record);
+                result.Add(clientRecord);
             }
+            return result;
         }
 
 
         private ClientStore _clientStore;
+        private ScopeStore _scopeStore;
 
         [TestInitialize]
         public void Setup()
         {
             base.Setup();
-
             _clientStore = new ClientStore(StoreSettings.UsingFolder(TargetFolder));
-            ClientStoreTest.InsertTestData(_clientStore, 10);
+            _scopeStore = new ScopeStore(StoreSettings.UsingFolder(TargetFolder));
         }
 
         [TestMethod]
         public void TestCreateAsync()
         {
-            Client record = new Client()
-            {
-                ClientId = "CLIENTID:" + 0
-            };
-            ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
-            Guid id = clientRecord.Id;
+            var insert = ClientStoreTest.InsertTestData(_clientStore,_scopeStore, 1);
+
+            Guid id = insert[0].Id;
             var result = _clientStore.RetrieveAsync(id);
-            clientRecord = new ClientRecord(result.Result);
+            var clientRecord = new ClientRecord(result.Result);
 
 
             Assert.AreEqual(clientRecord.Id, id);
@@ -98,14 +100,12 @@ namespace P5.IdentityServer3.BiggyJson.Test
         public void TestUpdateAsync()
         {
 
-            Client record = new Client()
-            {
-                ClientId = "CLIENTID:" + 0
-            };
-            ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
-            Guid id = clientRecord.Id;
+            var insert = ClientStoreTest.InsertTestData(_clientStore, _scopeStore, 1);
+
+            Guid id = insert[0].Id;
+
             var result = _clientStore.RetrieveAsync(id);
-            clientRecord = new ClientRecord(result.Result);
+            var clientRecord = new ClientRecord(result.Result);
 
 
             Assert.AreEqual(clientRecord.Id, id);
@@ -123,20 +123,15 @@ namespace P5.IdentityServer3.BiggyJson.Test
         [TestMethod]
         public void TestDeleteAsync()
         {
+            var insert = ClientStoreTest.InsertTestData(_clientStore, _scopeStore, 1);
 
-            Client record = new Client()
-            {
-                ClientId = "CLIENTID:" + 0
-            };
-            ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
-            Guid id = clientRecord.Id;
+            Guid id = insert[0].Id;
             var result = _clientStore.RetrieveAsync(id);
-            clientRecord = new ClientRecord(result.Result);
+            var clientRecord = new ClientRecord(result.Result);
 
 
             Assert.AreEqual(clientRecord.Id, id);
-            var testData = Guid.NewGuid().ToString();
-            clientRecord.Record.ClientName = testData;
+
             _clientStore.DeleteAsync(id);
 
             result = _clientStore.RetrieveAsync(id);
@@ -146,15 +141,11 @@ namespace P5.IdentityServer3.BiggyJson.Test
         [TestMethod]
         public void TestFindClientByIdAsync()
         {
+            var insert = ClientStoreTest.InsertTestData(_clientStore, _scopeStore, 1);
 
-            Client record = new Client()
-            {
-                ClientId = "CLIENTID:" + 0
-            };
-            ClientRecord clientRecord = new ClientRecord(record.ToClientHandle());
-            Guid id = clientRecord.Id;
-            var result = _clientStore.FindClientByIdAsync("CLIENTID:" + 0);
-            clientRecord = new ClientRecord(result.Result.ToClientHandle());
+            Guid id = insert[0].Id;
+            var result = _clientStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var clientRecord = new ClientRecord(result.Result.ToClientHandle());
 
 
             Assert.AreEqual(clientRecord.Id, id);

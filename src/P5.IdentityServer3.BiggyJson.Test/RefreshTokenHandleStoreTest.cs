@@ -18,76 +18,64 @@ namespace P5.IdentityServer3.BiggyJson.Test
     [DeploymentItem("source", "source")]
     public class RefreshTokenHandleStoreTest:TestBase
     {
-        static void InsertTestData(RefreshTokenStore store, int count = 1)
+        public static List<RefreshTokenHandleRecord> InsertTestData(ClientStore clientStore,ScopeStore scopeStore, TokenHandleStore ths, RefreshTokenStore store, int count = 1)
         {
-
-            for (int i = 0; i < count; ++i)
+            List<RefreshTokenHandleRecord> result = new List<RefreshTokenHandleRecord>();
+            var insert = TokenHandleStoreTest.InsertTestData(clientStore, scopeStore,ths, count);
+            var subjectSeed = Guid.NewGuid().ToString();
+            var clientId = insert[0].Record.ClientId;
+            foreach (var item in insert)
             {
-
                 RefreshTokenHandle tokenHandle = new RefreshTokenHandle
                 {
 
-                    ClientId = "CLIENTID:" + i,
-                    AccessToken = TokenHandleStoreTest.MakeTokenHandle(i),
+                    ClientId = clientId,
+                    AccessToken = item.Record,
                     CreationTime = DateTimeOffset.UtcNow,
-                    Key = "KEY:" + i,
+                    Key = Guid.NewGuid().ToString(),
                     Expires = DateTimeOffset.UtcNow.AddMinutes(5),
                     LifeTime = 5,
-                    SubjectId = "SUBJECTID:" + i%2,
+                    SubjectId = item.Record.SubjectId,
                     Version = 1
                 };
-
-
                 var tokenHandleRecord = new RefreshTokenHandleRecord(tokenHandle);
                 store.CreateAsync(tokenHandleRecord.Record);
-
+                result.Add(tokenHandleRecord);
             }
+            return result;
         }
 
-        private ClientStore _clientStore;
-        private RefreshTokenStore _refreshTokenHandleStore;
+        private static ClientStore _clientStore;
+        private static TokenHandleStore _tokenHandleStore;
+        private static RefreshTokenStore _refreshTokenHandleStore;
+        private ScopeStore _scopeStore;
 
         [TestInitialize]
         public void Setup()
         {
             base.Setup();
-
             _clientStore = new ClientStore(StoreSettings.UsingFolder(TargetFolder));
+            _tokenHandleStore = new TokenHandleStore(StoreSettings.UsingFolder(TargetFolder));
             _refreshTokenHandleStore = new RefreshTokenStore(StoreSettings.UsingFolder(TargetFolder));
-            InsertTestData(_refreshTokenHandleStore, 10);
-            ClientStoreTest.InsertTestData(_clientStore, 10);
+            _scopeStore = new ScopeStore(StoreSettings.UsingFolder(TargetFolder));
         }
         [TestMethod]
         public void TestCreateAsync()
         {
-            RefreshTokenHandle record = new RefreshTokenHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            RefreshTokenHandleRecord tokenHandleRecord = new RefreshTokenHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
+            var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 1);
+            Guid id = insert[0].Id;
             var result = _refreshTokenHandleStore.RetrieveAsync(id);
-            tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
-
-
+            var tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
             Assert.AreEqual(tokenHandleRecord.Id, id);
-
         }
 
         [TestMethod]
          public void TestUpdateAsync()
         {
-
-            RefreshTokenHandle record = new RefreshTokenHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            RefreshTokenHandleRecord tokenHandleRecord = new RefreshTokenHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
+            var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 1);
+            Guid id = insert[0].Id;
             var result = _refreshTokenHandleStore.RetrieveAsync(id);
-            tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
-
-
+            var tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
             Assert.AreEqual(tokenHandleRecord.Id, id);
 
             var testValue = Guid.NewGuid().ToString();
@@ -104,75 +92,68 @@ namespace P5.IdentityServer3.BiggyJson.Test
         [TestMethod]
          public void TestStoreAsync()
         {
-
-            RefreshTokenHandle record = new RefreshTokenHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            RefreshTokenHandleRecord tokenHandleRecord = new RefreshTokenHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
-
-            var key = "KEY:" + 0;
-            var result = _refreshTokenHandleStore.GetAsync(key);
-
-            key = "KEY:" + 10;
-            tokenHandleRecord = new RefreshTokenHandleRecord(new RefreshTokenHandle()
-            {
-                Key = key
-            });
-            id = tokenHandleRecord.Id;
-            RefreshToken token = result.Result;
-            _refreshTokenHandleStore.StoreAsync(key, token);
-            result = _refreshTokenHandleStore.GetAsync(key);
-            tokenHandleRecord = new RefreshTokenHandleRecord(new RefreshTokenHandle(key, result.Result));
-
+            var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 1);
+            Guid id = insert[0].Id;
+            var result = _refreshTokenHandleStore.RetrieveAsync(id);
+            var tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
             Assert.AreEqual(tokenHandleRecord.Id, id);
+
+            tokenHandleRecord.Record.SubjectId = Guid.NewGuid().ToString();
+            tokenHandleRecord.Record.AccessToken.SubjectId = tokenHandleRecord.Record.SubjectId;
+            tokenHandleRecord.Record.Key = Guid.NewGuid().ToString();
+            var key = tokenHandleRecord.Record.Key;
+            var rt = tokenHandleRecord.Record.MakeRefreshToken(_clientStore);
+
+
+            _refreshTokenHandleStore.StoreAsync(key,tokenHandleRecord.Record.MakeRefreshToken(_clientStore));
+
+            var storedResult = _refreshTokenHandleStore.GetAsync(key);
+            Assert.IsNotNull(storedResult.Result);
+
+
+            Assert.AreEqual(rt.SubjectId, storedResult.Result.SubjectId);
 
         }
 
         [TestMethod]
          public void TestGetAsync()
         {
+            var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 1);
+            Guid id = insert[0].Id;
+            var result = _refreshTokenHandleStore.RetrieveAsync(id);
+            var tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
+            Assert.AreEqual(tokenHandleRecord.Id, id);
 
-            RefreshTokenHandle record = new RefreshTokenHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            RefreshTokenHandleRecord tokenHandleRecord = new RefreshTokenHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
 
-            var key = "KEY:" + 0;
-            var result = _refreshTokenHandleStore.GetAsync(key);
+            var storedResult = _refreshTokenHandleStore.GetAsync(tokenHandleRecord.Record.Key);
 
 
             Assert.IsNotNull(result.Result);
-            Assert.AreEqual(result.Result.ClientId, "CLIENTID:" + 0);
+            Assert.AreEqual(result.Result.ClientId, insert[0].Record.ClientId);
         }
 
         [TestMethod]
          public void TestRemoveAsync()
         {
 
-            RefreshTokenHandle record = new RefreshTokenHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            RefreshTokenHandleRecord tokenHandleRecord = new RefreshTokenHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
+            var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 1);
+            Guid id = insert[0].Id;
+            var result = _refreshTokenHandleStore.RetrieveAsync(id);
+            var tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
+            Assert.AreEqual(tokenHandleRecord.Id, id);
 
-            var key = "KEY:" + 0;
-            var result = _refreshTokenHandleStore.GetAsync(key);
+
+            var storedResult = _refreshTokenHandleStore.GetAsync(tokenHandleRecord.Record.Key);
 
 
             Assert.IsNotNull(result.Result);
-            Assert.AreEqual(result.Result.ClientId, "CLIENTID:" + 0);
-
-            _refreshTokenHandleStore.RemoveAsync(key);
-            result = _refreshTokenHandleStore.GetAsync(key);
+            Assert.AreEqual(result.Result.ClientId, insert[0].Record.ClientId);
 
 
-            Assert.IsNull(result.Result);
+            _refreshTokenHandleStore.RemoveAsync(tokenHandleRecord.Record.Key);
+            storedResult = _refreshTokenHandleStore.GetAsync(tokenHandleRecord.Record.Key);
 
+            Assert.IsNull(storedResult.Result);
 
         }
 
@@ -180,14 +161,10 @@ namespace P5.IdentityServer3.BiggyJson.Test
          public void TestGetAllAsync()
         {
 
-            RefreshTokenHandle record = new RefreshTokenHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            RefreshTokenHandleRecord tokenHandleRecord = new RefreshTokenHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
+            var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 10);
+            Guid id = insert[0].Id;
 
-            var subject = "SUBJECTID:" + 0;
+            var subject = insert[0].Record.SubjectId;
             var result = _refreshTokenHandleStore.GetAllAsync(subject);
 
 
@@ -202,24 +179,18 @@ namespace P5.IdentityServer3.BiggyJson.Test
          public void TestRevokeAsync()
         {
 
-            RefreshTokenHandle record = new RefreshTokenHandle()
-            {
-                Key = "KEY:" + 0
-            };
-            RefreshTokenHandleRecord tokenHandleRecord = new RefreshTokenHandleRecord(record);
-            Guid id = tokenHandleRecord.Id;
+            var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 1);
+            Guid id = insert[0].Id;
 
-            var key = "KEY:" + 0;
-            var result = _refreshTokenHandleStore.GetAsync(key);
-
+            var subject = insert[0].Record.SubjectId;
+            var clientId = insert[0].Record.ClientId;
+            var result = _refreshTokenHandleStore.GetAsync(insert[0].Record.Key);
 
             Assert.IsNotNull(result.Result);
-            Assert.AreEqual(result.Result.ClientId, "CLIENTID:" + 0);
 
-            var subject = "SUBJECTID:" + 0;
-            var clientId = result.Result.ClientId;
             _refreshTokenHandleStore.RevokeAsync(subject, clientId);
-            result = _refreshTokenHandleStore.GetAsync(key);
+            result = _refreshTokenHandleStore.GetAsync(insert[0].Record.Key);
+
             Assert.IsNull(result.Result);
 
         }

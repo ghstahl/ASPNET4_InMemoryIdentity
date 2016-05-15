@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using IdentityServer3.Core.Extensions;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 
@@ -34,29 +36,43 @@ namespace P5.IdentityServer3.Common
             }
         }
 
-        protected abstract TRequestedScopes SerializeRequestScopes(List<string> scopeNames);
+        public abstract TRequestedScopes SerializeRequestScopes(List<string> scopeNames);
 
-        protected abstract TClaimIdentityRecords SerializeClaimsIdentityRecords(List<ClaimIdentityRecord> claimIdentityRecords);
+        public abstract TClaimIdentityRecords SerializeClaimsIdentityRecords(List<ClaimIdentityRecord> claimIdentityRecords);
 
-        public global::IdentityServer3.Core.Models.AuthorizationCode MakeAuthorizationCode(IClientStore clientStore,IScopeStore scopeStore)
+        public async Task<global::IdentityServer3.Core.Models.AuthorizationCode> MakeAuthorizationCodeAsync(IClientStore clientStore, IScopeStore scopeStore)
         {
-            var result = new AuthorizationCode()
+            AuthorizationCode result;
+            try
             {
-                Client = clientStore.FindClientByIdAsync(this.ClientId).Result,
-                CreationTime = CreationTime,
-                IsOpenId = IsOpenId,
-                RedirectUri = RedirectUri,
-                WasConsentShown = WasConsentShown,
-                Nonce = Nonce,
-                RequestedScopes = scopeStore.FindScopesAsync(DeserializeScopes(RequestedScopes)).Result,
-                Subject = DeserializeSubject(ClaimIdentityRecords)
-            };
-            return result;
+                var client = clientStore.FindClientByIdAsync(this.ClientId).Result;
+                var requestedScopes = scopeStore.FindScopesAsync(DeserializeScopes(RequestedScopes)).Result;
+                var subject = DeserializeSubject(ClaimIdentityRecords);
+
+                result = new AuthorizationCode()
+                {
+                    Client = client,
+                    CreationTime = CreationTime,
+                    IsOpenId = IsOpenId,
+                    RedirectUri = RedirectUri,
+                    WasConsentShown = WasConsentShown,
+                    Nonce = Nonce,
+                    RequestedScopes = requestedScopes,
+                    Subject = subject
+                };
+
+
+            }
+            catch (Exception e)
+            {
+                result = null;
+            }
+            return await Task.FromResult(result);
         }
 
-        protected abstract ClaimsPrincipal DeserializeSubject(TClaimIdentityRecords claimIdentityRecords);
+        public abstract ClaimsPrincipal DeserializeSubject(TClaimIdentityRecords claimIdentityRecords);
 
-        protected abstract IEnumerable<string> DeserializeScopes(TRequestedScopes requestedScopes);
+        public abstract IEnumerable<string> DeserializeScopes(TRequestedScopes requestedScopes);
         public string Key { get; set; }
         //
         // Summary:
