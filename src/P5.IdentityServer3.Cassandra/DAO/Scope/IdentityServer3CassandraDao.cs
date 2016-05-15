@@ -31,6 +31,85 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private static AsyncLazy<PreparedStatement> _FindScopeByNamee { get; set; }
 
         #endregion
+
+        public static void PrepareScopeStatements()
+        {
+            #region PREPARED STATEMENTS for Scope
+
+            _CreateScopeClaimByNameAndScopeId =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"scopeclaims_by_name_and_scopeid(Name,ScopeId,ScopeName) " +
+                            @"VALUES(?,?,?)");
+                        return result;
+                    });
+            _CreateScopeClaimByNameAndScopeName =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"scopeclaims_by_name_and_scopename(Name,ScopeId,ScopeName) " +
+                            @"VALUES(?,?,?)");
+                        return result;
+                    });
+            _CreateScopeClaim = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
+                        {
+                            _CreateScopeClaimByNameAndScopeId.Value,
+                            _CreateScopeClaimByNameAndScopeName.Value,
+                        }));
+
+            /*
+            INSERT
+            INTO scopes (Id,AllowUnrestrictedIntrospection,ClaimsRule,Description,DisplayName,
+             *          Emphasize,Enabled,IncludeAllClaimsForUser,name,Required,ScopeSecrets,ShowInDiscoveryDocument,ScopeType)
+            VALUES (1f65aebc-bf07-4afc-aa05-e9a1ed48e0b0,true,'1 ClaimsRule','1 Description','1 DisplayName',true,true,true,'1 name',true,[ 'rivendell', 'rohan' ],true,1 );
+            */
+            _CreateScopeById =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"scopes_by_id (Id,AllowUnrestrictedIntrospection,ClaimsDocument,ClaimsRule,Description,DisplayName,Emphasize,Enabled,IncludeAllClaimsForUser,name,Required,ScopeSecretsDocument,ShowInDiscoveryDocument,ScopeType) " +
+                            @"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        return result;
+                    });
+
+            _CreateScopeByName =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"scopes_by_name (Id,AllowUnrestrictedIntrospection,ClaimsDocument,ClaimsRule,Description,DisplayName,Emphasize,Enabled,IncludeAllClaimsForUser,name,Required,ScopeSecretsDocument,ShowInDiscoveryDocument,ScopeType) " +
+                            @"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        return result;
+                    });
+            // All the statements needed by the CreateAsync method
+            _CreateScope = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
+                        {
+                            _CreateScopeById.Value,
+                            _CreateScopeByName.Value,
+                        }));
+
+            _FindScopeById =
+                new AsyncLazy<PreparedStatement>(
+                    () => _cassandraSession.PrepareAsync("SELECT * " +
+                                                         "FROM scopes_by_id " +
+                                                         "WHERE id = ?"));
+
+            _FindScopeByNamee =
+                new AsyncLazy<PreparedStatement>(
+                    () => _cassandraSession.PrepareAsync("SELECT * " +
+                                                         "FROM scopes_by_name " +
+                                                         "WHERE name = ?"));
+
+            #endregion
+        }
         public static async Task<bool> CreateScopeAsync(FlattenedScopeRecord scopeRecord,
     CancellationToken cancellationToken = default(CancellationToken))
         {

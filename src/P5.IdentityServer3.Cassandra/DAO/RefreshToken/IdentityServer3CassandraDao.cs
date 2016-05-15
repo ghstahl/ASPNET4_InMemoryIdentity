@@ -30,6 +30,68 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         #endregion
 
+        public static void PrepareRefreshTokenStatements()
+        {
+            #region PREPARED STATEMENTS for RefreshToken
+
+            /*
+                         ************************************************
+                            AccessToken text,
+                            ClientId text,
+                            CreationTime timestamp,
+                            Expires timestamp,
+                            Key text,
+                            Lifetime int,
+                            SubjectId text,
+                            Version int,
+                         ************************************************
+                         */
+
+            _CreateRefreshTokenByClientId =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"RefreshTokenHandle_By_ClientId(AccessToken, ClientId,CreationTime,Expires,Key,Lifetime,SubjectId,Version) " +
+                            @"VALUES(?,?,?,?,?,?,?,?)");
+                        return result;
+                    });
+
+            _CreateRefreshTokenByKey =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"RefreshTokenHandle_By_Key(AccessToken, ClientId,CreationTime,Expires,Key,Lifetime,SubjectId,Version) " +
+                            @"VALUES(?,?,?,?,?,?,?,?)");
+                        return result;
+                    });
+
+            _DeleteRefreshTokenByClientIdAndKey =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"Delete FROM Refreshtokenhandle_by_clientid " +
+                            @"WHERE clientid = ? " +
+                            @"AND key = ?");
+                        return result;
+                    });
+            _DeleteRefreshTokenByKey =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"Delete FROM Refreshtokenhandle_by_key " +
+                            @"WHERE key = ?");
+                        return result;
+                    });
+
+            #endregion            
+
+        }
         public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
             IEnumerable<FlattenedRefreshTokenHandle> flattenedTokenHandles)
         {

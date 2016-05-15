@@ -29,6 +29,68 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         #endregion
 
+        public static void PrepareTokenHandleStatements()
+        {
+            #region PREPARED STATEMENTS for Token
+
+            /*
+                         ************************************************
+                            Audience text,
+                            Claims text,
+                            ClientId text,
+                            CreationTime timestamp,
+                            Expires timestamp,
+                            Issuer text,
+                            Key text,
+                            Lifetime int,
+                            SubjectId text,
+                            Type text,
+                            Version int,
+                         ************************************************
+                         */
+            _CreateTokenByClientId =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"TokenHandle_By_ClientId(Audience,Claims,ClientId,CreationTime,Expires,Issuer,Key,Lifetime,SubjectId,Type,Version) " +
+                            @"VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+                        return result;
+                    });
+            _CreateTokenByKey =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"TokenHandle_By_Key(Audience,Claims,ClientId,CreationTime,Expires,Issuer,Key,Lifetime,SubjectId,Type,Version) " +
+                            @"VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+                        return result;
+                    });
+
+            _DeleteTokenByClientIdAndKey =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"Delete FROM tokenhandle_by_clientid " +
+                            @"WHERE clientid = ? " +
+                            @"AND key = ?");
+                        return result;
+                    });
+            _DeleteTokenByKey =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"Delete FROM tokenhandle_by_key " +
+                            @"WHERE key = ?");
+                        return result;
+                    });
+
+            #endregion
+        }
         public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
             IEnumerable<FlattenedTokenHandle> flattenedTokenHandles)
         {

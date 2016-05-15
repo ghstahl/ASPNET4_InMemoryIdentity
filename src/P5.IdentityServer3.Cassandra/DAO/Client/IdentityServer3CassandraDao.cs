@@ -23,6 +23,70 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private static AsyncLazy<PreparedStatement> _FindClientById { get; set; }
 
         #endregion
+
+        public static void PrepareClientStatements()
+        {
+            #region PREPARED STATEMENTS for Client
+
+            /*
+                         ************************************************
+                            id uuid,
+                            AbsoluteRefreshTokenLifetime int,
+                            AccessTokenLifetime int,
+                            AccessTokenType int,
+                            AllowAccessToAllCustomGrantTypes boolean,
+                            AllowAccessToAllScopes boolean,
+                            AllowAccessTokensViaBrowser boolean,
+                            AllowClientCredentialsOnly boolean,
+                            AllowedCorsOrigins text,
+                            AllowedCustomGrantTypes text,
+                            AllowedScopes text,
+                            AllowRememberConsent boolean,
+                            AlwaysSendClientClaims boolean,
+                            AuthorizationCodeLifetime int,
+ 	                        Claims text,
+                            ClientId text,
+                            ClientName text,
+                            ClientSecrets text,
+                            ClientUri text,
+                            Enabled boolean,
+                            EnableLocalLogin boolean,
+                            Flow int,
+ 	                        IdentityProviderRestrictions text,
+                            IdentityTokenLifetime int,
+                            IncludeJwtId boolean,
+                            LogoUri text,
+                            LogoutSessionRequired boolean,
+                            LogoutUri text,
+                            PostLogoutRedirectUris text,
+                            PrefixClientClaims boolean,
+ 	                        RedirectUris text,
+                            RefreshTokenExpiration int,
+                            RefreshTokenUsage int,
+                            RequireConsent boolean,
+                            RequireSignOutPrompt boolean,
+                            SlidingRefreshTokenLifetime int,
+                            UpdateAccessTokenClaimsOnRefresh boolean,
+                         ************************************************
+                         */
+            _FindClientById =
+                new AsyncLazy<PreparedStatement>(
+                    () => _cassandraSession.PrepareAsync("SELECT * " +
+                                                         "FROM clients_by_id " +
+                                                         "WHERE id = ?"));
+            _CreateClientById =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"INSERT INTO " +
+                            @"clients_by_id (id,AbsoluteRefreshTokenLifetime,AccessTokenLifetime,AccessTokenType,AllowAccessToAllCustomGrantTypes,AllowAccessToAllScopes ,AllowAccessTokensViaBrowser ,AllowClientCredentialsOnly ,AllowedCorsOrigins ,AllowedCustomGrantTypes ,AllowedScopes ,AllowRememberConsent ,AlwaysSendClientClaims ,AuthorizationCodeLifetime ,Claims ,ClientId ,ClientName ,ClientSecrets ,ClientUri ,Enabled ,EnableLocalLogin ,Flow ,IdentityProviderRestrictions ,IdentityTokenLifetime ,IncludeJwtId ,LogoUri ,LogoutSessionRequired ,LogoutUri ,PostLogoutRedirectUris ,PrefixClientClaims ,RedirectUris ,RefreshTokenExpiration ,RefreshTokenUsage ,RequireConsent ,RequireSignOutPrompt,SlidingRefreshTokenLifetime,UpdateAccessTokenClaimsOnRefresh) " +
+                            @"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        return result;
+                    });
+
+            #endregion
+        }
         public static async Task<bool> CreateManyClientAsync(IList<FlattenedClientRecord> clients,
         CancellationToken cancellationToken = default(CancellationToken))
         {
