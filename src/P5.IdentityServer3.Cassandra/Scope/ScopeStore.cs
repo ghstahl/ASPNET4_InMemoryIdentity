@@ -14,14 +14,14 @@ namespace P5.IdentityServer3.Cassandra
         public async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> FindScopesAsync(
             IEnumerable<string> scopeNames)
         {
-            var scopeRecords = IdentityServer3CassandraDao.FindScopesByNamesAsync(scopeNames);
-            return await Task.FromResult(scopeRecords.Result);
+            var scopeRecords = await IdentityServer3CassandraDao.FindScopesByNamesAsync(scopeNames);
+            return scopeRecords;
         }
 
         public async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> GetScopesAsync(bool publicOnly = true)
         {
-            var scopeRecords = IdentityServer3CassandraDao.FindScopesAsync(publicOnly);
-            return await Task.FromResult(scopeRecords.Result);
+            var scopeRecords = await IdentityServer3CassandraDao.FindScopesAsync(publicOnly);
+            return scopeRecords;
         }
     }
 }

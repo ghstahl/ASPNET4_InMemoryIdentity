@@ -28,7 +28,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private static AsyncLazy<PreparedStatement> _CreateScopeClaimByNameAndScopeName { get; set; }
         private static AsyncLazy<PreparedStatement[]> _CreateScopeClaim { get; set; }
         private static AsyncLazy<PreparedStatement> _FindScopeById { get; set; }
-        private static AsyncLazy<PreparedStatement> _FindScopeByNamee { get; set; }
+        private static AsyncLazy<PreparedStatement> _FindScopeByName { get; set; }
 
         #endregion
 
@@ -102,7 +102,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                                                          "FROM scopes_by_id " +
                                                          "WHERE id = ?"));
 
-            _FindScopeByNamee =
+            _FindScopeByName =
                 new AsyncLazy<PreparedStatement>(
                     () => _cassandraSession.PrepareAsync("SELECT * " +
                                                          "FROM scopes_by_name " +
@@ -207,17 +207,19 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
-                var scopeMappedRecords = (await mapper.FetchAsync<ScopeMappedRecord>(query)).ToList();
+                var result = await mapper.FetchAsync<ScopeMappedRecord>(query);
 
 
-                foreach (var scopeMappedRecord in scopeMappedRecords)
+                List<global::IdentityServer3.Core.Models.Scope> finalResult = new List<Scope>();
+
+                foreach (var scopeMappedRecord in result)
                 {
                     scopeMappedRecord.Claims =
                         JsonConvert.DeserializeObject<List<ScopeClaim>>(scopeMappedRecord.ClaimsDocument);
+                    finalResult.Add(scopeMappedRecord);
                 }
-                var queryFinal = from item in scopeMappedRecords
-                                 select (Scope)item;
-                return queryFinal;
+
+                return finalResult;
             }
             catch (Exception e)
             {

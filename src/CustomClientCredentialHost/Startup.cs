@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#define CASSANDRA_STORE
+using System.Collections.Generic;
 using System.Web.Hosting;
 using System.Web.Http;
 using CustomClientCredentialHost.Config;
@@ -8,7 +9,11 @@ using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
 using Microsoft.Owin;
 using Owin;
+using P5.CassandraStore.Settings;
 using P5.IdentityServer3.BiggyJson;
+using P5.IdentityServer3.Cassandra;
+using P5.IdentityServer3.Cassandra.Configuration;
+using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServerCore.IdSrv;
 
@@ -24,9 +29,28 @@ namespace CustomClientCredentialHost
 
             var path = HostingEnvironment.MapPath("~/App_Data");
 
-
             var userService = new Registration<IUserService>(new UserServiceBase());
+            IdentityServerServiceFactory identityServerServiceFactory;
 
+#if CASSANDRA_STORE
+            app.UseIdentityServerCassandraStores(userService, out identityServerServiceFactory,
+                new IdentityServerCassandraOptions()
+                {
+                    ContactPoints = new List<string> { "cassandra" },
+                    Credentials = new CassandraCredentials() { Password = "", UserName = "" },
+                    KeySpace = "identityserver3"
+                });
+            foreach (var client in Clients.Get())
+            {
+                IdentityServer3CassandraDao.CreateClientAsync(
+                    new FlattenedClientRecord(new FlattenedClientHandle(client)));
+            }
+            foreach (var scope in Scopes.Get())
+            {
+                IdentityServer3CassandraDao.CreateScopeAsync(new FlattenedScopeRecord(new FlattenedScopeHandle(scope)));
+            }
+#endif
+#if BIGGY_STORE
             // Create and modify default settings
             StoreSettings settings = StoreSettings.DefaultSettings;
             settings.Folder = path;
@@ -43,8 +67,9 @@ namespace CustomClientCredentialHost
             }
 
             // Create the BiggyIdentityService factory
-            var factory = new ServiceFactory(userService, settings);
-            factory.Register(new Registration<IDictionary<string,IClaimsProvider>>(resolver =>
+            identityServerServiceFactory = new ServiceFactory(userService, settings);
+#endif
+            identityServerServiceFactory.Register(new Registration<IDictionary<string,IClaimsProvider>>(resolver =>
             {
                 var result = new Dictionary<string, IClaimsProvider>
                 {
@@ -60,11 +85,11 @@ namespace CustomClientCredentialHost
                 return result;
             }));
 
-            factory.ClaimsProvider = new Registration<IClaimsProvider>(typeof(CustomClaimsProviderHub));
+            identityServerServiceFactory.ClaimsProvider = new Registration<IClaimsProvider>(typeof(CustomClaimsProviderHub));
 
             var options = new IdentityServerOptions
             {
-                Factory = factory,
+                Factory = identityServerServiceFactory,
                 RequireSsl = false,
                 SigningCertificate = Certificate.Get(),
                 SiteName = "P5 IdentityServer3"
