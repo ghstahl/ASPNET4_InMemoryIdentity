@@ -50,13 +50,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 {
                     if (_cassandraSession == null)
                     {
-                        var cc = new CassandraConfig
-                        {
-                            ContactPoints = new List<string> {"cassandra"},
-                            Credentials = new CassandraCredentials() {Password = "", UserName = ""},
-                            KeySpace = "identityserver3"
-                        };
-                        var dao = new CassandraDao(cc);
+                        var dao = new CassandraDao(CassandraConfig);
                         _cassandraSession = dao.GetSession();
 
                         //-----------------------------------------------
