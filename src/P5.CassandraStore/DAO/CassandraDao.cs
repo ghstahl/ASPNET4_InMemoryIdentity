@@ -1,5 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Cassandra;
+using Cassandra.Mapping;
 using P5.CassandraStore.Settings;
 
 namespace P5.CassandraStore.DAO
@@ -73,6 +78,27 @@ namespace P5.CassandraStore.DAO
         public ISession GetSession()
         {
             return Session;
+        }
+
+        public static async Task<bool> TruncateTablesAsync(ISession session,IEnumerable<string> tables,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                string template = "truncate {0}";
+                foreach (string cql in tables.Select(table => string.Format(template, table)))
+                {
+                    await mapper.ExecuteAsync(cql);
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 }

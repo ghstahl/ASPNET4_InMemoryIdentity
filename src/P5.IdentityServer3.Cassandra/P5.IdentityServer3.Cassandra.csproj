@@ -84,6 +84,7 @@
     <Compile Include="DAO\RefreshToken\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\Scope\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\Token\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\Utility\IdentityServer3CassandraDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scope\ScopeClaimRecord.cs" />
     <Compile Include="Scope\ScopeMappedRecord.cs" />
