@@ -1,5 +1,6 @@
 using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 
@@ -27,21 +28,26 @@ namespace P5.IdentityServer3.Common.RefreshToken
         }
 
         protected abstract TTokenHandle Serialize(Token accessToken);
-        public abstract Token DeserializeTokenHandle(TTokenHandle obj, IClientStore clientStore);
+        public abstract Task<Token> DeserializeTokenHandleAsync(TTokenHandle obj, IClientStore clientStore);
         public TTokenHandle AccessToken { get; set; }
         public string ClientId { get; set; }
-        public Token MakeAccessToken(IClientStore clientStore)
+        public async Task<Token> MakeAccessTokenAsync(IClientStore clientStore)
         {
-            return DeserializeTokenHandle(AccessToken, clientStore);
+            var result = await DeserializeTokenHandleAsync(AccessToken, clientStore);
+            return result;
         }
 
-        public global::IdentityServer3.Core.Models.RefreshToken MakeRefreshToken(IClientStore clientStore)
+
+        public async Task<global::IdentityServer3.Core.Models.RefreshToken> MakeRefreshTokenAsync(IClientStore clientStore)
         {
-            var token = new global::IdentityServer3.Core.Models.RefreshToken();
-            token.AccessToken = MakeAccessToken(clientStore);
-            token.CreationTime = CreationTime;
-            token.LifeTime = LifeTime;
-            token.Version = Version;
+            var accessToken = await MakeAccessTokenAsync(clientStore);
+            var token = new global::IdentityServer3.Core.Models.RefreshToken()
+            {
+                AccessToken = accessToken,
+                CreationTime = CreationTime,
+                LifeTime = LifeTime,
+                Version = Version
+            };
             return token;
         }
 

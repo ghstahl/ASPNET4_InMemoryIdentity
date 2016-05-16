@@ -15,13 +15,13 @@ namespace P5.IdentityServer3.BiggyJson
         public TokenHandleStore(
             StoreSettings settings)
             : this(settings, new ClientStore(settings))
-        {       
+        {
         }
         public TokenHandleStore(
             StoreSettings settings,
             IClientStore clientStore)
             : this(clientStore, settings.Folder, settings.Database, settings.TokenHandleCollection)
-        { 
+        {
         }
 
         public TokenHandleStore(
@@ -56,7 +56,7 @@ namespace P5.IdentityServer3.BiggyJson
             var result = RetrieveAsync(tokenHandleRecord.Id);
             if (result.Result == null)
                 return await Task.FromResult<Token>(null);
-            var token = result.Result.MakeIdentityServerToken(_clientStore);
+            var token = await result.Result.MakeIdentityServerTokenAsync(_clientStore);
             return await Task.FromResult(token);
         }
 
@@ -69,12 +69,17 @@ namespace P5.IdentityServer3.BiggyJson
         public async Task<IEnumerable<ITokenMetadata>> GetAllAsync(string subject)
         {
             var collection = this.Store.TryLoadData();
-            var query = from item in collection
-                where item.Record.SubjectId == subject
-                select item.Record.MakeIdentityServerToken(_clientStore);
+            var queryRecord = from item in collection
+                        where item.Record.SubjectId == subject
+                        select item.Record;
+            List<Token> finalTokens = new List<Token>();
+            foreach (var record in queryRecord)
+            {
+                var fr = await record.MakeIdentityServerTokenAsync(_clientStore);
+                finalTokens.Add(fr);
+            }
 
-            var list = query.ToArray();
-            return await Task.FromResult(list.Cast<ITokenMetadata>());
+            return finalTokens;
         }
 
         public async Task RevokeAsync(string subject, string client)

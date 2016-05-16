@@ -1,8 +1,10 @@
-﻿namespace P5.IdentityServer3.Common
+﻿using System.Threading.Tasks;
+
+namespace P5.IdentityServer3.Common
 {
     public interface IClientHandle
     {
-        global::IdentityServer3.Core.Models.Client MakeClient();
+        Task<global::IdentityServer3.Core.Models.Client> MakeClientAsyc();
         string ClientId { get; set; }
     }
 }

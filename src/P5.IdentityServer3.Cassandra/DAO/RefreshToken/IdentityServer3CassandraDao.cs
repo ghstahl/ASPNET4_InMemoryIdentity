@@ -204,7 +204,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                         mapper.SingleAsync<FlattenedRefreshTokenHandle>(
                             "SELECT * FROM refreshtokenhandle_by_key WHERE key = ?", key);
                 IRefreshTokenHandle ch = record;
-                var result = ch.ToRefreshToken(clientStore);
+                var result = await ch.MakeRefreshTokenAsync(clientStore);
                 return result;
             }
             catch (Exception e)
@@ -227,9 +227,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     await
                         mapper.FetchAsync<FlattenedRefreshTokenHandle>(
                             "SELECT * FROM refreshtokenhandle_by_clientid WHERE subjectid = ?", subject);
-                var query = from item in record
-                    select item.MakeRefreshToken(clientStore);
-                return query;
+                
+                List<ITokenMetadata> listTokenMetadatas = new List<ITokenMetadata>();
+                foreach (var item in record)
+                {
+                    var tmd = await item.MakeRefreshTokenAsync(clientStore);
+                    listTokenMetadatas.Add(tmd);
+                }
+
+                return listTokenMetadatas;
             }
             catch (Exception e)
             {

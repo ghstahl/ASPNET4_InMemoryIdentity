@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using P5.IdentityServer3.Common.Models;
 
@@ -26,12 +27,12 @@ namespace P5.IdentityServer3.Common
             return simpleDocument;
         }
 
-        public override List<Claim> DeserializeClaims(string obj)
+        public override async Task<List<Claim>> DeserializeClaimsAsync(string obj)
         {
             var simpleDocument = new SimpleDocument<List<ClaimTypeRecord>>(obj);
             var document = (List<ClaimTypeRecord>)simpleDocument.Document;
             var result = document.ToClaims();
-            return result;
+            return await Task.FromResult(result);
         }
     }
 }

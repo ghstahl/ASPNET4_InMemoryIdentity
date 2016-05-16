@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 
 namespace P5.IdentityServer3.Common
@@ -27,29 +28,33 @@ namespace P5.IdentityServer3.Common
             return stringList;
         }
 
-        public override List<string> DeserializeStrings(List<string> obj)
+        public override async Task<List<Claim>> DeserializeClaimsAsync(List<ClaimTypeRecord> obj)
         {
-            return obj;
+            return await Task.FromResult( obj == null ? null : obj.ToClaims());
         }
+
 
         public override List<ClaimTypeRecord> Serialize(List<Claim> claims)
         {
              return claims == null ? null : claims.ToClaimTypeRecords();
         }
 
-        public override List<Claim> DeserializeClaims(List<ClaimTypeRecord> obj)
-        {
-            return obj == null ? null : obj.ToClaims();
-        }
+
 
         public override List<Secret> Serialize(List<Secret> secrets)
         {
             return secrets;
         }
 
-        public override List<Secret> DeserializeSecrets(List<Secret> obj)
+        public override async Task<List<string>> DeserializeStringsAsync(List<string> obj)
         {
-            return obj;
+              return await Task.FromResult( obj);
         }
+
+        public override async Task<List<Secret>> DeserializeSecretsAsync(List<Secret> obj)
+        {
+             return await Task.FromResult( obj);
+        }
+
     }
 }

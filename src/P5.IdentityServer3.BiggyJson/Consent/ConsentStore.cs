@@ -36,8 +36,15 @@ namespace P5.IdentityServer3.BiggyJson
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                 where subject == item.Record.Subject
-                select  item.Record.MakeConsent();
-            return await Task.FromResult(query);
+                select  item.Record;
+
+            List<Consent> finalConsents = new List<Consent>();
+            foreach (var item in query)
+            {
+                var consent = await item.MakeConsentAsync();
+                finalConsents.Add(consent);
+            }
+            return finalConsents;
         }
 
         public async Task RevokeAsync(string subject, string client)
@@ -50,7 +57,7 @@ namespace P5.IdentityServer3.BiggyJson
         {
             var id = GuidGenerator.CreateGuid(ConsentRecord.Namespace, client, subject);
             var result = await RetrieveAsync(id);
-            return result.MakeConsent();
+            return await result.MakeConsentAsync();
         }
 
         public async Task UpdateAsync(Consent consent)

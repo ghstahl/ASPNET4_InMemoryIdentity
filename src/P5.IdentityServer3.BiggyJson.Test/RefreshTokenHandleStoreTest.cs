@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
@@ -90,28 +91,28 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-         public void TestStoreAsync()
+         public async Task TestStoreAsync()
         {
             var insert = InsertTestData(_clientStore, _scopeStore, _tokenHandleStore, _refreshTokenHandleStore, 1);
             Guid id = insert[0].Id;
-            var result = _refreshTokenHandleStore.RetrieveAsync(id);
-            var tokenHandleRecord = new RefreshTokenHandleRecord(result.Result);
+            var result = await _refreshTokenHandleStore.RetrieveAsync(id);
+            var tokenHandleRecord = new RefreshTokenHandleRecord(result);
             Assert.AreEqual(tokenHandleRecord.Id, id);
 
             tokenHandleRecord.Record.SubjectId = Guid.NewGuid().ToString();
             tokenHandleRecord.Record.AccessToken.SubjectId = tokenHandleRecord.Record.SubjectId;
             tokenHandleRecord.Record.Key = Guid.NewGuid().ToString();
             var key = tokenHandleRecord.Record.Key;
-            var rt = tokenHandleRecord.Record.MakeRefreshToken(_clientStore);
+            var rt = await tokenHandleRecord.Record.MakeRefreshTokenAsync(_clientStore);
 
 
-            _refreshTokenHandleStore.StoreAsync(key,tokenHandleRecord.Record.MakeRefreshToken(_clientStore));
+            await _refreshTokenHandleStore.StoreAsync(key, rt);
 
-            var storedResult = _refreshTokenHandleStore.GetAsync(key);
-            Assert.IsNotNull(storedResult.Result);
+            var storedResult = await _refreshTokenHandleStore.GetAsync(key);
+            Assert.IsNotNull(storedResult);
 
 
-            Assert.AreEqual(rt.SubjectId, storedResult.Result.SubjectId);
+            Assert.AreEqual(rt.SubjectId, storedResult.SubjectId);
 
         }
 

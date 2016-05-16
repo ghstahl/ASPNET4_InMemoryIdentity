@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cassandra;
 using Cassandra.Mapping;
+using IdentityServer3.Core.Models;
 using P5.CassandraStore.Extensions;
 using P5.IdentityServer3.Common;
 
@@ -148,7 +149,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
                     await mapper.SingleAsync<FlattenedConsentHandle>("SELECT * FROM consent_by_id WHERE id = ?", id);
-                var result = record.MakeConsent();
+                var result = await record.MakeConsentAsync();
                 return result;
             }
             catch (Exception e)
@@ -171,7 +172,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     await
                         mapper.SingleAsync<FlattenedConsentHandle>(
                             "SELECT * FROM consent_by_clientid WHERE clientid = ? AND subject = ?", clientId, subject);
-                var result = record.MakeConsent();
+                var result = await record.MakeConsentAsync();
                 return result;
             }
             catch (Exception e)
@@ -214,9 +215,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     await
                         mapper.FetchAsync<FlattenedConsentHandle>(
                             "SELECT * FROM consent_by_clientid WHERE subject = ?", subject);
-                var query = from item in record
-                            select item.MakeConsent();
-                return query;
+
+                List<Consent> finalResult = new List<Consent>();
+                foreach (var item in record)
+                {
+                    var consent = await item.MakeConsentAsync();
+                    finalResult.Add(consent);
+                }
+                return finalResult;
             }
             catch (Exception e)
             {
@@ -238,9 +244,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     await
                         mapper.FetchAsync<FlattenedConsentHandle>(
                             "SELECT * FROM consent_by_clientid WHERE clientid = ?", clientId);
-                var query = from item in record
-                            select item.MakeConsent();
-                return query;
+
+                List<Consent> finalResult = new List<Consent>();
+                foreach (var item in record)
+                {
+                    var consent = await item.MakeConsentAsync();
+                    finalResult.Add(consent);
+                }
+                return finalResult;
+
             }
             catch (Exception e)
             {

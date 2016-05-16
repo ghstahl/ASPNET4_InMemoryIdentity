@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer3.Core.Services;
 
 namespace P5.IdentityServer3.Common
@@ -27,7 +28,7 @@ namespace P5.IdentityServer3.Common
 
         int Version { get; set; }
       
-        global::IdentityServer3.Core.Models.Token MakeIdentityServerToken(IClientStore clientStore);
+        Task<global::IdentityServer3.Core.Models.Token> MakeIdentityServerTokenAsync(IClientStore clientStore);
 
     }
 }

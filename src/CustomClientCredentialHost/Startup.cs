@@ -107,7 +107,8 @@ namespace CustomClientCredentialHost
                 ValidationMode = ValidationMode.ValidationEndpoint,
 
                 RequiredScopes = new[] {"api1"},
-                PreserveAccessToken = true
+                PreserveAccessToken = true,
+                EnableValidationResultCache = true
 
             });
 

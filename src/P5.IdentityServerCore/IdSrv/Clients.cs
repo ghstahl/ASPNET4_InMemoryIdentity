@@ -99,7 +99,7 @@ namespace P5.IdentityServerCore.IdSrv
                     {
                         "api1"
                     },
-                    AccessTokenType = AccessTokenType.Jwt
+                    AccessTokenType = AccessTokenType.Reference
                 },
 
                 // human is involved
@@ -108,7 +108,7 @@ namespace P5.IdentityServerCore.IdSrv
                     ClientName = "Silicon on behalf of Carbon Client",
                     ClientId = "carbon",
                     Enabled = true,
-                    AccessTokenType = AccessTokenType.Jwt,
+                    AccessTokenType = AccessTokenType.Reference,
 
                     Flow = Flows.ResourceOwner,
 

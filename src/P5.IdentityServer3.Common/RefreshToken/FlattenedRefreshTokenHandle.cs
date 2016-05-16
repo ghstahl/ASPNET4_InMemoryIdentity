@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using P5.IdentityServer3.Common.Models;
@@ -22,11 +23,11 @@ namespace P5.IdentityServer3.Common.RefreshToken
             return document;
         }
 
-        public override Token DeserializeTokenHandle(string obj, IClientStore clientStore)
+        public override async Task<Token> DeserializeTokenHandleAsync(string obj, IClientStore clientStore)
         {
             var simpleDocument = new SimpleDocument<TokenHandle>(obj);
             var document = (TokenHandle) simpleDocument.Document;
-            var result = document.MakeIdentityServerToken(clientStore);
+            var result = await document.MakeIdentityServerTokenAsync(clientStore);
             return result;
         }
     }

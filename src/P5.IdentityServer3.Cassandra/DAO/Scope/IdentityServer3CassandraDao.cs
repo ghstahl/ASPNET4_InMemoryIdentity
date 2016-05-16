@@ -319,8 +319,9 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
                 result.Add(boundById);
                 result.Add(boundByName);
+                var scopeInternal = await scopeRecord.Record.GetScopeAsync();
 
-                var claimsQuery = from scopeClaim in scopeRecord.Record.GetScope().Claims
+                var claimsQuery = from scopeClaim in scopeInternal.Claims
                                   select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
 
                 var scopeClaimBoundStatements = await BuildBoundStatements_ForCreate(claimsQuery);

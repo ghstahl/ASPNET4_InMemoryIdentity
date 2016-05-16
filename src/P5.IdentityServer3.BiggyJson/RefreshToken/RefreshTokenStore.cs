@@ -16,7 +16,7 @@ namespace P5.IdentityServer3.BiggyJson
         {
             _clientStore = new ClientStore(settings);
         }
-        
+
         public RefreshTokenStore(
             StoreSettings settings,
             IClientStore clientStore)
@@ -57,8 +57,8 @@ namespace P5.IdentityServer3.BiggyJson
             var result = RetrieveAsync(tokenHandleRecord.Id);
             if (result.Result == null)
                 return await Task.FromResult<RefreshToken>(null);
-            var token = result.Result.ToRefreshToken(_clientStore);
-            return await Task.FromResult(token);
+            var token = await result.Result.MakeRefreshTokenAsync(_clientStore);
+            return token;
         }
 
         public async Task RemoveAsync(string key)
@@ -72,10 +72,16 @@ namespace P5.IdentityServer3.BiggyJson
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                         where item.Record.SubjectId == subject
-                        select item.Record.ToRefreshToken(_clientStore);
+                        select item.Record;
 
-            var list = query.ToArray();
-            return await Task.FromResult(list.Cast<ITokenMetadata>());
+            List<RefreshToken> finalRefreshTokens = new List<RefreshToken>();
+            foreach (var item in query)
+            {
+                var refreshToken = await item.MakeRefreshTokenAsync(_clientStore);
+                finalRefreshTokens.Add(refreshToken);
+            }
+
+            return finalRefreshTokens;
         }
 
         public async Task RevokeAsync(string subject, string client)

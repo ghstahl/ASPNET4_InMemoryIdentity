@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
- 
+using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using P5.IdentityServer3.Common;
 
@@ -36,9 +36,15 @@ namespace P5.IdentityServer3.BiggyJson
             var query = from item in collection
                 join name in scopeNames
                     on item.Record.Name equals name
-                select item.Record.MakeIdentityServerScope();
+                select item.Record;
 
-            return await Task.FromResult(query);
+            List<global::IdentityServer3.Core.Models.Scope> finalScopes = new List<Scope>();
+            foreach (var item in query)
+            {
+                var scope = await item.MakeIdentityServerScopeAsync();
+                finalScopes.Add(scope);
+            }
+            return finalScopes;
         }
 
         public async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> GetScopesAsync(bool publicOnly = true)
@@ -46,9 +52,15 @@ namespace P5.IdentityServer3.BiggyJson
             var collection = this.Store.TryLoadData();
             var query = from item in collection
                 where item.Record.ShowInDiscoveryDocument || item.Record.ShowInDiscoveryDocument == publicOnly
-                select item.Record.MakeIdentityServerScope();
+                select item.Record;
 
-            return await Task.FromResult(query);
+            List<global::IdentityServer3.Core.Models.Scope> finalScopes = new List<Scope>();
+            foreach (var item in query)
+            {
+                var scope = await item.MakeIdentityServerScopeAsync();
+                finalScopes.Add(scope);
+            }
+            return finalScopes;
         }
 
 

@@ -112,10 +112,12 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             Assert.AreEqual(scopeRecord.Record.Name, name);
             Assert.AreEqual(scopeRecord.Id, id);
-            Assert.AreEqual(record.Claims.Count, scopeRecord.Record.GetScope().Claims.Count);
 
-            var differences = record.Claims.Except(scopeRecord.Record.GetScope().Claims, new ScopeClaimComparer());
-            Assert.IsTrue(differences.Count() == 0);
+            var scope = await scopeRecord.Record.GetScopeAsync();
+            Assert.AreEqual(record.Claims.Count, scope.Claims.Count);
+
+            var differences = record.Claims.Except(scope.Claims, new ScopeClaimComparer());
+            Assert.IsTrue(!differences.Any());
 
         }
 

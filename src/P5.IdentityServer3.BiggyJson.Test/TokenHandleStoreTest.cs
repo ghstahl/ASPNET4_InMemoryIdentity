@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
@@ -104,7 +105,7 @@ namespace P5.IdentityServer3.BiggyJson.Test
         }
 
         [TestMethod]
-         public void TestStoreAsync()
+         public async Task TestStoreAsync()
         {
             try
             {
@@ -114,15 +115,15 @@ namespace P5.IdentityServer3.BiggyJson.Test
                 Guid id = tokenHandleRecord.Id;
 
                 var key = th.Key;
-                var result = _tokenHandleStore.GetAsync(key);
-                Assert.IsNull(result.Result);
+                var result = await _tokenHandleStore.GetAsync(key);
+                Assert.IsNull(result);
 
 
 
-                Token token = th.MakeIdentityServerToken(_clientStore);
-                _tokenHandleStore.StoreAsync(key, token);
-                result = _tokenHandleStore.GetAsync(key);
-                tokenHandleRecord = new TokenHandleRecord(new TokenHandle(key, result.Result));
+                Token token = await th.MakeIdentityServerTokenAsync(_clientStore);
+                await _tokenHandleStore.StoreAsync(key, token);
+                result = await _tokenHandleStore.GetAsync(key);
+                tokenHandleRecord = new TokenHandleRecord(new TokenHandle(key, result));
 
                 Assert.AreEqual(tokenHandleRecord.Id, id);
             }

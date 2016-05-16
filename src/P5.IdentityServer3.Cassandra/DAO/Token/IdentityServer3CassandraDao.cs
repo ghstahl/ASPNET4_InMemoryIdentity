@@ -204,7 +204,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     await
                         mapper.SingleAsync<FlattenedTokenHandle>("SELECT * FROM tokenhandle_by_key WHERE key = ?", key);
                 ITokenHandle ch = record;
-                var result = ch.MakeIdentityServerToken(clientStore);
+                var result = await ch.MakeIdentityServerTokenAsync(clientStore);
                 return result;
             }
             catch (Exception e)
@@ -227,9 +227,16 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     await
                         mapper.FetchAsync<FlattenedTokenHandle>(
                             "SELECT * FROM tokenhandle_by_clientid WHERE subjectid = ?", subject);
-                var query = from item in record
-                    select item.MakeIdentityServerToken(clientStore);
-                return query;
+
+                List<ITokenMetadata> listTokenMetadatas = new List<ITokenMetadata>();
+                foreach (var item in record)
+                {
+                    var tmd = await item.MakeIdentityServerTokenAsync(clientStore);
+                    listTokenMetadatas.Add(tmd);
+                }
+
+
+                return listTokenMetadatas;
             }
             catch (Exception e)
             {

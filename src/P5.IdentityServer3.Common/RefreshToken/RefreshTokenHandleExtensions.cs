@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using IdentityServer3.Core.Services;
 
 namespace P5.IdentityServer3.Common.RefreshToken
@@ -19,18 +20,6 @@ namespace P5.IdentityServer3.Common.RefreshToken
             var handle = new FlattenedRefreshTokenHandle("", token);
             return handle;
         }
-        public static global::IdentityServer3.Core.Models.RefreshToken ToRefreshToken(this IRefreshTokenHandle handle, IClientStore store)
-        {
-            var token = new global::IdentityServer3.Core.Models.RefreshToken()
-            {
-                AccessToken = handle.MakeAccessToken(store),
-                CreationTime = handle.CreationTime,
-                LifeTime = handle.LifeTime,
-                Version = handle.Version
 
-            };
-            return token;
-
-        }
     }
 }

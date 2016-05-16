@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 
 namespace P5.IdentityServer3.Common
@@ -58,14 +59,23 @@ namespace P5.IdentityServer3.Common
         }
 
         public abstract TStringList Serialize(List<string> stringList);
-        public abstract List<string> DeserializeStrings(TStringList obj);
+        public abstract Task<List<string>> DeserializeStringsAsync(TStringList obj);
         public abstract TClaims Serialize(List<Claim> claims);
-        public abstract List<Claim> DeserializeClaims(TClaims obj);
+        public abstract Task<List<Claim>> DeserializeClaimsAsync(TClaims obj);
         public abstract TSecrets Serialize(List<Secret> secrets);
-        public abstract List<Secret> DeserializeSecrets(TSecrets obj);
+        public abstract Task<List<Secret>> DeserializeSecretsAsync(TSecrets obj);
 
-        public Client MakeClient()
+        public async Task<Client> MakeClientAsyc()
         {
+            var allowedCorsOrigins = await DeserializeStringsAsync(AllowedCorsOrigins);
+            var allowedCustomGrantTypes = await DeserializeStringsAsync(AllowedCustomGrantTypes);
+            var allowedScopes = await DeserializeStringsAsync(AllowedScopes);
+            var claims = await DeserializeClaimsAsync(Claims);
+            var clientSecrets = await DeserializeSecretsAsync(ClientSecrets);
+            var identityProviderRestrictions = await DeserializeStringsAsync(IdentityProviderRestrictions);
+            var postLogoutRedirectUris = await DeserializeStringsAsync(PostLogoutRedirectUris);
+            var redirectUris = await DeserializeStringsAsync(RedirectUris);
+
             Client client = new Client()
             {
                 AbsoluteRefreshTokenLifetime = AbsoluteRefreshTokenLifetime,
@@ -75,29 +85,29 @@ namespace P5.IdentityServer3.Common
                 AllowAccessToAllScopes = AllowAccessToAllScopes,
                 AllowAccessTokensViaBrowser = AllowAccessTokensViaBrowser,
                 AllowClientCredentialsOnly = AllowClientCredentialsOnly,
-                AllowedCorsOrigins = DeserializeStrings(AllowedCorsOrigins),
-                AllowedCustomGrantTypes = DeserializeStrings(AllowedCustomGrantTypes),
-                AllowedScopes = DeserializeStrings(AllowedScopes),
+                AllowedCorsOrigins = allowedCorsOrigins,
+                AllowedCustomGrantTypes = allowedCustomGrantTypes,
+                AllowedScopes = allowedScopes,
                 AllowRememberConsent = AllowRememberConsent,
                 AlwaysSendClientClaims = AlwaysSendClientClaims,
                 AuthorizationCodeLifetime = AuthorizationCodeLifetime,
-                Claims = DeserializeClaims(Claims),
+                Claims = claims,
                 ClientId = ClientId,
                 ClientName = ClientName,
-                ClientSecrets = DeserializeSecrets(ClientSecrets),
+                ClientSecrets = clientSecrets,
                 ClientUri = ClientUri,
                 Enabled = Enabled,
                 EnableLocalLogin = EnableLocalLogin,
                 Flow = Flow,
-                IdentityProviderRestrictions = DeserializeStrings(IdentityProviderRestrictions),
+                IdentityProviderRestrictions = identityProviderRestrictions,
                 IdentityTokenLifetime = IdentityTokenLifetime,
                 IncludeJwtId = IncludeJwtId,
                 LogoUri = LogoUri,
                 LogoutSessionRequired = LogoutSessionRequired,
                 LogoutUri = LogoutUri,
-                PostLogoutRedirectUris = DeserializeStrings(PostLogoutRedirectUris),
+                PostLogoutRedirectUris = postLogoutRedirectUris,
                 PrefixClientClaims = PrefixClientClaims,
-                RedirectUris = DeserializeStrings(RedirectUris),
+                RedirectUris = redirectUris,
                 RefreshTokenExpiration = RefreshTokenExpiration,
                 RefreshTokenUsage = RefreshTokenUsage,
                 RequireConsent = RequireConsent,

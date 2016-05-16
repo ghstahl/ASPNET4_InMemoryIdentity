@@ -141,7 +141,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 var record =
                     await mapper.SingleAsync<FlattenedClientHandle>("SELECT * FROM clients_by_id WHERE id = ?", id);
                 IClientHandle ch = record;
-                var result = ch.MakeClient();
+                var result = await ch.MakeClientAsyc();
                 return result;
             }
             catch (Exception e)

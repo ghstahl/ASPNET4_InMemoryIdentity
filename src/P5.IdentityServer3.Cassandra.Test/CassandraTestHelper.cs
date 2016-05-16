@@ -167,9 +167,10 @@ namespace P5.IdentityServer3.Cassandra.Test
             var result = new List<FlattenedRefreshTokenHandle>();
             foreach (var token in tokenInsert.Result)
             {
+                var accessToken = await token.MakeIdentityServerTokenAsync(store);
                 var rt = new RefreshToken
                 {
-                    AccessToken = token.MakeIdentityServerToken(store),
+                    AccessToken = accessToken,
                     CreationTime = DateTimeOffset.UtcNow,
                     LifeTime = 5,
                     Version = 1

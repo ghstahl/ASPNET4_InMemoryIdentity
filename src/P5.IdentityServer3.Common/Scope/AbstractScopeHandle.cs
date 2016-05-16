@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 
 namespace P5.IdentityServer3.Common
@@ -8,9 +9,13 @@ namespace P5.IdentityServer3.Common
     {
         private global::IdentityServer3.Core.Models.Scope _original;
 
-        public global::IdentityServer3.Core.Models.Scope GetScope()
+        public async Task<global::IdentityServer3.Core.Models.Scope> GetScopeAsync()
         {
-            return _original ?? (_original = MakeIdentityServerScope());
+            if (_original != null)
+                return await Task.FromResult(_original);
+            global::IdentityServer3.Core.Models.Scope result = null;
+            result = await MakeIdentityServerScopeAsync();
+            return result;
         }
 
         public AbstractScopeHandle(global::IdentityServer3.Core.Models.Scope scope = null)
@@ -33,17 +38,19 @@ namespace P5.IdentityServer3.Common
                 Type = scope.Type;
             }
         }
-        public Scope MakeIdentityServerScope()
+        public async Task<Scope> MakeIdentityServerScopeAsync()
         {
+            var claims = await DeserializeClaimsAsync(Claims);
+            var scopeSecrets = await DeserializeSecretsAsync(ScopeSecrets);
             var scope = new Scope( )
             {
-                Claims = DeserializeClaims(Claims),
+                Claims = claims,
                 Name = Name,
                 Type = Type,
                 Description = Description,
                 Enabled = Enabled,
                 ClaimsRule = ClaimsRule,
-                ScopeSecrets = DeserializeSecretes(ScopeSecrets),
+                ScopeSecrets = scopeSecrets,
                 Required = Required,
                 Emphasize = Emphasize,
                 IncludeAllClaimsForUser = IncludeAllClaimsForUser,
@@ -54,10 +61,10 @@ namespace P5.IdentityServer3.Common
             return scope;
         }
 
-        protected abstract List<Secret> DeserializeSecretes(TScecrets scopeSecrets);
-        protected abstract TScecrets Serialize(List<Secret> scopeSecrets);
-        protected abstract List<ScopeClaim> DeserializeClaims(TScopeClaims claims);
-        protected abstract TScopeClaims Serialize(List<ScopeClaim> claims);
+        public abstract Task<List<Secret>> DeserializeSecretsAsync(TScecrets scopeSecrets);
+        public abstract TScecrets Serialize(List<Secret> scopeSecrets);
+        public abstract Task<List<ScopeClaim>> DeserializeClaimsAsync(TScopeClaims claims);
+        public abstract TScopeClaims Serialize(List<ScopeClaim> claims);
 
 
 
