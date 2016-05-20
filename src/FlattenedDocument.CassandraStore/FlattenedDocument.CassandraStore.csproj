@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{98266DEF-FF72-4AB6-933F-45058CAC5911}</ProjectGuid>
+    <ProjectGuid>{9390EB2C-5D42-47AF-8B83-13A16E4B39B7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>P5.IdentityServer3.Cassandra</RootNamespace>
-    <AssemblyName>P5.IdentityServer3.Cassandra</AssemblyName>
+    <RootNamespace>FlattenedDocument.CassandraStore</RootNamespace>
+    <AssemblyName>FlattenedDocument.CassandraStore</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,11 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cassandra, Version=3.0.0.0, Culture=neutral, PublicKeyToken=10b231fbfc8c4b4d, processorArchitecture=MSIL">
-      <HintPath>..\packages\CassandraCSharpDriver.3.0.5\lib\net40\Cassandra.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="IdentityServer3, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\IdentityServer3.2.5.0\lib\net45\IdentityServer3.dll</HintPath>
+      <HintPath>..\packages\CassandraCSharpDriver.3.0.6\lib\net40\Cassandra.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -46,16 +42,8 @@
       <HintPath>..\packages\lz4net.1.0.5.93\lib\net40-client\LZ4.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
-      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -67,43 +55,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthorizationCode\AuthorizationCodeStore.cs" />
-    <Compile Include="Client\ClientStore.cs" />
-    <Compile Include="CommonStore\CassandraStore.cs" />
-    <Compile Include="CommonStore\StoreSettings.cs" />
-    <Compile Include="Configuration\AppBuilderExtensions.cs" />
-    <Compile Include="Configuration\IdentityServerCassandraOptions.cs" />
-    <Compile Include="Configuration\ServiceFactory.cs" />
-    <Compile Include="Consent\ConsentStore.cs" />
-    <Compile Include="DAO\AuthorizationCode\IdentityServer3CassandraDao.cs" />
-    <Compile Include="DAO\Client\IdentityServer3CassandraDao.cs" />
-    <Compile Include="DAO\Consent\IdentityServer3CassandraDao.cs" />
-    <Compile Include="DAO\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\CassandraStoreOptions.cs" />
+    <Compile Include="DAO\FlattenedDocument\CassandraPageInterceptor.cs" />
+    <Compile Include="DAO\FlattenedDocument\CassandraPageProxy.cs" />
+    <Compile Include="DAO\FlattenedDocument\FlattenedDocumentCassandraDao.cs" />
+    <Compile Include="DAO\FlattenedDocumentCassandraDao.cs" />
+    <Compile Include="DAO\FlattenedDocument\PageProxy.cs" />
     <Compile Include="DAO\MyMappings.cs" />
-    <Compile Include="DAO\RefreshToken\IdentityServer3CassandraDao.cs" />
-    <Compile Include="DAO\Scope\IdentityServer3CassandraDao.cs" />
-    <Compile Include="DAO\Token\IdentityServer3CassandraDao.cs" />
-    <Compile Include="DAO\Utility\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\Utility\FlattenedDocumentCassandraDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scope\ScopeClaimRecord.cs" />
-    <Compile Include="Scope\ScopeMappedRecord.cs" />
-    <Compile Include="Scope\ScopeStore.cs" />
-    <Compile Include="RefreshToken\RefreshTokenHandleStore.cs" />
-    <Compile Include="Token\TokenHandleStore.cs" />
+    <Compile Include="Store\FlattenedDocumentStore.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CQL\Setup.cql" />
+    <None Include="CQL\Example.cql" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
-      <Project>{51566eae-2937-41d2-a6c8-d055a74a6209}</Project>
+      <Project>{51566EAE-2937-41D2-A6C8-D055A74A6209}</Project>
       <Name>P5.CassandraStore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\P5.IdentityServer3.Common\P5.IdentityServer3.Common.csproj">
-      <Project>{cbef1303-a168-4860-8537-2b23a3ccb844}</Project>
-      <Name>P5.IdentityServer3.Common</Name>
+    <ProjectReference Include="..\P5.Store.Core\P5.Store.Core.csproj">
+      <Project>{909166b9-d719-47a9-9c61-92fd5ed35ba4}</Project>
+      <Name>P5.Store.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

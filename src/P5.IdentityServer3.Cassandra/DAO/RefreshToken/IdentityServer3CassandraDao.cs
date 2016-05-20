@@ -8,6 +8,7 @@ using Cassandra;
 using Cassandra.Mapping;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
+using P5.CassandraStore;
 using P5.CassandraStore.Extensions;
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.RefreshToken;
