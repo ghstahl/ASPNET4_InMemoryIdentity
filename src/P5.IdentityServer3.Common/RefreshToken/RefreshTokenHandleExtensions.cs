@@ -6,9 +6,9 @@ namespace P5.IdentityServer3.Common.RefreshToken
 {
     public static class RefreshTokenHandleExtensions
     {
-        public static Guid CreateGuid(this IRefreshTokenHandle tokenHandle, Guid @namespace)
+        public static Guid CreateGuid(this IRefreshTokenHandle tokenHandle)
         {
-            return GuidGenerator.CreateGuid(@namespace, tokenHandle.Key);
+            return GuidGenerator.CreateGuid(RefreshTokenConstants.Namespace, tokenHandle.Key);
         }
         public static RefreshTokenHandle ToRefeshTokenHandle(this global::IdentityServer3.Core.Models.RefreshToken token)
         {

@@ -23,7 +23,7 @@ namespace P5.IdentityServer3.BiggyJson
 
         protected override Guid GetId(ConsentHandle record)
         {
-            return record.CreateGuid(ConsentRecord.Namespace);
+            return record.CreateGuid( );
         }
 
         protected override ConsentRecord NewWrap(ConsentHandle record)
@@ -49,13 +49,13 @@ namespace P5.IdentityServer3.BiggyJson
 
         public async Task RevokeAsync(string subject, string client)
         {
-            var id = GuidGenerator.CreateGuid(ConsentRecord.Namespace, client, subject);
+            var id = GuidGenerator.CreateGuid(ConsentConstants.Namespace, client, subject);
             await DeleteAsync(id);
         }
 
         public async Task<Consent> LoadAsync(string subject, string client)
         {
-            var id = GuidGenerator.CreateGuid(ConsentRecord.Namespace, client, subject);
+            var id = GuidGenerator.CreateGuid(ConsentConstants.Namespace, client, subject);
             var result = await RetrieveAsync(id);
             return await result.MakeConsentAsync();
         }

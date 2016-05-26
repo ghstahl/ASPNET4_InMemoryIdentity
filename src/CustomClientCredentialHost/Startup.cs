@@ -42,12 +42,12 @@ namespace CustomClientCredentialHost
                 });
             foreach (var client in Clients.Get())
             {
-                IdentityServer3CassandraDao.CreateClientAsync(
+                IdentityServer3CassandraDao.UpsertClientAsync(
                     new FlattenedClientRecord(new FlattenedClientHandle(client)));
             }
             foreach (var scope in Scopes.Get())
             {
-                IdentityServer3CassandraDao.CreateScopeAsync(new FlattenedScopeRecord(new FlattenedScopeHandle(scope)));
+                IdentityServer3CassandraDao.UpsertScopeAsync(new FlattenedScopeRecord(new FlattenedScopeHandle(scope)));
             }
 #endif
 #if BIGGY_STORE

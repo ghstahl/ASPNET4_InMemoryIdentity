@@ -9,7 +9,7 @@ using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using P5.IdentityServer3.Cassandra.Client;
+ 
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.MSTest.Common;
@@ -37,6 +37,15 @@ namespace P5.IdentityServer3.Cassandra.Test
             await IdentityServer3CassandraDao.TruncateTablesAsync();
             result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
             Assert.IsNull(result);
+
+        }
+        [TestMethod]
+        public async Task TestCreateTablesAsync()
+        {
+
+
+            await IdentityServer3CassandraDao.CreateTablesAsync();
+
 
         }
     }

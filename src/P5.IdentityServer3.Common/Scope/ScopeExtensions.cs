@@ -7,12 +7,17 @@ namespace P5.IdentityServer3.Common
 {
     public static class ScopeExtensions
     {
-        public static Guid CreateGuid<TScopeClaims, TScecrets>(this AbstractScopeHandle<TScopeClaims, TScecrets> scope,
-            Guid @namespace)
+        public static Guid ScopeNameToGuid(this string name)
+        {
+            return GuidGenerator.CreateGuid(ScopeConstants.Namespace, name);
+        }
+
+        public static Guid CreateGuid<TScopeClaims, TScecrets>(this AbstractScopeHandle<TScopeClaims, TScecrets> scope
+            )
             where TScopeClaims : class
             where TScecrets : class
         {
-            return GuidGenerator.CreateGuid(@namespace, scope.Name);
+            return GuidGenerator.CreateGuid(ScopeConstants.Namespace, scope.Name);
         }
 
         public static string ToName<TScopeClaims, TScecrets>(this AbstractScopeHandle<TScopeClaims, TScecrets> scope)

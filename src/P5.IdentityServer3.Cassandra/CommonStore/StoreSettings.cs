@@ -1,4 +1,4 @@
-namespace P5.IdentityServer3.Cassandra.CommonStore
+namespace P5.IdentityServer3.Cassandra
 {
     public class StoreSettings
     {

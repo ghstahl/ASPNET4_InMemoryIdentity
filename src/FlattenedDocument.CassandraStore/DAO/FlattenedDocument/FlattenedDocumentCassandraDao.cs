@@ -15,158 +15,159 @@ using ProductStore.Cassandra.DAO;
 namespace FlattenedDocument.CassandraStore.DAO
 {
     public partial class FlattenedDocumentCassandraDao
-	{
-		//-----------------------------------------------
-		// PREPARED STATEMENTS for FlattenedDocument
-		//-----------------------------------------------
+    {
+//-----------------------------------------------
+// PREPARED STATEMENTS for FlattenedDocument
+//-----------------------------------------------
 
-		#region PREPARED STATEMENTS for FlattenedDocument
+        #region PREPARED STATEMENTS for FlattenedDocument
 
-		private static AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentById { get; set; }
-		private static AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentByTypeAndVersion { get; set; }
-		private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentById { get; set; }
-		private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByType { get; set; }
-		private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByTypeAndVersion { get; set; }
-		private static string FindFlattenedDocumentQuery { get; set; }
+        private static AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentById { get; set; }
+        private static AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentByTypeAndVersion { get; set; }
+        private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentById { get; set; }
+        private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByType { get; set; }
+        private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByTypeAndVersion { get; set; }
+        private static string FindFlattenedDocumentQuery { get; set; }
         private static string FindFlattenedDocumentByIdQuery { get; set; }
-		private static string FindFlattenedDocumentByType { get; set; }
-		private static string FindFlattenedDocumentByTypeAndVersion { get; set; }
+        private static string FindFlattenedDocumentByType { get; set; }
+        private static string FindFlattenedDocumentByTypeAndVersion { get; set; }
 
-		#endregion
+        #endregion
 
-		public static void PrepareFlattenedDocumentStatements(string seedTableName)
-		{
-			#region PREPARED STATEMENTS for FlattenedDocument
+        public static void PrepareFlattenedDocumentStatements(string seedTableName)
+        {
+            #region PREPARED STATEMENTS for FlattenedDocument
 
-			string tableById = TableByIdName(seedTableName);
-			string tableByTypeAndVersion = TableByTypeAndVersionName(seedTableName);
-			/*
-						 ************************************************
-							Id uuid,
-							DocumentType text,
-							DocumentVersion text,
-							Document text,
-						 ************************************************
-						 */
+            string tableById = TableByIdName(seedTableName);
+            string tableByTypeAndVersion = TableByTypeAndVersionName(seedTableName);
+/*
+************************************************
+Id uuid,
+DocumentType text,
+DocumentVersion text,
+Document text,
+************************************************
+*/
 
             FindFlattenedDocumentQuery = string.Format("SELECT * FROM {0}", tableById);
             FindFlattenedDocumentByIdQuery = string.Format("SELECT * FROM {0} WHERE id = ?", tableById);
 
-            
-			FindFlattenedDocumentByType  =
-				string.Format("SELECT * FROM {0} WHERE DocumentType = ?",
-					tableByTypeAndVersion);
 
-			FindFlattenedDocumentByTypeAndVersion =
-				string.Format("SELECT * FROM {0} WHERE DocumentType = ? AND DocumentVersion = ?",
-					tableByTypeAndVersion);
+            FindFlattenedDocumentByType =
+                string.Format("SELECT * FROM {0} WHERE DocumentType = ?",
+                    tableByTypeAndVersion);
 
-			var queryUpsertFlattenedDocumentById = string.Format(@"INSERT INTO " +
+            FindFlattenedDocumentByTypeAndVersion =
+                string.Format("SELECT * FROM {0} WHERE DocumentType = ? AND DocumentVersion = ?",
+                    tableByTypeAndVersion);
+
+            var queryUpsertFlattenedDocumentById = string.Format(@"INSERT INTO " +
                                                                  @"{0}(Id,DocumentType,DocumentVersion,DocumentJson) " +
-																 @"VALUES(?,?,?,?)", tableById);
+                                                                 @"VALUES(?,?,?,?)", tableById);
 
-			_UpsertFlattenedDocumentById =
-				new AsyncLazy<PreparedStatement>(
-					() =>
-					{
-						var result = CassandraSession.PrepareAsync(queryUpsertFlattenedDocumentById);
-						return result;
-					});
+            _UpsertFlattenedDocumentById =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = CassandraSession.PrepareAsync(queryUpsertFlattenedDocumentById);
+                        return result;
+                    });
 
-			var queryUpsertFlattenedDocumentByTypeAndVersion = string.Format(@"INSERT INTO " +
+            var queryUpsertFlattenedDocumentByTypeAndVersion = string.Format(@"INSERT INTO " +
                                                                              @"{0}(Id,DocumentType,DocumentVersion,DocumentJson) " +
-																			 @"VALUES(?,?,?,?)", tableByTypeAndVersion);
-			_UpsertFlattenedDocumentByTypeAndVersion =
-				new AsyncLazy<PreparedStatement>(
-					() =>
-					{
-						var result = CassandraSession.PrepareAsync(queryUpsertFlattenedDocumentByTypeAndVersion);
-						return result;
-					});
+                                                                             @"VALUES(?,?,?,?)", tableByTypeAndVersion);
+            _UpsertFlattenedDocumentByTypeAndVersion =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = CassandraSession.PrepareAsync(queryUpsertFlattenedDocumentByTypeAndVersion);
+                        return result;
+                    });
 
-			var queryDeleteFlattenedDocumentById = string.Format(@"Delete FROM {0} " +
-																 @"WHERE id = ?", tableById);
-			_DeleteFlattenedDocumentById =
-				new AsyncLazy<PreparedStatement>(
-					() =>
-					{
-						var result = CassandraSession.PrepareAsync(queryDeleteFlattenedDocumentById);
-						return result;
-					});
+            var queryDeleteFlattenedDocumentById = string.Format(@"Delete FROM {0} " +
+                                                                 @"WHERE id = ?", tableById);
+            _DeleteFlattenedDocumentById =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = CassandraSession.PrepareAsync(queryDeleteFlattenedDocumentById);
+                        return result;
+                    });
 
-			var queryDeleteFlattenedDocumentByType = string.Format(@"Delete FROM {0} " +
-																   @"WHERE DocumentType = ?", tableByTypeAndVersion);
-			_DeleteFlattenedDocumentByType =
-				new AsyncLazy<PreparedStatement>(
-					() =>
-					{
-						var result = CassandraSession.PrepareAsync(queryDeleteFlattenedDocumentByType);
-						return result;
-					});
+            var queryDeleteFlattenedDocumentByType = string.Format(@"Delete FROM {0} " +
+                                                                   @"WHERE DocumentType = ?", tableByTypeAndVersion);
+            _DeleteFlattenedDocumentByType =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = CassandraSession.PrepareAsync(queryDeleteFlattenedDocumentByType);
+                        return result;
+                    });
 
-			var queryDeleteFlattenedDocumentByTypeAndVersion = string.Format(@"Delete FROM {0} " +
-																			 @"WHERE DocumentType = ? " +
-																			 @"AND DocumentVersion = ?",
-				tableByTypeAndVersion);
+            var queryDeleteFlattenedDocumentByTypeAndVersion = string.Format(@"Delete FROM {0} " +
+                                                                             @"WHERE DocumentType = ? " +
+                                                                             @"AND DocumentVersion = ?",
+                tableByTypeAndVersion);
 
-			_DeleteFlattenedDocumentByTypeAndVersion =
-				new AsyncLazy<PreparedStatement>(
-					() =>
-					{
-						var result = CassandraSession.PrepareAsync(queryDeleteFlattenedDocumentByTypeAndVersion);
-						return result;
-					});
+            _DeleteFlattenedDocumentByTypeAndVersion =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = CassandraSession.PrepareAsync(queryDeleteFlattenedDocumentByTypeAndVersion);
+                        return result;
+                    });
 
-			#endregion
-		}
+            #endregion
+        }
 
-		public static async Task<List<BoundStatement>> BuildBoundStatements_ForUpsert(
-			IEnumerable<IDocumentRecord> items)
-		{
+        public static async Task<List<BoundStatement>> BuildBoundStatements_ForUpsert(
+            IEnumerable<IDocumentRecord> items)
+        {
 
-			var result = new List<BoundStatement>();
-			foreach (var item in items)
-			{
-				PreparedStatement prepared = await _UpsertFlattenedDocumentById;
-				BoundStatement bound = prepared.Bind(
-					item.Id,
-					item.DocumentType,
-					item.DocumentVersion,
-					item.DocumentJson
-					);
-				result.Add(bound);
+            var result = new List<BoundStatement>();
+            foreach (var item in items)
+            {
+                PreparedStatement prepared = await _UpsertFlattenedDocumentById;
+                BoundStatement bound = prepared.Bind(
+                    item.Id,
+                    item.DocumentType,
+                    item.DocumentVersion,
+                    item.DocumentJson
+                    );
+                result.Add(bound);
 
-				prepared = await _UpsertFlattenedDocumentByTypeAndVersion;
-				bound = prepared.Bind(
-					item.Id,
-					item.DocumentType,
-					item.DocumentVersion,
-					item.DocumentJson
-					);
-				result.Add(bound);
-			}
-			return result;
-		}
+                prepared = await _UpsertFlattenedDocumentByTypeAndVersion;
+                bound = prepared.Bind(
+                    item.Id,
+                    item.DocumentType,
+                    item.DocumentVersion,
+                    item.DocumentJson
+                    );
+                result.Add(bound);
+            }
+            return result;
+        }
 
-		public static async Task<List<BoundStatement>> BuildBoundStatements_ForFlattenedDocumentDelete(Guid id,
-			string documentType,
-			string documentVersion)
-		{
-			var result = new List<BoundStatement>();
+        public static async Task<List<BoundStatement>> BuildBoundStatements_ForFlattenedDocumentDelete(Guid id,
+            string documentType,
+            string documentVersion)
+        {
+            var result = new List<BoundStatement>();
 
-			PreparedStatement prepared = await _DeleteFlattenedDocumentByTypeAndVersion;
-			BoundStatement bound = prepared.Bind(
-				documentType, documentVersion);
-			result.Add(bound);
+            PreparedStatement prepared = await _DeleteFlattenedDocumentByTypeAndVersion;
+            BoundStatement bound = prepared.Bind(
+                documentType, documentVersion);
+            result.Add(bound);
 
-			prepared = await _DeleteFlattenedDocumentById;
-			bound = prepared.Bind(id);
-			result.Add(bound);
+            prepared = await _DeleteFlattenedDocumentById;
+            bound = prepared.Bind(id);
+            result.Add(bound);
 
-			return result;
-		}
+            return result;
+        }
+
         public static async Task<bool> DeleteFlattenedDocumentByTypeAsync(string type,
-           CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -195,13 +196,13 @@ namespace FlattenedDocument.CassandraStore.DAO
             }
             catch (Exception e)
             {
-                // only here to catch during a debug unit test.
+// only here to catch during a debug unit test.
                 throw;
             }
         }
 
-        public static async Task<bool> DeleteFlattenedDocumentByTypeAndVersionAsync(string type,string version,
-           CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<bool> DeleteFlattenedDocumentByTypeAndVersionAsync(string type, string version,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -223,7 +224,7 @@ namespace FlattenedDocument.CassandraStore.DAO
             }
             catch (Exception e)
             {
-                // only here to catch during a debug unit test.
+// only here to catch during a debug unit test.
                 throw;
             }
         }
@@ -251,117 +252,118 @@ namespace FlattenedDocument.CassandraStore.DAO
             }
             catch (Exception e)
             {
-                // only here to catch during a debug unit test.
+// only here to catch during a debug unit test.
                 throw;
             }
         }
-        public static async Task<bool> UpsertFlattenedDocumentAsync(IDocumentRecord documentRecord,
-			CancellationToken cancellationToken = default(CancellationToken))
-		{
-			try
-			{
-				var list = new List<IDocumentRecord> { documentRecord };
-				return await UpsertManyFlattenedDocumentAsync(list, cancellationToken);
-			}
-			catch (Exception e)
-			{
-				// only here to catch during a debug unit test.
-				throw;
-			}
-		}
 
-		public static async Task<bool> UpsertManyFlattenedDocumentAsync(
-			IEnumerable<IDocumentRecord> documentRecords,
-			CancellationToken cancellationToken = default(CancellationToken))
-		{
-			try
-			{
-				if (documentRecords == null)
+        public static async Task<bool> UpsertFlattenedDocumentAsync(IDocumentRecord documentRecord,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var list = new List<IDocumentRecord> {documentRecord};
+                return await UpsertManyFlattenedDocumentAsync(list, cancellationToken);
+            }
+            catch (Exception e)
+            {
+// only here to catch during a debug unit test.
+                throw;
+            }
+        }
+
+        public static async Task<bool> UpsertManyFlattenedDocumentAsync(
+            IEnumerable<IDocumentRecord> documentRecords,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                if (documentRecords == null)
                     throw new ArgumentNullException("documentRecords");
 
                 var session = CassandraSession;
-				cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
 
-				var batch = new BatchStatement();
-				var boundStatements = await BuildBoundStatements_ForUpsert(documentRecords);
-				batch.AddRange(boundStatements);
+                var batch = new BatchStatement();
+                var boundStatements = await BuildBoundStatements_ForUpsert(documentRecords);
+                batch.AddRange(boundStatements);
 
-				await session.ExecuteAsync(batch).ConfigureAwait(false);
-				return true;
-			}
-			catch (Exception e)
-			{
-				// only here to catch during a debug unit test.
-				throw;
-			}
-		}
+                await session.ExecuteAsync(batch).ConfigureAwait(false);
+                return true;
+            }
+            catch (Exception e)
+            {
+// only here to catch during a debug unit test.
+                throw;
+            }
+        }
 
-		public static async Task<IDocumentRecord> FindFlattenedDocumentByIdAsync(Guid id,
-			CancellationToken cancellationToken = default(CancellationToken))
-		{
-			try
-			{
-				var session = CassandraSession;
-				IMapper mapper = new Mapper(session);
-				cancellationToken.ThrowIfCancellationRequested();
-				var record =
-					await
-						mapper.SingleAsync<DocumentRecord>(FindFlattenedDocumentByIdQuery, id);
-				IDocumentRecord ch = record;
-				return ch;
-			}
-			catch (Exception e)
-			{
-                // throws an exception when nothing is found,
-                // Indication of missing element is only in the message, which can't be trusted to be stable.
-                // need to file a defect against datastax to get better exception information
-			    return null;
-			}
-		}
+        public static async Task<IDocumentRecord> FindFlattenedDocumentByIdAsync(Guid id,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await
+                        mapper.SingleAsync<DocumentRecord>(FindFlattenedDocumentByIdQuery, id);
+                IDocumentRecord ch = record;
+                return ch;
+            }
+            catch (Exception e)
+            {
+// throws an exception when nothing is found,
+// Indication of missing element is only in the message, which can't be trusted to be stable.
+// need to file a defect against datastax to get better exception information
+                return null;
+            }
+        }
 
         public static async Task<IDocumentRecord> FindFlattenedDocumentByTypeAndVersionAsync(string type, string version,
-			CancellationToken cancellationToken = default(CancellationToken))
-		{
-			try
-			{
-				var session = CassandraSession;
-				IMapper mapper = new Mapper(session);
-				cancellationToken.ThrowIfCancellationRequested();
-				var record =
-					await
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await
                         mapper.SingleAsync<DocumentRecord>(FindFlattenedDocumentByTypeAndVersion, type, version);
                 IDocumentRecord ch = record;
-				return ch;
-			}
-			catch (Exception e)
-			{
-                // throws an exception when nothing is found,
-                // Indication of missing element is only in the message, which can't be trusted to be stable.
-                // need to file a defect against datastax to get better exception information
+                return ch;
+            }
+            catch (Exception e)
+            {
+// throws an exception when nothing is found,
+// Indication of missing element is only in the message, which can't be trusted to be stable.
+// need to file a defect against datastax to get better exception information
                 return null;
-			}
-		}
+            }
+        }
 
         public static async Task<IEnumerable<IDocumentRecord>> FindFlattenedDocumentsByTypeAsync(string type,
-		  CancellationToken cancellationToken = default(CancellationToken))
-		{
-			try
-			{
-				var session = CassandraSession;
-				IMapper mapper = new Mapper(session);
-				cancellationToken.ThrowIfCancellationRequested();
-				var record =
-					await
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await
                         mapper.FetchAsync<DocumentRecord>(FindFlattenedDocumentByType, type);
                 return record;
-			}
-			catch (Exception e)
-			{
-				// only here to catch during a debug unit test.
-				throw;
-			}
-		}
+            }
+            catch (Exception e)
+            {
+// only here to catch during a debug unit test.
+                throw;
+            }
+        }
 
         public static async Task<P5.Store.Core.Models.IPage<DocumentRecord>> PageFlattenedDocumentsAsync(
             int pageSize, byte[] pagingState,
@@ -387,17 +389,18 @@ namespace FlattenedDocument.CassandraStore.DAO
                             opt.SetPageSize(pageSize).SetPagingState(pagingState)));
                 }
 
-                // var result = CreatePageProxy(page);
+// var result = CreatePageProxy(page);
                 var result = new PageProxy<DocumentRecord>(page);
 
                 return result;
             }
             catch (Exception e)
             {
-                // only here to catch during a debug unit test.
+// only here to catch during a debug unit test.
                 throw;
             }
         }
+
         public static async Task<P5.Store.Core.Models.IPage<DocumentRecord>> PageFlattenedDocumentsByTypeAsync(
             string type,
             int pageSize, byte[] pagingState,
@@ -423,30 +426,31 @@ namespace FlattenedDocument.CassandraStore.DAO
                             opt.SetPageSize(pageSize).SetPagingState(pagingState)));
                 }
 
-                // var result = CreatePageProxy(page);
+// var result = CreatePageProxy(page);
                 var result = new PageProxy<DocumentRecord>(page);
 
                 return result;
             }
             catch (Exception e)
             {
-                // only here to catch during a debug unit test.
+// only here to catch during a debug unit test.
                 throw;
             }
         }
+
 #if _USE_CASTLE
         private static P5.Store.Core.Models.IPage<DocumentRecord> CreatePageProxy(
-           Cassandra.Mapping.IPage<DocumentRecord> cassandrPage)
+        Cassandra.Mapping.IPage<DocumentRecord> cassandrPage)
         {
             ProxyGenerator generator = new ProxyGenerator();
 
             var service =
-                generator.CreateInterfaceProxyWithoutTarget<P5.Store.Core.Models.IPage<DocumentRecord>>(
-                    new CassandraPageInterceptor<DocumentRecord>(
-                        new CassandraPageProxy<DocumentRecord>(cassandrPage)));
+            generator.CreateInterfaceProxyWithoutTarget<P5.Store.Core.Models.IPage<DocumentRecord>>(
+            new CassandraPageInterceptor<DocumentRecord>(
+            new CassandraPageProxy<DocumentRecord>(cassandrPage)));
             return service;
         }
 #endif
 
-	}
+    }
 }

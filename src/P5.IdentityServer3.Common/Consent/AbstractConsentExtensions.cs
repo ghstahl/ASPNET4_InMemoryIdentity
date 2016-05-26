@@ -4,9 +4,9 @@ namespace P5.IdentityServer3.Common
 {
     public static class AbstractConsentExtensions
     {
-        public static Guid CreateGuid<TScopes>(this AbstractConsentHandle<TScopes> consent, Guid @namespace) where TScopes : class
+        public static Guid CreateGuid<TScopes>(this AbstractConsentHandle<TScopes> consent) where TScopes : class
         {
-            return GuidGenerator.CreateGuid(@namespace, consent.ClientId, consent.Subject);
+            return GuidGenerator.CreateGuid(ConsentConstants.Namespace, consent.ClientId, consent.Subject);
         }
     }
 }

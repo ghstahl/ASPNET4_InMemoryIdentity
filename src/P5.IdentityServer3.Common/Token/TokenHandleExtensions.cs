@@ -6,9 +6,9 @@ namespace P5.IdentityServer3.Common
 {
     public static class TokenHandleExtensions
     {
-        public static Guid CreateGuid(this ITokenHandle tokenHandle, Guid @namespace)
+        public static Guid CreateGuid(this ITokenHandle tokenHandle)
         {
-            return GuidGenerator.CreateGuid(@namespace, tokenHandle.Key);
+            return GuidGenerator.CreateGuid(TokenConstants.Namespace, tokenHandle.Key);
         }
         public static TokenHandle ToTokenHandle(this Token token)
         {

@@ -8,7 +8,7 @@ using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Newtonsoft.Json;
-using P5.IdentityServer3.Cassandra.Client;
+ 
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.RefreshToken;
@@ -72,7 +72,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                 var scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(record));
                 result.Add(scopeRecord);
             }
-            await IdentityServer3CassandraDao.CreateManyScopeAsync(result);
+            await IdentityServer3CassandraDao.UpsertManyScopeAsync(result);
             return result;
         }
 
@@ -157,7 +157,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
                 result.Add(clientrecord);
             }
-            await IdentityServer3CassandraDao.CreateManyClientAsync(result);
+            await IdentityServer3CassandraDao.UpsertManyClientAsync(result);
             return result;
         }
 

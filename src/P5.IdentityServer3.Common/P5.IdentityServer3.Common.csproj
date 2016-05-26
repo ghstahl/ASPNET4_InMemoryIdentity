@@ -43,6 +43,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -55,13 +56,16 @@
     <Compile Include="AuthorizationCode\AbstractAuthorizationCodeHandleExtensions.cs" />
     <Compile Include="AuthorizationCode\AuthorizationCodeHandle.cs" />
     <Compile Include="AuthorizationCode\AuthorizationCodeHandleRecord.cs" />
+    <Compile Include="AuthorizationCode\AuthorizationCodeConstants.cs" />
     <Compile Include="AuthorizationCode\FlattenedAuthorizationCodeHandle.cs" />
     <Compile Include="AuthorizationCode\FlattenedAuthorizationCodeHandleRecord.cs" />
     <Compile Include="AuthorizationCode\IAuthorizationCodeHandle.cs" />
     <Compile Include="Claim\ClaimExtensions.cs" />
     <Compile Include="Claim\ClaimIdentityRecord.cs" />
     <Compile Include="Claim\ClaimTypeRecord.cs" />
+    <Compile Include="Claim\ClaimConstants.cs" />
     <Compile Include="Client\AbstractClientHandle.cs" />
+    <Compile Include="Client\ClientConstants.cs" />
     <Compile Include="Client\ClientExtensions.cs" />
     <Compile Include="Client\ClientHandle.cs" />
     <Compile Include="Client\ClientRecord.cs" />
@@ -70,11 +74,13 @@
     <Compile Include="Client\IClientHandle.cs" />
     <Compile Include="Consent\AbstractConsentExtensions.cs" />
     <Compile Include="Consent\AbstractConsentHandle.cs" />
+    <Compile Include="Consent\ConsentConstants.cs" />
     <Compile Include="Consent\ConsentHandle.cs" />
     <Compile Include="Consent\ConsentRecord.cs" />
     <Compile Include="Consent\FlattenedConsentHandle.cs" />
     <Compile Include="Consent\FlattenedConsentRecord.cs" />
     <Compile Include="Consent\IConsentHandle.cs" />
+    <Compile Include="Extensions\PropertyExtension.cs" />
     <Compile Include="Helpers\GuidGenerator.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Models\DocumentMetaData.cs" />
@@ -84,23 +90,33 @@
     <Compile Include="Models\ISimpleDocument.cs" />
     <Compile Include="Models\SimpleDocument.cs" />
     <Compile Include="RefreshToken\AbstractRefreshTokenHandle.cs" />
+    <Compile Include="RefreshToken\RefreshTokenConstants.cs" />
     <Compile Include="RefreshToken\FlattenedRefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\IRefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleExtensions.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleRecord.cs" />
+    <Compile Include="Resources\Messages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Messages.resx</DependentUpon>
+    </Compile>
     <Compile Include="ScopeClaimComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScopeComparer.cs" />
     <Compile Include="Scope\AbstractScopeHandle.cs" />
     <Compile Include="Scope\FlattenedScopeHandle.cs" />
     <Compile Include="Scope\FlattenedScopeRecord.cs" />
     <Compile Include="Scope\IScopeHandle.cs" />
+    <Compile Include="Scope\ScopeConstants.cs" />
     <Compile Include="Scope\ScopeExtensions.cs" />
     <Compile Include="Scope\ScopeHandle.cs" />
     <Compile Include="Scope\ScopeRecord.cs" />
+    <Compile Include="SecretComparer.cs" />
     <Compile Include="Token\AbstractTokenHandle.cs" />
     <Compile Include="Token\FlattenedTokenHandle.cs" />
     <Compile Include="Token\ITokenHandle.cs" />
+    <Compile Include="Token\TokenConstants.cs" />
     <Compile Include="Token\TokenHandle.cs" />
     <Compile Include="Token\TokenHandleExtensions.cs" />
     <Compile Include="Token\TokenHandleRecord.cs" />
@@ -109,7 +125,13 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Messages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Messages.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

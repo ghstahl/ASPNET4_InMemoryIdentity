@@ -19,9 +19,12 @@ namespace P5.IdentityServer3.Cassandra.Test
         private IdentityServer3CassandraDao _store;
 
         [TestInitialize]
-        public void Setup()
+        public async void Setup()
         {
+
             base.Setup();
+            await IdentityServer3CassandraDao.CreateTablesAsync();
+            await IdentityServer3CassandraDao.TruncateTablesAsync();
         }
 
 
@@ -46,6 +49,159 @@ namespace P5.IdentityServer3.Cassandra.Test
             var nameList = queryNames.ToList();
             var result = await IdentityServer3CassandraDao.FindScopesByNamesAsync(nameList);
             Assert.AreEqual(result.Count(), insertResult.Count);
+
+        }
+
+        [TestMethod]
+        public async Task TestCreateAddAndDeleteScopesSecretsAsync()
+        {
+            var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
+            var queryNames = from item in insertResult
+                select item.Record.Name;
+            var nameList = queryNames.ToList();
+
+            var adminStore = new IdentityServer3AdminStore();
+            var stored = await adminStore.FindScopesAsync(nameList);
+
+            Assert.AreEqual(stored.Count(), insertResult.Count);
+            var secretComparer = new SecretComparer();
+            var scopeComparer = new ScopeComparer();
+            var scope = await insertResult[0].Record.MakeIdentityServerScopeAsync();
+            var storedScope = stored.FirstOrDefault();
+            Assert.IsTrue(scopeComparer.Equals(scope, storedScope));
+
+            List<Secret> secrets = new List<Secret>();
+            for (int i = 0; i < 2; ++i)
+            {
+                secrets.Add(new Secret()
+                {
+                    Value = Guid.NewGuid().ToString(),
+                    Description = Guid.NewGuid().ToString(),
+                    Expiration = DateTimeOffset.UtcNow.AddHours(1),
+                    Type = Guid.NewGuid().ToString()
+                });
+            }
+            List<Secret> original = storedScope.ScopeSecrets;
+
+            List<Secret> expected = storedScope.ScopeSecrets.Union(secrets, new SecretComparer()).ToList();
+
+            await adminStore.AddScopeSecretsAsync(insertResult[0].Record.Name, secrets);
+            stored = await adminStore.FindScopesAsync(nameList);
+            storedScope = stored.FirstOrDefault();
+            Assert.IsTrue(scopeComparer.Equals(scope, storedScope));
+
+            var query = from item in storedScope.ScopeSecrets
+                        where !expected.Contains(item, secretComparer)
+                        select item;
+            var finalList = query.ToList();
+            Assert.IsTrue(finalList.Count == 0);
+
+
+            //DELETE IT
+            await adminStore.DeleteScopeSecretsAsync(insertResult[0].Record.Name, secrets);
+            stored = await adminStore.FindScopesAsync(nameList);
+            storedScope = stored.FirstOrDefault();
+            Assert.IsTrue(scopeComparer.Equals(scope, storedScope));
+
+            query = from item in storedScope.ScopeSecrets
+                        where !original.Contains(item, secretComparer)
+                        select item;
+            finalList = query.ToList();
+            Assert.IsTrue(finalList.Count == 0);
+
+
+
+        }
+
+        [TestMethod]
+        public async Task TestCreateAndAddScopesSecretsAsync()
+        {
+            await IdentityServer3CassandraDao.CreateTablesAsync();
+            await IdentityServer3CassandraDao.TruncateTablesAsync();
+
+            var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
+            var queryNames = from item in insertResult
+                             select item.Record.Name;
+            var nameList = queryNames.ToList();
+
+            var adminStore = new IdentityServer3AdminStore();
+            var stored = await adminStore.FindScopesAsync(nameList);
+
+            Assert.AreEqual(stored.Count(), insertResult.Count);
+            var secretComparer = new SecretComparer();
+            var scopeComparer = new ScopeComparer();
+            var scope = await insertResult[0].Record.MakeIdentityServerScopeAsync();
+            var storedScope = stored.FirstOrDefault();
+            Assert.IsTrue(scopeComparer.Equals(scope, storedScope));
+
+            List<Secret> secrets = new List<Secret>();
+            for (int i = 0; i < 2; ++i)
+            {
+                secrets.Add(new Secret()
+                {
+                    Value = Guid.NewGuid().ToString(),
+                    Description = Guid.NewGuid().ToString(),
+                    Expiration = DateTimeOffset.UtcNow.AddHours(1),
+                    Type = Guid.NewGuid().ToString()
+                });
+            }
+            List<Secret> expected = storedScope.ScopeSecrets.Union(secrets, new SecretComparer()).ToList();
+            await adminStore.AddScopeSecretsAsync(insertResult[0].Record.Name, secrets);
+            stored = await adminStore.FindScopesAsync(nameList);
+            storedScope = stored.FirstOrDefault();
+            Assert.IsTrue(scopeComparer.Equals(scope, storedScope));
+
+            var query = from item in storedScope.ScopeSecrets
+                        where !expected.Contains(item, secretComparer)
+                        select item;
+            var finalList = query.ToList();
+            Assert.IsTrue(finalList.Count == 0);
+
+        }
+        [TestMethod]
+        public async Task TestCreateAndAddScopeClaimsAsync()
+        {
+            await IdentityServer3CassandraDao.CreateTablesAsync();
+            await IdentityServer3CassandraDao.TruncateTablesAsync();
+
+            var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
+            var queryNames = from item in insertResult
+                             select item.Record.Name;
+            var nameList = queryNames.ToList();
+
+            var adminStore = new IdentityServer3AdminStore();
+            var stored = await adminStore.FindScopesAsync(nameList);
+
+            Assert.AreEqual(stored.Count(), insertResult.Count);
+            var scopeClaimComparer = new ScopeClaimComparer();
+            var scopeComparer = new ScopeComparer();
+            var scope = await insertResult[0].Record.MakeIdentityServerScopeAsync();
+            var storedScope = stored.FirstOrDefault();
+            Assert.IsTrue(scopeComparer.Equals(scope, storedScope));
+
+            List<ScopeClaim> claims = new List<ScopeClaim>();
+            for (int i = 0; i < 2; ++i)
+            {
+                claims.Add(new ScopeClaim
+                {
+                   Name = Guid.NewGuid().ToString(),
+                   AlwaysIncludeInIdToken = true,
+                   Description = Guid.NewGuid().ToString()
+                });
+            }
+            List<ScopeClaim> expected = storedScope.Claims.Union(claims, new ScopeClaimComparer()).ToList();
+
+            await adminStore.AddScopeClaimsAsync(insertResult[0].Record.Name, claims);
+            stored = await adminStore.FindScopesAsync(nameList);
+            storedScope = stored.FirstOrDefault();
+            Assert.IsTrue(scopeComparer.Equals(scope, storedScope));
+
+            var query = from item in storedScope.Claims
+                        where !expected.Contains(item, scopeClaimComparer)
+                        select item;
+            var finalList = query.ToList();
+            Assert.IsTrue(finalList.Count == 0);
+
 
         }
 
@@ -102,7 +258,7 @@ namespace P5.IdentityServer3.Cassandra.Test
             var scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(record));
             Guid id = scopeRecord.Id;
 
-            var result = await IdentityServer3CassandraDao.CreateScopeAsync(scopeRecord);
+            var result = await IdentityServer3CassandraDao.UpsertScopeAsync(scopeRecord);
             Assert.IsTrue(result);
 
             var result2 = await IdentityServer3CassandraDao.FindScopeByIdAsync(id);

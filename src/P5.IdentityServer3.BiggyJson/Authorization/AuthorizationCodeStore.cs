@@ -45,7 +45,7 @@ namespace P5.IdentityServer3.BiggyJson
 
         protected override Guid GetId(AuthorizationCodeHandle record)
         {
-            return record.CreateGuid(AuthorizationCodeHandleRecord.Namespace);
+            return record.CreateGuid();
         }
 
         protected override AuthorizationCodeHandleRecord NewWrap(AuthorizationCodeHandle record)

@@ -15,8 +15,7 @@ namespace P5.IdentityServer3.Common
                 return true;
             if (ReferenceEquals(x, null) ||ReferenceEquals(y, null))
                 return false;
-            return x.Name == y.Name && x.AlwaysIncludeInIdToken == y.AlwaysIncludeInIdToken &&
-                   x.Description == y.Description;
+            return x.Name == y.Name;
         }
 
         public int GetHashCode(ScopeClaim obj)
@@ -25,9 +24,8 @@ namespace P5.IdentityServer3.Common
                 return 0;
 
             int hashName = obj.Name == null? 0 : obj.Name.GetHashCode();
-            int hashDescription = obj.Description == null ? 0 : obj.Description.GetHashCode();
-            int hashAlwaysIncludeInIdToken = obj.AlwaysIncludeInIdToken.GetHashCode();
-            return hashName ^ hashDescription ^ hashAlwaysIncludeInIdToken;
+
+            return hashName ;
         }
     }
 }

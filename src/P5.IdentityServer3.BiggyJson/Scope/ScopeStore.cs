@@ -22,7 +22,7 @@ namespace P5.IdentityServer3.BiggyJson
         }
         protected override Guid GetId(ScopeHandle record)
         {
-            return record.CreateGuid(ScopeRecord.Namespace);
+            return record.CreateGuid();
         }
 
         protected override ScopeRecord NewWrap(ScopeHandle record)

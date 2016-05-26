@@ -1,8 +1,6 @@
 ﻿using IdentityServer3.Core.Configuration;
 using IdentityServer3.Core.Services;
-using P5.IdentityServer3.Cassandra.AuthorizationCode;
-using P5.IdentityServer3.Cassandra.Client;
-using P5.IdentityServer3.Cassandra.CommonStore;
+
 
 namespace P5.IdentityServer3.Cassandra
 {
