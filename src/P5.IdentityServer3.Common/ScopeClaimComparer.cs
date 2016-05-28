@@ -9,6 +9,16 @@ namespace P5.IdentityServer3.Common
 {
     public class ScopeClaimComparer : IEqualityComparer<ScopeClaim>
     {
+        public static ScopeClaimComparer DeepScopeClaimComparer
+        {
+            get { return new ScopeClaimComparer(true); }
+        }
+
+        public static ScopeClaimComparer MinimalScopeClaimComparer
+        {
+            get { return new ScopeClaimComparer(); }
+        }
+
         private bool _deep;
 
         public ScopeClaimComparer(bool deep = false)

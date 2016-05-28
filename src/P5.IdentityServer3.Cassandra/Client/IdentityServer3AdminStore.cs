@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using P5.IdentityServer3.Cassandra.DAO;
@@ -80,16 +81,58 @@ namespace P5.IdentityServer3.Cassandra
             await ClientStore.DeleteAllowedCustomGrantTypesFromClientAsync(clientId, allowedCustomGrantTypes);
         }
 
-        public async Task AddAllowedScopesToClientAsync(string clientId, IEnumerable<string> allowedScopes)
+        public async Task AddIdentityProviderRestrictionsToClientAsync(string clientId,
+            IEnumerable<string> identityProviderRestrictions)
         {
-            await ClientStore.AddAllowedScopesToClientAsync(clientId, allowedScopes);
+            await ClientStore.AddIdentityProviderRestrictionsToClientAsync(clientId, identityProviderRestrictions);
         }
 
-        public async Task DeleteAllowedScopesFromClientAsync(string clientId, IEnumerable<string> allowedScopes)
+        public async Task DeleteIdentityProviderRestrictionsFromClientAsync(string clientId,
+            IEnumerable<string> identityProviderRestrictions)
         {
-            await ClientStore.DeleteAllowedScopesFromClientAsync(clientId, allowedScopes);
+            await ClientStore.DeleteIdentityProviderRestrictionsFromClientAsync(clientId, identityProviderRestrictions);
         }
 
+        public async Task AddPostLogoutRedirectUrisToClientAsync(string clientId,
+            IEnumerable<string> postLogoutRedirectUris)
+        {
+            await ClientStore.AddPostLogoutRedirectUrisToClientAsync(clientId, postLogoutRedirectUris);
+        }
 
+        public async Task DeletePostLogoutRedirectUrisFromClientAsync(string clientId,
+            IEnumerable<string> postLogoutRedirectUris)
+        {
+            await ClientStore.DeletePostLogoutRedirectUrisFromClientAsync(clientId, postLogoutRedirectUris);
+        }
+
+        public async Task AddRedirectUrisToClientAsync(string clientId, IEnumerable<string> redirectUris)
+        {
+            await ClientStore.AddRedirectUrisToClientAsync(clientId, redirectUris);
+        }
+
+        public async Task DeleteRedirectUrisFromClientAsync(string clientId, IEnumerable<string> redirectUris)
+        {
+            await ClientStore.DeleteRedirectUrisFromClientAsync(clientId, redirectUris);
+        }
+
+        public async Task AddClientSecretsToClientAsync(string clientId, IEnumerable<Secret> clientSecrets)
+        {
+            await ClientStore.AddClientSecretsToClientAsync(clientId, clientSecrets);
+        }
+
+        public async Task DeleteClientSecretsFromClientAsync(string clientId, IEnumerable<Secret> clientSecrets)
+        {
+            await ClientStore.DeleteClientSecretsFromClientAsync(clientId, clientSecrets);
+        }
+
+        public async Task AddClaimsToClientAsync(string clientId, IEnumerable<Claim> claims)
+        {
+            await ClientStore.AddClaimsToClientAsync(clientId, claims);
+        }
+
+        public async Task DeleteClaimsFromClientAsync(string clientId, IEnumerable<Claim> claims)
+        {
+            await ClientStore.DeleteClaimsFromClientAsync(clientId, claims);
+        }
     }
 }

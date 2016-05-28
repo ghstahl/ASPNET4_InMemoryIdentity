@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
@@ -74,13 +75,101 @@ namespace P5.IdentityServer3.Cassandra
         /// <returns></returns>
         Task DeleteAllowedCorsOriginsFromClientAsync(string clientId, IEnumerable<string> allowedCorsOrigins);
 
+        /// <summary>
+        /// Adds new grant types to the list of existing ones
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="allowedCustomGrantTypes"></param>
+        /// <returns></returns>
         Task AddAllowedCustomGrantTypesToClientAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes);
+
+        /// <summary>
+        /// Deletes grants types for the list of existing ones
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="allowedCustomGrantTypes"></param>
+        /// <returns></returns>
         Task DeleteAllowedCustomGrantTypesFromClientAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes);
 
-        Task AddAllowedScopesToClientAsync(string clientId, IEnumerable<string> allowedScopes);
-        Task DeleteAllowedScopesFromClientAsync(string clientId, IEnumerable<string> allowedScopes);
-        
-        
+        /// <summary>
+        /// Adds new scopes to the list of existing IdentityProviderRestrictions
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="identityProviderRestrictions"></param>
+        /// <returns></returns>
+        Task AddIdentityProviderRestrictionsToClientAsync(string clientId, IEnumerable<string> identityProviderRestrictions);
+
+        /// <summary>
+        /// Deletes scopes from the list of existing IdentityProviderRestrictions
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="identityProviderRestrictions"></param>
+        /// <returns></returns>
+        Task DeleteIdentityProviderRestrictionsFromClientAsync(string clientId, IEnumerable<string> identityProviderRestrictions);
+
+        /// <summary>
+        /// Adds new scopes to the list of existing PostLogoutRedirectUris
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="postLogoutRedirectUris"></param>
+        /// <returns></returns>
+        Task AddPostLogoutRedirectUrisToClientAsync(string clientId, IEnumerable<string> postLogoutRedirectUris);
+
+        /// <summary>
+        /// Deletes scopes from the list of existing PostLogoutRedirectUris
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="postLogoutRedirectUris"></param>
+        /// <returns></returns>
+        Task DeletePostLogoutRedirectUrisFromClientAsync(string clientId, IEnumerable<string> postLogoutRedirectUris);
+
+        /// <summary>
+        /// Adds new scopes to the list of existing RedirectUris
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="redirectUris"></param>
+        /// <returns></returns>
+        Task AddRedirectUrisToClientAsync(string clientId, IEnumerable<string> redirectUris);
+
+        /// <summary>
+        /// Deletes scopes from the list of existing RedirectUris
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="redirectUris"></param>
+        /// <returns></returns>
+        Task DeleteRedirectUrisFromClientAsync(string clientId, IEnumerable<string> redirectUris);
+
+        /// <summary>
+        /// Adds new scopes to the list of existing ClientSecrets
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="clientSecrets"></param>
+        /// <returns></returns>
+        Task AddClientSecretsToClientAsync(string clientId, IEnumerable<Secret> clientSecrets);
+
+        /// <summary>
+        /// Deletes scopes from the list of existing ClientSecrets
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="clientSecrets"></param>
+        /// <returns></returns>
+        Task DeleteClientSecretsFromClientAsync(string clientId, IEnumerable<Secret> clientSecrets);
+
+        /// <summary>
+        /// Adds new scopes to the list of existing Claims
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="claims"></param>
+        /// <returns></returns>
+        Task AddClaimsToClientAsync(string clientId, IEnumerable<Claim> claims);
+
+        /// <summary>
+        /// Deletes scopes from the list of existing Claims
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="claims"></param>
+        /// <returns></returns>
+        Task DeleteClaimsFromClientAsync(string clientId, IEnumerable<Claim> claims);
     }
 
 

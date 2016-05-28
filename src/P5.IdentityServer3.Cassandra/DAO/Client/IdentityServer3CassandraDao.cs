@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Cassandra;
 using Cassandra.Mapping;
+using IdentityModel;
 using IdentityServer3.Core.Models;
 using P5.CassandraStore;
 using P5.CassandraStore.Extensions;
@@ -173,14 +175,18 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
 
         }
+
         public static async Task<bool> UpsertClientAsync(Client client,
-           CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
                 if (client == null)
                     throw new ArgumentNullException("client");
-                return await UpsertClientAsync(new FlattenedClientRecord(new FlattenedClientHandle(client)), cancellationToken);
+                return
+                    await
+                        UpsertClientAsync(new FlattenedClientRecord(new FlattenedClientHandle(client)),
+                            cancellationToken);
             }
             catch (Exception e)
             {
@@ -322,6 +328,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 cancellationToken.ThrowIfCancellationRequested();
             }
         }
+
         public static async Task AddScopesToClientByIdAsync(string clientId, IEnumerable<string> scopes,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -332,13 +339,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
             var scopeRecordsList = scopeRecords.ToList();
             if (scopeList.Count != scopeRecordsList.Count)
             {
-                throw new ArgumentException("one or more scopes requested do not exist, so they cannot be added","scopes");
+                throw new ArgumentException("one or more scopes requested do not exist, so they cannot be added",
+                    "scopes");
             }
 
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
             if (stored == null)
             {
-                throw new Exception(string.Format("CASSANDRA Exception: Cannot find record for ClientId:[{0}]",clientId));
+                throw new Exception(string.Format("CASSANDRA Exception: Cannot find record for ClientId:[{0}]", clientId));
             }
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -354,61 +362,202 @@ namespace P5.IdentityServer3.Cassandra.DAO
             cancellationToken.ThrowIfCancellationRequested();
 
             var query = from item in stored.AllowedScopes
-                where !scopes.Contains(item)
+                where !scopes.Contains(item, StringComparer.OrdinalIgnoreCase)
                 select item;
             stored.AllowedScopes = query.ToList();
             await UpsertClientAsync(stored, cancellationToken);
 
         }
 
-        public static async Task AddAllowedCorsOriginsToClientByClientIdAsync(string clientId, IEnumerable<string> allowedCorsOrigins,
+        public static async Task AddAllowedCorsOriginsToClientByClientIdAsync(string clientId,
+            IEnumerable<string> allowedCorsOrigins,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            List<string> ulist = stored.AllowedCorsOrigins.Union(allowedCorsOrigins, StringComparer.OrdinalIgnoreCase).ToList();
+            List<string> ulist =
+                stored.AllowedCorsOrigins.Union(allowedCorsOrigins, StringComparer.OrdinalIgnoreCase).ToList();
             stored.AllowedCorsOrigins = ulist;
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteAllowedCorsOriginsFromClientByClientIdAsync(string clientId, IEnumerable<string> allowedCorsOrigins,
+        public static async Task DeleteAllowedCorsOriginsFromClientByClientIdAsync(string clientId,
+            IEnumerable<string> allowedCorsOrigins,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
             var query = from item in stored.AllowedCorsOrigins
-                        where !allowedCorsOrigins.Contains(item)
-                        select item;
+                where !allowedCorsOrigins.Contains(item, StringComparer.OrdinalIgnoreCase)
+                select item;
             stored.AllowedCorsOrigins = query.ToList();
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task AddAllowedCustomGrantTypesByClientIdAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes,
+        public static async Task AddAllowedCustomGrantTypesByClientIdAsync(string clientId,
+            IEnumerable<string> allowedCustomGrantTypes,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            List<string> ulist = stored.AllowedCustomGrantTypes.Union(allowedCustomGrantTypes, StringComparer.OrdinalIgnoreCase).ToList();
+            List<string> ulist =
+                stored.AllowedCustomGrantTypes.Union(allowedCustomGrantTypes, StringComparer.OrdinalIgnoreCase).ToList();
             stored.AllowedCustomGrantTypes = ulist;
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteAllowedCustomGrantTypesFromClientByClientIdAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes,
+        public static async Task DeleteAllowedCustomGrantTypesFromClientByClientIdAsync(string clientId,
+            IEnumerable<string> allowedCustomGrantTypes,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
             var query = from item in stored.AllowedCustomGrantTypes
-                        where !allowedCustomGrantTypes.Contains(item)
-                        select item;
+                where !allowedCustomGrantTypes.Contains(item, StringComparer.OrdinalIgnoreCase)
+                select item;
             stored.AllowedCustomGrantTypes = query.ToList();
             await UpsertClientAsync(stored, cancellationToken);
         }
 
 
+        public static async Task AddIdentityProviderRestrictionsToClientByIdAsync(string clientId,
+            IEnumerable<string> identityProviderRestrictions,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<string> ulist =
+                stored.IdentityProviderRestrictions.Union(identityProviderRestrictions, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            stored.IdentityProviderRestrictions = ulist;
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task DeleteIdentityProviderRestrictionsFromClientByIdAsync(string clientId,
+            IEnumerable<string> identityProviderRestrictions,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.IdentityProviderRestrictions
+                where !identityProviderRestrictions.Contains(item, StringComparer.OrdinalIgnoreCase)
+                select item;
+            stored.IdentityProviderRestrictions = query.ToList();
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task AddPostLogoutRedirectUrisToClientByIdAsync(string clientId,
+            IEnumerable<string> postLogoutRedirectUris,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<string> ulist =
+                stored.PostLogoutRedirectUris.Union(postLogoutRedirectUris, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            stored.PostLogoutRedirectUris = ulist;
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task DeletePostLogoutRedirectUrisFromClientByIdAsync(string clientId,
+            IEnumerable<string> postLogoutRedirectUris,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.PostLogoutRedirectUris
+                where !postLogoutRedirectUris.Contains(item, StringComparer.OrdinalIgnoreCase)
+                select item;
+            stored.PostLogoutRedirectUris = query.ToList();
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task AddRedirectUrisToClientByIdAsync(string clientId, IEnumerable<string> redirectUris,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<string> ulist =
+                stored.RedirectUris.Union(redirectUris, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            stored.RedirectUris = ulist;
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task DeleteRedirectUrisFromClientByIdAsync(string clientId, IEnumerable<string> redirectUris,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.RedirectUris
+                where !redirectUris.Contains(item, StringComparer.OrdinalIgnoreCase)
+                select item;
+            stored.RedirectUris = query.ToList();
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task AddClientSecretsToClientByIdAsync(string clientId, 
+            IEnumerable<Secret> clientSecrets,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<Secret> ulist =
+                stored.ClientSecrets.Union(clientSecrets, SecretComparer.OrdinalIgnoreCase)
+                    .ToList();
+            stored.ClientSecrets = ulist;
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task DeleteClientSecretsFromClientByIdAsync(string clientId,
+            IEnumerable<Secret> clientSecrets,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.ClientSecrets
+                        where !clientSecrets.Contains(item, SecretComparer.OrdinalIgnoreCase)
+                        select item;
+            stored.ClientSecrets = query.ToList();
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task AddClaimsToClientByIdAsync(string clientId, IEnumerable<Claim> claims,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<Claim> ulist =
+                stored.Claims.Union(claims, new ClaimComparer())
+                    .ToList();
+            stored.Claims = ulist;
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task DeleteClaimsFromClientByIdAsync(string clientId, IEnumerable<Claim> claims,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.Claims
+                        where !claims.Contains(item, new ClaimComparer())
+                        select item;
+            stored.Claims = query.ToList();
+            await UpsertClientAsync(stored, cancellationToken); 
+        }
     }
 }

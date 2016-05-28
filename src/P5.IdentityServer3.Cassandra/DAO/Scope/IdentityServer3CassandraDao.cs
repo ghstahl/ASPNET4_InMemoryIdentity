@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -398,7 +399,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             var stored = await FindScopeByName(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            List<ScopeClaim> ulist = stored.Claims.Union(claims, new ScopeClaimComparer()).ToList();
+            List<ScopeClaim> ulist = stored.Claims.Union(claims, ScopeClaimComparer.MinimalScopeClaimComparer).ToList();
             stored.Claims = ulist;
             await UpsertScopeAsync(stored);
         }
@@ -407,7 +408,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             var stored = await FindScopeByName(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            var comparer = new ScopeClaimComparer();
+            var comparer = ScopeClaimComparer.MinimalScopeClaimComparer;
             var query = from item in stored.Claims
                         where !claims.Contains(item, comparer)
                         select item;
@@ -420,14 +421,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             var stored = await FindScopeByName(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            var comparer = new ScopeClaimComparer();
+            var comparer = ScopeClaimComparer.MinimalScopeClaimComparer;
             var claimsList = claims.ToList();
             var query = from item in stored.Claims
                         where !claimsList.Contains(item, comparer)
                         select item;
             var remainingClaims = query.ToList(); // these are the ones we keep.
             // create a merged version.
-            List<ScopeClaim> ulist = remainingClaims.Union(claimsList, new ScopeClaimComparer()).ToList();
+            List<ScopeClaim> ulist = remainingClaims.Union(claimsList, ScopeClaimComparer.MinimalScopeClaimComparer).ToList();
 
             // Upsert the new version
             stored.Claims = ulist;
@@ -440,7 +441,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             var stored = await FindScopeByName(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            List<Secret> ulist = stored.ScopeSecrets.Union(secrets, new SecretComparer()).ToList();
+            List<Secret> ulist = stored.ScopeSecrets.Union(secrets, SecretComparer.OrdinalIgnoreCase).ToList();
             stored.ScopeSecrets = ulist;
 
             await UpsertScopeAsync(stored);
@@ -451,7 +452,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             var stored = await FindScopeByName(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            var comparer = new SecretComparer();
+            var comparer = SecretComparer.OrdinalIgnoreCase;
             var query = from item in stored.ScopeSecrets
                         where !secrets.Contains(item,comparer)
                         select item;
@@ -473,8 +474,5 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertScopeAsync(stored);
 
         }
-
-
-
     }
 }

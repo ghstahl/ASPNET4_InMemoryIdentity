@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
@@ -17,16 +18,26 @@ namespace P5.IdentityServer3.Cassandra
         {
             if (clientId == null)
             {
-                throw new ArgumentNullException("clientId","Validation failed.");
+                throw new ArgumentNullException("clientId", "Validation failed.");
             }
-            var result =  await IdentityServer3CassandraDao.FindClientByClientIdAsync(clientId);
+            var result = await IdentityServer3CassandraDao.FindClientByClientIdAsync(clientId);
             return result;
         }
 
         public async Task CreateClientAsync(Client client)
         {
             await IdentityServer3CassandraDao.UpsertClientAsync(
-               new FlattenedClientRecord(new FlattenedClientHandle(client)));
+                new FlattenedClientRecord(new FlattenedClientHandle(client)));
+        }
+
+        public async Task DeleteClientAsync(string clientId)
+        {
+            await IdentityServer3CassandraDao.DeleteClientByClientIdAsync(clientId);
+        }
+
+        public async Task DeleteClientAsync(Guid id)
+        {
+            await IdentityServer3CassandraDao.DeleteClientByIdAsync(id);
         }
 
         public async Task CleanupClientByIdAsync(string clientId)
@@ -54,39 +65,88 @@ namespace P5.IdentityServer3.Cassandra
             await IdentityServer3CassandraDao.AddAllowedCorsOriginsToClientByClientIdAsync(clientId, allowedCorsOrigins);
         }
 
-        public async Task DeleteAllowedCorsOriginsFromClientAsync(string clientId, IEnumerable<string> allowedCorsOrigins)
+        public async Task DeleteAllowedCorsOriginsFromClientAsync(string clientId,
+            IEnumerable<string> allowedCorsOrigins)
         {
-            await IdentityServer3CassandraDao.DeleteAllowedCorsOriginsFromClientByClientIdAsync(clientId, allowedCorsOrigins);
+            await
+                IdentityServer3CassandraDao.DeleteAllowedCorsOriginsFromClientByClientIdAsync(clientId,
+                    allowedCorsOrigins);
         }
 
-        public async Task AddAllowedCustomGrantTypesToClientAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes)
+        public async Task AddAllowedCustomGrantTypesToClientAsync(string clientId,
+            IEnumerable<string> allowedCustomGrantTypes)
         {
-            await IdentityServer3CassandraDao.AddAllowedCustomGrantTypesByClientIdAsync(clientId, allowedCustomGrantTypes);
+            await
+                IdentityServer3CassandraDao.AddAllowedCustomGrantTypesByClientIdAsync(clientId, allowedCustomGrantTypes);
         }
 
-        public async Task DeleteAllowedCustomGrantTypesFromClientAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes)
+        public async Task DeleteAllowedCustomGrantTypesFromClientAsync(string clientId,
+            IEnumerable<string> allowedCustomGrantTypes)
         {
-            await IdentityServer3CassandraDao.DeleteAllowedCustomGrantTypesFromClientByClientIdAsync(clientId, allowedCustomGrantTypes);
+            await
+                IdentityServer3CassandraDao.DeleteAllowedCustomGrantTypesFromClientByClientIdAsync(clientId,
+                    allowedCustomGrantTypes);
         }
 
-        public async Task AddAllowedScopesToClientAsync(string clientId, IEnumerable<string> allowedScopes)
+        public async Task AddIdentityProviderRestrictionsToClientAsync(string clientId,
+            IEnumerable<string> identityProviderRestrictions)
         {
-            await IdentityServer3CassandraDao.AddScopesToClientByIdAsync(clientId, allowedScopes);
+            await
+                IdentityServer3CassandraDao.AddIdentityProviderRestrictionsToClientByIdAsync(clientId,
+                    identityProviderRestrictions);
         }
 
-        public async Task DeleteAllowedScopesFromClientAsync(string clientId, IEnumerable<string> allowedScopes)
+        public async Task DeleteIdentityProviderRestrictionsFromClientAsync(string clientId,
+            IEnumerable<string> identityProviderRestrictions)
         {
-            await IdentityServer3CassandraDao.DeleteScopesFromClientByIdAsync(clientId, allowedScopes);
+            await
+                IdentityServer3CassandraDao.DeleteIdentityProviderRestrictionsFromClientByIdAsync(clientId,
+                    identityProviderRestrictions);
         }
 
-        public async Task DeleteClientAsync(string clientId)
+        public async Task AddPostLogoutRedirectUrisToClientAsync(string clientId,
+            IEnumerable<string> postLogoutRedirectUris)
         {
-            await IdentityServer3CassandraDao.DeleteClientByClientIdAsync(clientId);
+            await
+                IdentityServer3CassandraDao.AddPostLogoutRedirectUrisToClientByIdAsync(clientId, postLogoutRedirectUris);
         }
 
-        public async Task DeleteClientAsync(Guid id)
+        public async Task DeletePostLogoutRedirectUrisFromClientAsync(string clientId,
+            IEnumerable<string> postLogoutRedirectUris)
         {
-            await IdentityServer3CassandraDao.DeleteClientByIdAsync(id);
+            await
+                IdentityServer3CassandraDao.DeletePostLogoutRedirectUrisFromClientByIdAsync(clientId,
+                    postLogoutRedirectUris);
+        }
+
+        public async Task AddRedirectUrisToClientAsync(string clientId, IEnumerable<string> redirectUris)
+        {
+            await IdentityServer3CassandraDao.AddRedirectUrisToClientByIdAsync(clientId, redirectUris);
+        }
+
+        public async Task DeleteRedirectUrisFromClientAsync(string clientId, IEnumerable<string> redirectUris)
+        {
+            await IdentityServer3CassandraDao.DeleteRedirectUrisFromClientByIdAsync(clientId, redirectUris);
+        }
+
+        public async Task AddClientSecretsToClientAsync(string clientId, IEnumerable<Secret> clientSecrets)
+        {
+            await IdentityServer3CassandraDao.AddClientSecretsToClientByIdAsync(clientId, clientSecrets);
+        }
+
+        public async Task DeleteClientSecretsFromClientAsync(string clientId, IEnumerable<Secret> clientSecrets)
+        {
+            await IdentityServer3CassandraDao.DeleteClientSecretsFromClientByIdAsync(clientId, clientSecrets);
+        }
+
+        public async Task AddClaimsToClientAsync(string clientId, IEnumerable<Claim> claims)
+        {
+            await IdentityServer3CassandraDao.AddClaimsToClientByIdAsync(clientId, claims);
+        }
+
+        public async Task DeleteClaimsFromClientAsync(string clientId, IEnumerable<Claim> claims)
+        {
+            await IdentityServer3CassandraDao.DeleteClaimsFromClientByIdAsync(clientId, claims);
         }
     }
 }
