@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 
@@ -32,10 +33,7 @@ namespace P5.IdentityServer3.Cassandra
             await ScopeStore.CreateScopeAsync(scope);
         }
 
-        public async Task CreateManyScopeAsync(IEnumerable<Scope> scopes)
-        {
-            await ScopeStore.CreateManyScopeAsync(scopes);
-        }
+       
         public async Task AddScopeSecretsAsync(string name, IEnumerable<Secret> secrets)
         {
             await ScopeStore.AddScopeSecretsAsync(name, secrets);
@@ -53,6 +51,11 @@ namespace P5.IdentityServer3.Cassandra
         public async Task DeleteScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
         {
             await ScopeStore.DeleteScopeClaimsAsync(name, claims);
+        }
+
+        public async Task UpdateScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
+        {
+            await ScopeStore.UpdateScopeClaimsAsync(name, claims);
         }
     }
 }

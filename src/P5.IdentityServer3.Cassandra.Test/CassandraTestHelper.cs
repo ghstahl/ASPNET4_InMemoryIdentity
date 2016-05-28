@@ -8,7 +8,7 @@ using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using Newtonsoft.Json;
- 
+
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.RefreshToken;
@@ -70,18 +70,26 @@ namespace P5.IdentityServer3.Cassandra.Test
                     }
                 };
                 var scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(record));
+                await IdentityServer3CassandraDao.UpsertScopeAsync(scopeRecord);
                 result.Add(scopeRecord);
+
             }
-            await IdentityServer3CassandraDao.UpsertManyScopeAsync(result);
+         //   await IdentityServer3CassandraDao.UpsertManyScopeAsync(result);
             return result;
         }
 
         public static async Task<List<FlattenedClientRecord>> InsertTestData_Clients(int count = 1)
         {
+            var insertScope = await InsertTestData_Scopes(3);
+            var scopeNames = (from item in insertScope
+                let c = item.Record.Name
+                select c).ToList();
+
             List<FlattenedClientRecord> result = new List<FlattenedClientRecord>();
             for (int i = 0; i < count; ++i)
             {
                 var name = "ClientName:" + Guid.NewGuid();
+
                 global::IdentityServer3.Core.Models.Client client = new global::IdentityServer3.Core.Models.Client()
                 {
                     AbsoluteRefreshTokenLifetime = 1,
@@ -104,11 +112,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                         "AllowedCustomGrantTypes 1:" + i,
                         "AllowedCustomGrantTypes 2:" + i
                     },
-                    AllowedScopes = new List<string>()
-                    {
-                        "AllowedScopes 1:" + i,
-                        "AllowedScopes 2:" + i
-                    },
+                    AllowedScopes = scopeNames,
                     ClientId = Guid.NewGuid().ToString(),
                     ClientName = name,
                     ClientUri = "ClientUri:" + i,
@@ -154,10 +158,11 @@ namespace P5.IdentityServer3.Cassandra.Test
                     }
                 };
                 FlattenedClientRecord clientrecord = new FlattenedClientRecord(new FlattenedClientHandle(client));
+                await IdentityServer3CassandraDao.UpsertClientAsync(clientrecord);
 
                 result.Add(clientrecord);
             }
-            await IdentityServer3CassandraDao.UpsertManyClientAsync(result);
+           
             return result;
         }
 

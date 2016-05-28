@@ -13,6 +13,7 @@ using P5.CassandraStore.Extensions;
 
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.Extensions;
+using StringComparer = System.StringComparer;
 
 namespace P5.IdentityServer3.Cassandra.DAO
 {
@@ -148,53 +149,6 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> UpsertManyClientAsync(IList<Client> clients,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                if (clients == null)
-                    throw new ArgumentNullException("clients");
-                 if (clients.Count == 0)
-                    throw new ArgumentException("clients is empty");
-                 var query = from item in clients
-                             let c = new FlattenedClientRecord(new FlattenedClientHandle(item))
-                             select c;
-
-                return await UpsertManyClientAsync(query.ToList(), cancellationToken);
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-
-        }
-
-        public static async Task<bool> UpsertManyClientAsync(IList<FlattenedClientRecord> clients,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                if (clients == null)
-                    throw new ArgumentNullException("clients");
-                if (clients.Count == 0)
-                    throw new ArgumentException("clients is empty");
-
-                var session = CassandraSession;
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var batch = new BatchStatement();
-                var boundStatements = await BuildBoundStatements_ForCreate(clients);
-                batch.AddRange(boundStatements);
-                await session.ExecuteAsync(batch).ConfigureAwait(false);
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-
-        }
 
         public static async Task<bool> UpsertClientAsync(FlattenedClientRecord client,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -202,12 +156,19 @@ namespace P5.IdentityServer3.Cassandra.DAO
             try
             {
                 if (client == null)
-                    throw new ArgumentNullException("client");
-                var myList = new List<FlattenedClientRecord> {client};
-                return await UpsertManyClientAsync(myList, cancellationToken);
+                    throw new ArgumentNullException("clients");
+                var session = CassandraSession;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var batch = new BatchStatement();
+                var boundStatements = await BuildBoundStatements_ForCreate(client);
+                batch.AddRange(boundStatements);
+                await session.ExecuteAsync(batch).ConfigureAwait(false);
+                return true;
             }
             catch (Exception e)
             {
+                throw;
                 return false;
             }
 
@@ -219,7 +180,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             {
                 if (client == null)
                     throw new ArgumentNullException("client");
-                return await UpsertClientAsync(new FlattenedClientRecord(new FlattenedClientHandle(client)));
+                return await UpsertClientAsync(new FlattenedClientRecord(new FlattenedClientHandle(client)), cancellationToken);
             }
             catch (Exception e)
             {
@@ -270,54 +231,53 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
         public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
-            IEnumerable<FlattenedClientRecord> flattenedClientRecords)
+            FlattenedClientRecord record)
         {
             var result = new List<BoundStatement>();
-            foreach (var record in flattenedClientRecords)
-            {
-                var client = record.Record;
-                PreparedStatement prepared = await _CreateClientById;
-                BoundStatement bound = prepared.Bind(
-                    record.Id,
-                    client.AbsoluteRefreshTokenLifetime,
-                    client.AccessTokenLifetime,
-                    (int) client.AccessTokenType,
-                    client.AllowAccessToAllCustomGrantTypes,
-                    client.AllowAccessToAllScopes,
-                    client.AllowAccessTokensViaBrowser,
-                    client.AllowClientCredentialsOnly,
-                    client.AllowedCorsOrigins,
-                    client.AllowedCustomGrantTypes,
-                    client.AllowedScopes,
-                    client.AllowRememberConsent,
-                    client.AlwaysSendClientClaims,
-                    client.AuthorizationCodeLifetime,
-                    client.Claims,
-                    client.ClientId,
-                    client.ClientName,
-                    client.ClientSecrets,
-                    client.ClientUri,
-                    client.Enabled,
-                    client.EnableLocalLogin,
-                    (int) client.Flow,
-                    client.IdentityProviderRestrictions,
-                    client.IdentityTokenLifetime,
-                    client.IncludeJwtId,
-                    client.LogoUri,
-                    client.LogoutSessionRequired,
-                    client.LogoutUri,
-                    client.PostLogoutRedirectUris,
-                    client.PrefixClientClaims,
-                    client.RedirectUris,
-                    (int) client.RefreshTokenExpiration,
-                    (int) client.RefreshTokenUsage,
-                    client.RequireConsent,
-                    client.RequireSignOutPrompt,
-                    client.SlidingRefreshTokenLifetime,
-                    client.UpdateAccessTokenClaimsOnRefresh
-                    );
-                result.Add(bound);
-            }
+
+            var client = record.Record;
+            PreparedStatement prepared = await _CreateClientById;
+            BoundStatement bound = prepared.Bind(
+                record.Id,
+                client.AbsoluteRefreshTokenLifetime,
+                client.AccessTokenLifetime,
+                (int) client.AccessTokenType,
+                client.AllowAccessToAllCustomGrantTypes,
+                client.AllowAccessToAllScopes,
+                client.AllowAccessTokensViaBrowser,
+                client.AllowClientCredentialsOnly,
+                client.AllowedCorsOrigins,
+                client.AllowedCustomGrantTypes,
+                client.AllowedScopes,
+                client.AllowRememberConsent,
+                client.AlwaysSendClientClaims,
+                client.AuthorizationCodeLifetime,
+                client.Claims,
+                client.ClientId,
+                client.ClientName,
+                client.ClientSecrets,
+                client.ClientUri,
+                client.Enabled,
+                client.EnableLocalLogin,
+                (int) client.Flow,
+                client.IdentityProviderRestrictions,
+                client.IdentityTokenLifetime,
+                client.IncludeJwtId,
+                client.LogoUri,
+                client.LogoutSessionRequired,
+                client.LogoutUri,
+                client.PostLogoutRedirectUris,
+                client.PrefixClientClaims,
+                client.RedirectUris,
+                (int) client.RefreshTokenExpiration,
+                (int) client.RefreshTokenUsage,
+                client.RequireConsent,
+                client.RequireSignOutPrompt,
+                client.SlidingRefreshTokenLifetime,
+                client.UpdateAccessTokenClaimsOnRefresh
+                );
+            result.Add(bound);
+
             return result;
         }
 
@@ -335,13 +295,54 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task AddScopesToClientByIdAsync(string clientId, IEnumerable<string> scopes,
+        public static async Task CleanupClientByIdAsync(string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            List<string> ulist = stored.AllowedScopes.Union(scopes).ToList();
+            var scopeRecords = await FindScopesByNamesAsync(stored.AllowedScopes, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var scopeRecordsList = scopeRecords.ToList();
+            if (stored.AllowedScopes.Count != scopeRecordsList.Count)
+            {
+                var query = from item in scopeRecordsList
+                    let c = item.Name
+                    select c;
+
+                await UpdateClientByIdAsync(clientId, new List<PropertyValue>()
+                {
+                    new PropertyValue()
+                    {
+                        Name = "AllowedScopes",
+                        Value = query.ToList()
+                    }
+                });
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+        }
+        public static async Task AddScopesToClientByIdAsync(string clientId, IEnumerable<string> scopes,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var scopeList = scopes.ToList();
+            var scopeRecords = await FindScopesByNamesAsync(scopeList, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var scopeRecordsList = scopeRecords.ToList();
+            if (scopeList.Count != scopeRecordsList.Count)
+            {
+                throw new ArgumentException("one or more scopes requested do not exist, so they cannot be added","scopes");
+            }
+
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            if (stored == null)
+            {
+                throw new Exception(string.Format("CASSANDRA Exception: Cannot find record for ClientId:[{0}]",clientId));
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<string> ulist = stored.AllowedScopes.Union(scopeList).ToList();
             stored.AllowedScopes = ulist;
             await UpsertClientAsync(stored, cancellationToken);
         }
@@ -359,5 +360,55 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
 
         }
+
+        public static async Task AddAllowedCorsOriginsToClientByClientIdAsync(string clientId, IEnumerable<string> allowedCorsOrigins,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<string> ulist = stored.AllowedCorsOrigins.Union(allowedCorsOrigins, StringComparer.OrdinalIgnoreCase).ToList();
+            stored.AllowedCorsOrigins = ulist;
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task DeleteAllowedCorsOriginsFromClientByClientIdAsync(string clientId, IEnumerable<string> allowedCorsOrigins,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.AllowedCorsOrigins
+                        where !allowedCorsOrigins.Contains(item)
+                        select item;
+            stored.AllowedCorsOrigins = query.ToList();
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task AddAllowedCustomGrantTypesByClientIdAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            List<string> ulist = stored.AllowedCustomGrantTypes.Union(allowedCustomGrantTypes, StringComparer.OrdinalIgnoreCase).ToList();
+            stored.AllowedCustomGrantTypes = ulist;
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task DeleteAllowedCustomGrantTypesFromClientByClientIdAsync(string clientId, IEnumerable<string> allowedCustomGrantTypes,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.AllowedCustomGrantTypes
+                        where !allowedCustomGrantTypes.Contains(item)
+                        select item;
+            stored.AllowedCustomGrantTypes = query.ToList();
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+
     }
 }

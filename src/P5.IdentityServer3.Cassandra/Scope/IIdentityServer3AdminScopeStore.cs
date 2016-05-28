@@ -10,10 +10,10 @@ namespace P5.IdentityServer3.Cassandra
     {
         Task UpdateScopeByNameAsync(string name, IEnumerable<PropertyValue> properties);
         Task CreateScopeAsync(global::IdentityServer3.Core.Models.Scope scope);
-        Task CreateManyScopeAsync(IEnumerable<global::IdentityServer3.Core.Models.Scope> scopes);
         Task AddScopeSecretsAsync(string name, IEnumerable<Secret> secrets);
         Task DeleteScopeSecretsAsync(string name, IEnumerable<Secret> secrets);
         Task AddScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims);
         Task DeleteScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims);
+        Task UpdateScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims);
     }
 }

@@ -25,10 +25,10 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         private static AsyncLazy<PreparedStatement> _CreateScopeById { get; set; }
         private static AsyncLazy<PreparedStatement> _CreateScopeByName { get; set; }
-        private static AsyncLazy<PreparedStatement[]> _CreateScope { get; set; }
+
         private static AsyncLazy<PreparedStatement> _CreateScopeClaimByNameAndScopeId { get; set; }
         private static AsyncLazy<PreparedStatement> _CreateScopeClaimByNameAndScopeName { get; set; }
-        private static AsyncLazy<PreparedStatement[]> _CreateScopeClaim { get; set; }
+
         private static AsyncLazy<PreparedStatement> _FindScopeById { get; set; }
         private static AsyncLazy<PreparedStatement> _FindScopeByName { get; set; }
 
@@ -58,11 +58,6 @@ namespace P5.IdentityServer3.Cassandra.DAO
                             @"VALUES(?,?,?)");
                         return result;
                     });
-            _CreateScopeClaim = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
-            {
-                _CreateScopeClaimByNameAndScopeId.Value,
-                _CreateScopeClaimByNameAndScopeName.Value,
-            }));
 
             /*
             INSERT
@@ -92,11 +87,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                         return result;
                     });
             // All the statements needed by the CreateAsync method
-            _CreateScope = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
-            {
-                _CreateScopeById.Value,
-                _CreateScopeByName.Value,
-            }));
+
 
             _FindScopeById =
                 new AsyncLazy<PreparedStatement>(
@@ -127,65 +118,33 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
-                var scopeRecords = new List<FlattenedScopeRecord>();
-                scopeRecords.Add(scopeRecord);
-                return await UpsertManyScopeAsync(scopeRecords, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-
-        }
-
-        public static async Task<bool> UpsertManyScopeAsync(IEnumerable<Scope> scopes,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                if (scopes == null)
-                    throw new ArgumentNullException("scopes");
-
-                var query = from item in scopes
-                    let c = new FlattenedScopeRecord(new FlattenedScopeHandle(item))
-                    select c;
-
-                return await UpsertManyScopeAsync(query, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-
-        }
-
-
-        public static async Task<bool> UpsertManyScopeAsync(IEnumerable<FlattenedScopeRecord> scopeRecords,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-
                 var session = CassandraSession;
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (scopeRecords == null)
+                if (scopeRecord == null)
                     throw new ArgumentNullException("scopeRecord");
-                if (scopeRecords.Count() == 0)
-                    throw new ArgumentException("scopeRecords is empty");
 
+                // breaking batch apart.
                 var batch = new BatchStatement();
-                var boundStatements = await BuildBoundStatements_ForCreate(scopeRecords);
+                var boundStatements = await BuildBoundStatements_ForScopeClaimCreate(scopeRecord);
                 batch.AddRange(boundStatements);
+                await session.ExecuteAsync(batch).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                batch = new BatchStatement();
+                boundStatements = await BuildBoundStatements_ForCreate(scopeRecord);
+                batch.AddRange(boundStatements);
+
                 await session.ExecuteAsync(batch).ConfigureAwait(false);
                 return true;
             }
             catch (Exception e)
             {
-                return false;
+                throw;
             }
 
         }
+
 
         public static async Task<global::IdentityServer3.Core.Models.Scope> FindScopeByIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -290,20 +249,40 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
-            IEnumerable<FlattenedScopeRecord> scopeRecords)
+        public static async Task<List<BoundStatement>> BuildBoundStatements_ForScopeClaimCreate(
+            FlattenedScopeRecord scopeRecord)
         {
             var result = new List<BoundStatement>();
-            foreach (var scopeRecord in scopeRecords)
-            {
-                PreparedStatement[] prepared = await _CreateScope;
-                var scope = scopeRecord.Record;
-                //   var scopeSecretsDocument = new SimpleDocument<List<Secret>>(scope.ScopeSecrets);
-                //   var claimsDocument = new SimpleDocument<List<ScopeClaim>>(scope.Claims);
-                int scopeType = (int) scope.Type;
-                var preparedById = prepared[0];
-                var preparedByName = prepared[1];
-                /*@"scopes_by_id (
+
+            var scope = scopeRecord.Record;
+            //   var scopeSecretsDocument = new SimpleDocument<List<Secret>>(scope.ScopeSecrets);
+            //   var claimsDocument = new SimpleDocument<List<ScopeClaim>>(scope.Claims);
+            int scopeType = (int) scope.Type;
+
+
+            var scopeInternal = await scopeRecord.Record.GetScopeAsync();
+
+            var claimsQuery = from scopeClaim in scopeInternal.Claims
+                select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
+
+            var scopeClaimBoundStatements = await BuildBoundStatements_ForCreate(claimsQuery);
+            result.AddRange(scopeClaimBoundStatements);
+
+            return result;
+        }
+
+        public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+            FlattenedScopeRecord scopeRecord)
+        {
+            var result = new List<BoundStatement>();
+
+
+            var scope = scopeRecord.Record;
+            //   var scopeSecretsDocument = new SimpleDocument<List<Secret>>(scope.ScopeSecrets);
+            //   var claimsDocument = new SimpleDocument<List<ScopeClaim>>(scope.Claims);
+            int scopeType = (int) scope.Type;
+
+            /*@"scopes_by_id (
                  * Id,
                  * AllowUnrestrictedIntrospection,
                  * ClaimsRule,
@@ -318,50 +297,43 @@ namespace P5.IdentityServer3.Cassandra.DAO
                  * ShowInDiscoveryDocument,
                  * ScopeType) " +
                 */
-                BoundStatement boundById = preparedById.Bind(
-                    scopeRecord.Id,
-                    scope.AllowUnrestrictedIntrospection,
-                    scope.Claims,
-                    scope.ClaimsRule,
-                    scope.Description,
-                    scope.DisplayName,
-                    scope.Emphasize,
-                    scope.Enabled,
-                    scope.IncludeAllClaimsForUser,
-                    scope.Name,
-                    scope.Required,
-                    scope.ScopeSecrets,
-                    scope.ShowInDiscoveryDocument,
-                    scopeType);
+            PreparedStatement prepared = await _CreateScopeById;
+            BoundStatement bound = prepared.Bind(
+                scopeRecord.Id,
+                scope.AllowUnrestrictedIntrospection,
+                scope.Claims,
+                scope.ClaimsRule,
+                scope.Description,
+                scope.DisplayName,
+                scope.Emphasize,
+                scope.Enabled,
+                scope.IncludeAllClaimsForUser,
+                scope.Name,
+                scope.Required,
+                scope.ScopeSecrets,
+                scope.ShowInDiscoveryDocument,
+                scopeType);
+            result.Add(bound);
 
-                //@"producttemplates_by_type(documenttype,documentversion,id,document) " +
-                BoundStatement boundByName = preparedByName.Bind(
-                    scopeRecord.Id,
-                    scope.AllowUnrestrictedIntrospection,
-                    scope.Claims,
-                    scope.ClaimsRule,
-                    scope.Description,
-                    scope.DisplayName,
-                    scope.Emphasize,
-                    scope.Enabled,
-                    scope.IncludeAllClaimsForUser,
-                    scope.Name,
-                    scope.Required,
-                    scope.ScopeSecrets,
-                    scope.ShowInDiscoveryDocument,
-                    scopeType);
+            //@"producttemplates_by_type(documenttype,documentversion,id,document) " +
+            prepared = await _CreateScopeByName;
+            bound = prepared.Bind(
+                scopeRecord.Id,
+                scope.AllowUnrestrictedIntrospection,
+                scope.Claims,
+                scope.ClaimsRule,
+                scope.Description,
+                scope.DisplayName,
+                scope.Emphasize,
+                scope.Enabled,
+                scope.IncludeAllClaimsForUser,
+                scope.Name,
+                scope.Required,
+                scope.ScopeSecrets,
+                scope.ShowInDiscoveryDocument,
+                scopeType);
+            result.Add(bound);
 
-
-                result.Add(boundById);
-                result.Add(boundByName);
-                var scopeInternal = await scopeRecord.Record.GetScopeAsync();
-
-                var claimsQuery = from scopeClaim in scopeInternal.Claims
-                    select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
-
-                var scopeClaimBoundStatements = await BuildBoundStatements_ForCreate(claimsQuery);
-                result.AddRange(scopeClaimBoundStatements);
-            }
             return result;
         }
 
@@ -371,26 +343,28 @@ namespace P5.IdentityServer3.Cassandra.DAO
             var result = new List<BoundStatement>();
             foreach (var scopeClaimRecord in scopeClaimRecords)
             {
-                PreparedStatement[] prepared = await _CreateScopeClaim;
-                PreparedStatement preparedByNameAndScopeId = prepared[0];
-                PreparedStatement preparedByNameAndScopeName = prepared[1];
+
+
 
                 /*
                  * @"scopeclaims_by_name_and_scopeid(Name,ScopeId,ScopeName,AlwaysIncludeInIdToken,Description) " +
                 */
-                BoundStatement statementByNameAndScopeId = preparedByNameAndScopeId.Bind(
+                PreparedStatement prepared = await _CreateScopeClaimByNameAndScopeId;
+                BoundStatement bound = prepared.Bind(
                     scopeClaimRecord.Name,
                     scopeClaimRecord.ScopeId,
                     scopeClaimRecord.ScopeName
                     );
-                BoundStatement statementByNameAndScopeName = preparedByNameAndScopeName.Bind(
-                    scopeClaimRecord.Name,
-                    scopeClaimRecord.ScopeId,
-                    scopeClaimRecord.ScopeName
-                    );
+                result.Add(bound);
 
-                result.Add(statementByNameAndScopeId);
-                result.Add(statementByNameAndScopeName);
+                prepared = await _CreateScopeClaimByNameAndScopeName;
+                bound = prepared.Bind(
+                    scopeClaimRecord.Name,
+                    scopeClaimRecord.ScopeId,
+                    scopeClaimRecord.ScopeName
+                    );
+                result.Add(bound);
+
             }
             return result;
         }
@@ -441,6 +415,25 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertScopeAsync(stored);
 
         }
+        public static async Task UpdateScopeClaimsInScopeByNameAsync(string name, IEnumerable<ScopeClaim> claims,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindScopeByName(name, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            var comparer = new ScopeClaimComparer();
+            var claimsList = claims.ToList();
+            var query = from item in stored.Claims
+                        where !claimsList.Contains(item, comparer)
+                        select item;
+            var remainingClaims = query.ToList(); // these are the ones we keep.
+            // create a merged version.
+            List<ScopeClaim> ulist = remainingClaims.Union(claimsList, new ScopeClaimComparer()).ToList();
+
+            // Upsert the new version
+            stored.Claims = ulist;
+            await UpsertScopeAsync(stored);
+        }
+
         public static async Task AddScopeSecretsByNameAsync(string name, IEnumerable<Secret> secrets,
            CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -480,5 +473,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertScopeAsync(stored);
 
         }
+
+
+
     }
 }

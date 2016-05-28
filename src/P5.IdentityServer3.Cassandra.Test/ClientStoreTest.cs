@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer3.Core.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
- 
+
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.Extensions;
@@ -23,9 +23,11 @@ namespace P5.IdentityServer3.Cassandra.Test
         private IdentityServer3CassandraDao _store;
 
         [TestInitialize]
-        public void Setup()
+        public async void Setup()
         {
             base.Setup();
+            await IdentityServer3CassandraDao.CreateTablesAsync();
+            await IdentityServer3CassandraDao.TruncateTablesAsync();
         }
 
 
@@ -43,7 +45,7 @@ namespace P5.IdentityServer3.Cassandra.Test
             var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
             Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
             var adminStore = new IdentityServer3AdminStore();
-            await adminStore.DeleteClientByIdAsync(insert[0].Id);
+            await adminStore.DeleteClientAsync(insert[0].Id);
             result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
             Assert.IsNull(result);
         }
@@ -54,56 +56,174 @@ namespace P5.IdentityServer3.Cassandra.Test
             var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
             Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
             var adminStore = new IdentityServer3AdminStore();
-            await adminStore.DeleteClientByClientIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteClientAsync(insert[0].Record.ClientId);
             result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task TestCreateAndAddScopeByClientIdAsync()
+        public async Task TestCreateAndAddAllowedCorsOriginsByClientIdAsync()
         {
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
             var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
             Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
             var adminStore = new IdentityServer3AdminStore();
-            List<string> scopes = new List<string>()
+            List<string> allowedCorsOrigins = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddScopesToClientByIdAsync(insert[0].Record.ClientId, scopes);
+            await adminStore.AddAllowedCorsOriginsToClientAsync(insert[0].Record.ClientId, allowedCorsOrigins);
 
-            scopes.AddRange(result.AllowedScopes);
+            var finalList = new List<string>();
+            finalList.AddRange(allowedCorsOrigins);
+            finalList.AddRange(result.AllowedCorsOrigins);
 
             result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
-            Assert.AreEqual(result.AllowedScopes.Count(), scopes.Count);
+            Assert.AreEqual(result.AllowedCorsOrigins.Count(), finalList.Count);
 
 
-            var ff = result.AllowedScopes.Except(scopes);
+            var ff = result.AllowedCorsOrigins.Except(finalList);
+            Assert.IsFalse(ff.Any());
+        }
+
+        [TestMethod]
+        public async Task TestCreateAddAndDeleteAllowedCorsOriginsByClientIdAsync()
+        {
+            var insert = await CassandraTestHelper.InsertTestData_Clients(1);
+            var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            var adminStore = new IdentityServer3AdminStore();
+            List<string> allowedCorsOrigins = new List<string>()
+            {
+                Guid.NewGuid().ToString()
+            };
+            var originalList = result.AllowedCorsOrigins;
+            await adminStore.AddAllowedCorsOriginsToClientAsync(insert[0].Record.ClientId, allowedCorsOrigins);
+
+            var finalList = new List<string>();
+            finalList.AddRange(allowedCorsOrigins);
+            finalList.AddRange(result.AllowedCorsOrigins);
+
+            result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            Assert.AreEqual(result.AllowedCorsOrigins.Count(), finalList.Count);
+
+            var ff = result.AllowedCorsOrigins.Except(finalList);
+            Assert.IsFalse(ff.Any());
+
+
+            await adminStore.DeleteAllowedCorsOriginsFromClientAsync(insert[0].Record.ClientId, allowedCorsOrigins);
+            result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            Assert.AreEqual(result.AllowedCorsOrigins.Count(), originalList.Count);
+            ff = result.AllowedCorsOrigins.Except(originalList);
+            Assert.IsFalse(ff.Any());
+        }
+        [TestMethod]
+        public async Task TestCreateAndAddScopeByClientIdAsync()
+        {
+            var insert = await CassandraTestHelper.InsertTestData_Clients(1);
+            var adminStore = new IdentityServer3AdminStore();
+           // await adminStore.CleanupClientByIdAsync(insert[0].Record.ClientId);
+            var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            var originalAllowedScopes = result.AllowedScopes;
+            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+
+            List<Scope> scopes = new List<Scope>()
+            {
+                new Scope()
+                {
+                    AllowUnrestrictedIntrospection = true,
+                    Name = Guid.NewGuid().ToString(),
+                    Enabled = true
+                },
+                 new Scope()
+                {
+                    AllowUnrestrictedIntrospection = true,
+                    Name = Guid.NewGuid().ToString(),
+                    Enabled = true
+                }
+            };
+            foreach (var scope in scopes)
+            {
+                await adminStore.CreateScopeAsync(scope);
+            }
+
+
+            var query = from item in scopes
+                let c = item.Name
+                select c;
+
+            List<string> addedScopeNames = query.ToList();
+            List<string> finalExpected = new List<string>();
+            finalExpected.AddRange(addedScopeNames);
+            finalExpected.AddRange(result.AllowedScopes);
+
+            await adminStore.AddScopesToClientAsync(insert[0].Record.ClientId, addedScopeNames);
+
+
+
+            result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.AllowedScopes.Count(), finalExpected.Count);
+
+
+            var ff = result.AllowedScopes.Except(finalExpected);
             Assert.IsFalse(ff.Any());
         }
         [TestMethod]
         public async Task TestCreateAndAddDeleteScopeByClientIdAsync()
         {
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
             var adminStore = new IdentityServer3AdminStore();
-            List<string> scopes = new List<string>()
+            // await adminStore.CleanupClientByIdAsync(insert[0].Record.ClientId);
+            var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            var originalAllowedScopes = result.AllowedScopes;
+            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+
+            List<Scope> scopes = new List<Scope>()
             {
-                Guid.NewGuid().ToString()
+                new Scope()
+                {
+                    AllowUnrestrictedIntrospection = true,
+                    Name = Guid.NewGuid().ToString(),
+                    Enabled = true
+                },
+                 new Scope()
+                {
+                    AllowUnrestrictedIntrospection = true,
+                    Name = Guid.NewGuid().ToString(),
+                    Enabled = true
+                }
             };
+            foreach (var scope in scopes)
+            {
+                await adminStore.CreateScopeAsync(scope);
+            }
 
-            await adminStore.AddScopesToClientByIdAsync(insert[0].Record.ClientId, scopes);
 
-            scopes.AddRange(result.AllowedScopes);
+            var query = from item in scopes
+                        let c = item.Name
+                        select c;
+
+            List<string> addedScopeNames = query.ToList();
+            List<string> finalExpected = new List<string>();
+            finalExpected.AddRange(addedScopeNames);
+            finalExpected.AddRange(result.AllowedScopes);
+
+            await adminStore.AddScopesToClientAsync(insert[0].Record.ClientId, addedScopeNames);
+
+
 
             result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
-            Assert.AreEqual(result.AllowedScopes.Count(), scopes.Count);
-            var ff = result.AllowedScopes.Except(scopes);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.AllowedScopes.Count(), finalExpected.Count);
+
+
+            var ff = result.AllowedScopes.Except(finalExpected);
             Assert.IsFalse(ff.Any());
 
-            await adminStore.DeleteScopesFromClientByIdAsync(insert[0].Record.ClientId, result.AllowedScopes);
+
+            await adminStore.DeleteScopesFromClientAsync(insert[0].Record.ClientId, result.AllowedScopes);
             result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
             Assert.IsFalse(result.AllowedScopes.Any());
 

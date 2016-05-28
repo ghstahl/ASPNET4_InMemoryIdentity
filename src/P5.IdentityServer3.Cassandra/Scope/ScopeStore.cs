@@ -35,11 +35,7 @@ namespace P5.IdentityServer3.Cassandra
             await IdentityServer3CassandraDao.UpsertScopeAsync(scope);
         }
 
-        public async Task CreateManyScopeAsync(IEnumerable<Scope> scopes)
-        {
-            await IdentityServer3CassandraDao.UpsertManyScopeAsync(scopes);
-        }
-
+       
         public async Task AddScopeSecretsAsync(string name, IEnumerable<Secret> secrets)
         {
             await IdentityServer3CassandraDao.AddScopeSecretsByNameAsync(name, secrets);
@@ -50,6 +46,7 @@ namespace P5.IdentityServer3.Cassandra
             await IdentityServer3CassandraDao.DeleteScopeSecretsFromScopeByNameAsync(name, secrets);
         }
 
+
         public async Task AddScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
         {
             await IdentityServer3CassandraDao.AddScopeClaimsToScopeByNameAsync(name, claims);
@@ -58,6 +55,11 @@ namespace P5.IdentityServer3.Cassandra
         public async Task DeleteScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
         {
             await IdentityServer3CassandraDao.DeleteScopeClaimsFromScopeByNameAsync(name, claims);
+        }
+
+        public async Task UpdateScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
+        {
+            await IdentityServer3CassandraDao.UpdateScopeClaimsInScopeByNameAsync(name, claims);
         }
     }
 }
