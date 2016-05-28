@@ -148,5 +148,10 @@ namespace P5.IdentityServer3.Cassandra
         {
             await IdentityServer3CassandraDao.DeleteClaimsFromClientByIdAsync(clientId, claims);
         }
+
+        public async Task UpdateClaimsInClientAsync(string clientId, IEnumerable<Claim> claims)
+        {
+            await IdentityServer3CassandraDao.UpdateClaimsInClientByIdAsync(clientId, claims);
+        }
     }
 }

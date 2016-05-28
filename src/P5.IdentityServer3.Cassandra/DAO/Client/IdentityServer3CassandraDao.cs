@@ -15,6 +15,7 @@ using P5.CassandraStore.Extensions;
 
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.Extensions;
+using ClaimComparer = P5.IdentityServer3.Common.ClaimComparer;
 using StringComparer = System.StringComparer;
 
 namespace P5.IdentityServer3.Cassandra.DAO
@@ -506,7 +507,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task AddClientSecretsToClientByIdAsync(string clientId, 
+        public static async Task AddClientSecretsToClientByIdAsync(string clientId,
             IEnumerable<Secret> clientSecrets,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -528,8 +529,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
             cancellationToken.ThrowIfCancellationRequested();
 
             var query = from item in stored.ClientSecrets
-                        where !clientSecrets.Contains(item, SecretComparer.OrdinalIgnoreCase)
-                        select item;
+                where !clientSecrets.Contains(item, SecretComparer.OrdinalIgnoreCase)
+                select item;
             stored.ClientSecrets = query.ToList();
             await UpsertClientAsync(stored, cancellationToken);
         }
@@ -541,7 +542,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             cancellationToken.ThrowIfCancellationRequested();
 
             List<Claim> ulist =
-                stored.Claims.Union(claims, new ClaimComparer())
+                stored.Claims.Union(claims, ClaimComparer.MinimalComparer)
                     .ToList();
             stored.Claims = ulist;
             await UpsertClientAsync(stored, cancellationToken);
@@ -554,10 +555,26 @@ namespace P5.IdentityServer3.Cassandra.DAO
             cancellationToken.ThrowIfCancellationRequested();
 
             var query = from item in stored.Claims
-                        where !claims.Contains(item, new ClaimComparer())
-                        select item;
+                where !claims.Contains(item, ClaimComparer.MinimalComparer)
+                select item;
             stored.Claims = query.ToList();
-            await UpsertClientAsync(stored, cancellationToken); 
+            await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public static async Task UpdateClaimsInClientByIdAsync(string clientId, IEnumerable<Claim> claims,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var query = from item in stored.Claims
+                where !claims.Contains(item, ClaimComparer.MinimalComparer)
+                select item;
+            var finalList = new List<Claim>();
+            finalList.AddRange(query.ToList());
+            finalList.AddRange(claims);
+            stored.Claims = finalList;
+            await UpsertClientAsync(stored, cancellationToken);
         }
     }
 }

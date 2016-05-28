@@ -60,6 +60,7 @@
     <Compile Include="AuthorizationCode\FlattenedAuthorizationCodeHandle.cs" />
     <Compile Include="AuthorizationCode\FlattenedAuthorizationCodeHandleRecord.cs" />
     <Compile Include="AuthorizationCode\IAuthorizationCodeHandle.cs" />
+    <Compile Include="ClaimComparer.cs" />
     <Compile Include="Claim\ClaimExtensions.cs" />
     <Compile Include="Claim\ClaimIdentityRecord.cs" />
     <Compile Include="Claim\ClaimTypeRecord.cs" />

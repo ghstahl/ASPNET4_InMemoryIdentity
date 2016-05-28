@@ -14,6 +14,7 @@ using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.Extensions;
 using P5.MSTest.Common;
+using ClaimComparer = P5.IdentityServer3.Common.ClaimComparer;
 
 namespace P5.IdentityServer3.Cassandra.Test
 {
@@ -550,7 +551,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                     Assert.AreEqual(propertyValue.Count, resultValue.Count);
 
                     IEnumerable<Claim> except =
-                        propertyValue.Except(resultValue, new ClaimComparer());
+                        propertyValue.Except(resultValue, ClaimComparer.MinimalComparer);
                     Assert.IsFalse(except.Any());
                 }
 
@@ -875,7 +876,7 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Claims.Count(), finalList.Count);
 
-            var ff = result.Claims.Except(finalList, new ClaimComparer());
+            var ff = result.Claims.Except(finalList, ClaimComparer.DeepComparer);
             Assert.IsFalse(ff.Any());
 
         }
@@ -907,7 +908,7 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Claims.Count(), finalList.Count);
 
-            var ff = result.Claims.Except(finalList, new ClaimComparer());
+            var ff = result.Claims.Except(finalList, ClaimComparer.DeepComparer);
             Assert.IsFalse(ff.Any());
 
             await adminStore.DeleteClaimsFromClientAsync(insert[0].Record.ClientId, result.Claims);
@@ -917,5 +918,51 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsFalse(result.Claims.Any());
         }
 
+        [TestMethod]
+        public async Task Test_Create_Add_Update_ClientClaims_ByClientIdAsync()
+        {
+            var adminStore = new IdentityServer3AdminStore();
+            var insert = await CassandraTestHelper.InsertTestData_Clients(1);
+            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+
+            var original = result.Claims;
+
+            var newClaims = new List<Claim>{
+                new Claim(Constants.ClaimTypes.Subject, Guid.NewGuid().ToString()),
+                new Claim(Constants.ClaimTypes.PreferredUserName, Guid.NewGuid().ToString()),
+            };
+
+            var finalList = new List<Claim>();
+            finalList.AddRange(original);
+            finalList.AddRange(newClaims);
+
+
+            await adminStore.AddClaimsToClientAsync(insert[0].Record.ClientId, newClaims);
+
+            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Claims.Count(), finalList.Count);
+
+            var ff = result.Claims.Except(finalList, ClaimComparer.DeepComparer);
+            Assert.IsFalse(ff.Any());
+
+            newClaims = new List<Claim>{
+                new Claim(Constants.ClaimTypes.Subject, Guid.NewGuid().ToString()),
+                new Claim(Constants.ClaimTypes.PreferredUserName, Guid.NewGuid().ToString()),
+            };
+            finalList = new List<Claim>();
+            finalList.AddRange(original);
+            finalList.AddRange(newClaims);
+
+            await adminStore.UpdateClaimsInClientAsync(insert[0].Record.ClientId, newClaims);
+            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            Assert.IsNotNull(result);
+
+
+            ff = result.Claims.Except(finalList, ClaimComparer.DeepComparer);
+            Assert.IsFalse(ff.Any());
+        }
     }
 }

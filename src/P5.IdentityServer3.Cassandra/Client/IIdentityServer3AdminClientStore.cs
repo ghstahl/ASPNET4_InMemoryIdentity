@@ -170,6 +170,16 @@ namespace P5.IdentityServer3.Cassandra
         /// <param name="claims"></param>
         /// <returns></returns>
         Task DeleteClaimsFromClientAsync(string clientId, IEnumerable<Claim> claims);
+
+        /// <summary>
+        /// Deletes scopes from the list of existing Claims
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="claims"></param>
+        /// <returns></returns>
+        Task UpdateClaimsInClientAsync(string clientId, IEnumerable<Claim> claims);
+
+
     }
 
 
