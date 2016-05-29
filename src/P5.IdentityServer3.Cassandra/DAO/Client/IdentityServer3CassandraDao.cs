@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -32,6 +33,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private static AsyncLazy<PreparedStatement> _FindClientById { get; set; }
         private static AsyncLazy<PreparedStatement> _DeleteClientById { get; set; }
 
+        private const string SelectClientQuery = @"SELECT * FROM clients_by_id";
 
         #endregion
 
@@ -576,5 +578,43 @@ namespace P5.IdentityServer3.Cassandra.DAO
             stored.Claims = finalList;
             await UpsertClientAsync(stored, cancellationToken);
         }
+
+        public static async Task<Store.Core.Models.IPage<FlattenedClientHandle>> PageClientsAsync(int pageSize, byte[] pagingState,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                IPage<FlattenedClientHandle> page;
+                if (pagingState == null)
+                {
+                    page = await mapper.FetchPageAsync<FlattenedClientHandle>(
+                        Cql.New(SelectClientQuery).WithOptions(opt =>
+                            opt.SetPageSize(pageSize)));
+                }
+                else
+                {
+                    page = await mapper.FetchPageAsync<FlattenedClientHandle>(
+                        Cql.New(SelectClientQuery).WithOptions(opt =>
+                            opt.SetPageSize(pageSize).SetPagingState(pagingState)));
+                }
+
+                // var result = CreatePageProxy(page);
+                var result = new PageProxy<FlattenedClientHandle>(page);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                // only here to catch during a debug unit test.
+                throw;
+            }
+        }
     }
+
+
 }
+

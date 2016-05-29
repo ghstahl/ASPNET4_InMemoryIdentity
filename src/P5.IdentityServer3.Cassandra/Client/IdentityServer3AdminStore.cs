@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
+using P5.Store.Core.Models;
 
 namespace P5.IdentityServer3.Cassandra
 {
@@ -138,6 +139,11 @@ namespace P5.IdentityServer3.Cassandra
         public async Task UpdateClaimsInClientAsync(string clientId, IEnumerable<Claim> claims)
         {
             await ClientStore.UpdateClaimsInClientAsync(clientId, claims);
+        }
+
+        public async Task<IPage<FlattenedClientHandle>> PageClientsAsync(int pageSize, byte[] pagingState)
+        {
+            return await ClientStore.PageClientsAsync(pageSize, pagingState);
         }
     }
 }

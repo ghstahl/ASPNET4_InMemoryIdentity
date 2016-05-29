@@ -60,7 +60,6 @@
     <Compile Include="DAO\FlattenedDocument\CassandraPageProxy.cs" />
     <Compile Include="DAO\FlattenedDocument\FlattenedDocumentCassandraDao.cs" />
     <Compile Include="DAO\FlattenedDocumentCassandraDao.cs" />
-    <Compile Include="DAO\FlattenedDocument\PageProxy.cs" />
     <Compile Include="DAO\MyMappings.cs" />
     <Compile Include="DAO\Utility\FlattenedDocumentCassandraDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

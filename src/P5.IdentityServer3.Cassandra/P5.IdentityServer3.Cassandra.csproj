@@ -117,6 +117,10 @@
       <Project>{cbef1303-a168-4860-8537-2b23a3ccb844}</Project>
       <Name>P5.IdentityServer3.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\P5.Store.Core\P5.Store.Core.csproj">
+      <Project>{909166b9-d719-47a9-9c61-92fd5ed35ba4}</Project>
+      <Name>P5.Store.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

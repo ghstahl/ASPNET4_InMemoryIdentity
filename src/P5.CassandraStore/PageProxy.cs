@@ -1,8 +1,12 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using P5.Store.Core.Models;
 
-namespace FlattenedDocument.CassandraStore.DAO
+namespace P5.CassandraStore
 {
     //  good old hardcoded mapping vs the Castle intercepter with reflection.
     public class PageProxy<T> : IPage<T>

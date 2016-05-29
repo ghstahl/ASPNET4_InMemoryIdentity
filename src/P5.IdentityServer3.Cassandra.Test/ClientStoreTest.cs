@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
+using IdentityServer3.Core.ResponseHandling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using P5.IdentityServer3.Cassandra.DAO;
@@ -32,8 +33,8 @@ namespace P5.IdentityServer3.Cassandra.Test
         public async void Setup()
         {
             base.Setup();
-            await IdentityServer3CassandraDao.CreateTablesAsync();
-            await IdentityServer3CassandraDao.TruncateTablesAsync();
+     //       await IdentityServer3CassandraDao.CreateTablesAsync();
+     //       await IdentityServer3CassandraDao.TruncateTablesAsync();
         }
 
 
@@ -963,6 +964,34 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             ff = result.Claims.Except(finalList, ClaimComparer.DeepComparer);
             Assert.IsFalse(ff.Any());
+        }
+        [TestMethod]
+        public async Task Test_Create_Page_ByClientIdAsync()
+        {
+            await IdentityServer3CassandraDao.TruncateTablesAsync();
+            int nNumber = 100;
+            var adminStore = new IdentityServer3AdminStore();
+            var insert = await CassandraTestHelper.InsertTestData_Clients(nNumber);
+            foreach (var item in insert)
+            {
+                var result = await adminStore.FindClientByIdAsync(item.Record.ClientId);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(item.Record.ClientName, result.ClientName);
+            }
+
+
+            var pageSize = 9;
+            byte[] pagingState = null;
+            int runningCount = 0;
+            do
+            {
+                var items = await adminStore.PageClientsAsync(pageSize, pagingState);
+                pagingState = items.PagingState;
+                runningCount += items.Count();
+            } while (pagingState != null);
+            Assert.AreEqual(100, runningCount);
+
+
         }
     }
 }

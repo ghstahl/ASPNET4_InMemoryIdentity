@@ -10,6 +10,9 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public const string WellKnownAuthorizationCodeHandleByKey = "authorizationcodehandle_by_key";
         public const string WellKnownRefreshTokenHandleByKey = "refreshtokenhandle_by_key";
         public const string WellKnownConsentByClientId = "consent_by_clientid";
+        public const string WellKnownClientsById = "clients_by_id";
+
+
         private static bool _init { get; set; }
 
         public static void Init()
@@ -26,6 +29,9 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             // Define mappings in the constructor of your class
             // that inherits from Mappings
+
+            For<FlattenedClientHandle>()
+               .TableName(WellKnownClientsById);
 
             For<FlattenedTokenHandle>()
                 .TableName(WellKnownTokenhandleByKey);

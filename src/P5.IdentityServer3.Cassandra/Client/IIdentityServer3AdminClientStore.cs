@@ -4,6 +4,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
+using P5.IdentityServer3.Common;
+using P5.Store.Core.Models;
 
 namespace P5.IdentityServer3.Cassandra
 {
@@ -179,6 +181,13 @@ namespace P5.IdentityServer3.Cassandra
         /// <returns></returns>
         Task UpdateClaimsInClientAsync(string clientId, IEnumerable<Claim> claims);
 
+        /// <summary>
+        /// Pages through all the Client recrods
+        /// </summary>
+        /// <param name="pageSize"></param>
+        /// <param name="pagingState"></param>
+        /// <returns></returns>
+        Task<IPage<FlattenedClientHandle>> PageClientsAsync(int pageSize, byte[] pagingState);
 
     }
 

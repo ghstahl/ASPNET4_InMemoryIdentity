@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLazy.cs" />
+    <Compile Include="PageProxy.cs" />
     <Compile Include="DAO\CassandraDAO.cs" />
     <Compile Include="DAO\ICassandraDAO.cs" />
     <Compile Include="Extensions\CassandraExtensions.cs" />
@@ -62,6 +63,12 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\P5.Store.Core\P5.Store.Core.csproj">
+      <Project>{909166b9-d719-47a9-9c61-92fd5ed35ba4}</Project>
+      <Name>P5.Store.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
