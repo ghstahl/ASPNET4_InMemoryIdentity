@@ -77,7 +77,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Areas\IdentityServer3Admin\Class1.cs" />
+    <Compile Include="Areas\IdentityServer3Admin\IdentityServer3AdminAreaRegistration.cs" />
     <Compile Include="Areas\IdentityServer3Admin\Controllers\HomeController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -86,9 +86,28 @@
     <None Include="Areas\IdentityServer3Admin\Views\web.config" />
     <None Include="Areas\IdentityServer3Admin\Views\_ViewStart.cshtml" />
     <None Include="packages.config" />
+    <None Include="React\package.json" />
+    <None Include="React\src\client\example.less" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\IdentityServer3Admin\Views\Shared\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="React\src\actions\Posts.js" />
+    <Content Include="React\src\bundle.js" />
+    <Content Include="React\src\client\client.js" />
+    <Content Include="React\src\components\App.js" />
+    <Content Include="React\src\components\CommentInput.js" />
+    <Content Include="React\src\components\CommentList.js" />
+    <Content Include="React\src\constants\actions.js" />
+    <Content Include="React\src\index.html" />
+    <Content Include="React\src\reducers\posts.js" />
+    <Content Include="React\src\redux\actions.js" />
+    <Content Include="React\src\redux\reducer.js" />
+    <Content Include="React\src\redux\store.js" />
+    <Content Include="React\src\utils\ajaxCommentsHelper.js" />
+    <Content Include="React\src\utils\getHeaders.js" />
+    <Content Include="React\webpack.config.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

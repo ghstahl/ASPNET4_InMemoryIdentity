@@ -51,7 +51,7 @@ gulp.task("clean:areas", function (cb) {
 
 
 gulp.task('copy:P5.IdentityServer3.Admin:areas', function () {
-    return gulp.src(['../P5.IdentityServer3.Admin/Areas/**', '!../P5.IdentityServer3.Admin/Areas/*/{Controllers,Controllers/**}'])
+    return gulp.src(['../P5.IdentityServer3.Admin/Areas/**', '!../P5.IdentityServer3.Admin/Areas/*/{Controllers,Controllers/**}', '!../P5.IdentityServer3.Admin/Areas/**/*.cs'])
         .pipe(gulp.dest('Areas/'));
 });
 
