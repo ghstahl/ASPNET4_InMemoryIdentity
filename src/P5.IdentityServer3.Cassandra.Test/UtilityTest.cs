@@ -40,13 +40,16 @@ namespace P5.IdentityServer3.Cassandra.Test
 
         }
         [TestMethod]
-        public async Task TestCreateTablesAsync()
+        public async Task Test_CreateTablesAsync()
         {
-
-
             await IdentityServer3CassandraDao.CreateTablesAsync();
-
-
         }
+        [TestMethod]
+        public async Task Test_TruncateTablesAsync()
+        {
+            await IdentityServer3CassandraDao.TruncateTablesAsync();
+        }
+
+        
     }
 }

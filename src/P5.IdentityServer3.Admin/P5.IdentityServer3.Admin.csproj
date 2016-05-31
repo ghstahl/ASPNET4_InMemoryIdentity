@@ -50,6 +50,10 @@
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
       <Private>True</Private>
@@ -77,11 +81,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Areas\IdentityServer3Admin\Controllers\CountryInformationResponse.cs" />
+    <Compile Include="Areas\IdentityServer3Admin\Controllers\IdentityServer3AdminApiController.cs" />
     <Compile Include="Areas\IdentityServer3Admin\IdentityServer3AdminAreaRegistration.cs" />
     <Compile Include="Areas\IdentityServer3Admin\Controllers\HomeController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Areas\IdentityServer3Admin\Views\Home\index.cshtml" />
     <None Include="Areas\IdentityServer3Admin\Views\web.config" />
     <None Include="Areas\IdentityServer3Admin\Views\_ViewStart.cshtml" />
@@ -108,6 +115,12 @@
     <Content Include="React\src\utils\ajaxCommentsHelper.js" />
     <Content Include="React\src\utils\getHeaders.js" />
     <Content Include="React\webpack.config.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\P5.IdentityServer3.Cassandra\P5.IdentityServer3.Cassandra.csproj">
+      <Project>{98266def-ff72-4ab6-933f-45058cac5911}</Project>
+      <Name>P5.IdentityServer3.Cassandra</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
