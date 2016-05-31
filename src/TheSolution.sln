@@ -61,6 +61,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FlattenedDocument", "Flatte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlattenedDocument.CassandraStore.Test", "FlattenedDocument.CassandraStore.Test\FlattenedDocument.CassandraStore.Test.csproj", "{ED4EA033-CAE8-4957-81A5-CE35F4A3DF3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServer3.Admin", "P5.IdentityServer3.Admin\P5.IdentityServer3.Admin.csproj", "{A881A03E-2931-44AB-BF0C-2873BF235A94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +157,10 @@ Global
 		{ED4EA033-CAE8-4957-81A5-CE35F4A3DF3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED4EA033-CAE8-4957-81A5-CE35F4A3DF3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED4EA033-CAE8-4957-81A5-CE35F4A3DF3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A881A03E-2931-44AB-BF0C-2873BF235A94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A881A03E-2931-44AB-BF0C-2873BF235A94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A881A03E-2931-44AB-BF0C-2873BF235A94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A881A03E-2931-44AB-BF0C-2873BF235A94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,5 +182,6 @@ Global
 		{9390EB2C-5D42-47AF-8B83-13A16E4B39B7} = {6F816E46-BC96-455F-B45E-9D006D574641}
 		{909166B9-D719-47A9-9C61-92FD5ED35BA4} = {6F816E46-BC96-455F-B45E-9D006D574641}
 		{ED4EA033-CAE8-4957-81A5-CE35F4A3DF3C} = {7307648D-A46C-476B-A233-BA9BA0B6D192}
+		{A881A03E-2931-44AB-BF0C-2873BF235A94} = {9A70D75E-42F3-4643-947B-BBAFF84FEDC2}
 	EndGlobalSection
 EndGlobal

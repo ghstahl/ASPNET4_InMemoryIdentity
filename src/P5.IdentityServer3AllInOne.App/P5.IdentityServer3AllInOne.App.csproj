@@ -266,11 +266,13 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="gulpfile.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <EmbeddedResource Include="Config\idsrv3test.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <Content Include="package.json" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -333,6 +335,10 @@
     <ProjectReference Include="..\P5.AspNet.Identity.Biggy\P5.AspNet.Identity.Biggy.csproj">
       <Project>{ec8c86ff-227c-493a-81eb-c3cdaa7741d2}</Project>
       <Name>P5.AspNet.Identity.Biggy</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\P5.IdentityServer3.Admin\P5.IdentityServer3.Admin.csproj">
+      <Project>{a881a03e-2931-44ab-bf0c-2873bf235a94}</Project>
+      <Name>P5.IdentityServer3.Admin</Name>
     </ProjectReference>
     <ProjectReference Include="..\P5.IdentityServer3.BiggyJson\P5.IdentityServer3.BiggyJson.csproj">
       <Project>{9127f21e-3c4e-4276-855c-c2bc3b44360b}</Project>

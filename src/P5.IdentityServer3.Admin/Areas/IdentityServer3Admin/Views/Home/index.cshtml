@@ -1,0 +1,26 @@
+﻿@model HttpRequestBase
+
+@{
+    ViewBag.Title = "My Sweet IdentityServer3 Admin Home";
+}
+<h2>@ViewBag.Title</h2>
+
+<h2>Header</h2>
+@foreach (var key in Model.Headers.AllKeys)
+{
+    <div>
+        @string.Format("[{0}] : {1}", key, Model.Headers[key])
+    </div>
+}
+
+<h2>RequestType</h2>
+<duv>@Model.RequestType</duv>
+
+<h2>Form</h2>
+@foreach (var key in Model.Form.AllKeys)
+{
+    <div>
+        @string.Format("[{0}] : {1}", key, Model.Form[key])
+    </div>
+}
+
