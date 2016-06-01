@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLazy.cs" />
+    <Compile Include="CassandraOptions.cs" />
     <Compile Include="PageProxy.cs" />
     <Compile Include="DAO\CassandraDAO.cs" />
     <Compile Include="DAO\ICassandraDAO.cs" />

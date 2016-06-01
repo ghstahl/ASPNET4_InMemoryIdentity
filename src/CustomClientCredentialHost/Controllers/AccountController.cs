@@ -9,12 +9,15 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using CustomClientCredentialHost.Models;
+using P5.AspNet.Identity.Cassandra;
 
 namespace CustomClientCredentialHost.Controllers
 {
     [Authorize]
     public class AccountController : Controller
     {
+      
+
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -181,7 +184,7 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return View("Error");
             }
-            var result = await UserManager.ConfirmEmailAsync(userId, code);
+            var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 

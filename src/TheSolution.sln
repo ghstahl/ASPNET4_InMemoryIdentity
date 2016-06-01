@@ -63,6 +63,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlattenedDocument.Cassandra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServer3.Admin", "P5.IdentityServer3.Admin\P5.IdentityServer3.Admin.csproj", "{A881A03E-2931-44AB-BF0C-2873BF235A94}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.AspNet.Identity.Cassandra", "P5.AspNet.Identity.Cassandra\P5.AspNet.Identity.Cassandra.csproj", "{B9732F6C-5DC4-41DE-89C0-380EF0462A94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.AspNet.Identity.Common", "P5.AspNet.Identity.Common\P5.AspNet.Identity.Common.csproj", "{2313D7EC-991F-4747-98BE-71F6D8880BD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,6 +165,14 @@ Global
 		{A881A03E-2931-44AB-BF0C-2873BF235A94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A881A03E-2931-44AB-BF0C-2873BF235A94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A881A03E-2931-44AB-BF0C-2873BF235A94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9732F6C-5DC4-41DE-89C0-380EF0462A94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9732F6C-5DC4-41DE-89C0-380EF0462A94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9732F6C-5DC4-41DE-89C0-380EF0462A94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9732F6C-5DC4-41DE-89C0-380EF0462A94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2313D7EC-991F-4747-98BE-71F6D8880BD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2313D7EC-991F-4747-98BE-71F6D8880BD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2313D7EC-991F-4747-98BE-71F6D8880BD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2313D7EC-991F-4747-98BE-71F6D8880BD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -183,5 +195,7 @@ Global
 		{909166B9-D719-47A9-9C61-92FD5ED35BA4} = {6F816E46-BC96-455F-B45E-9D006D574641}
 		{ED4EA033-CAE8-4957-81A5-CE35F4A3DF3C} = {7307648D-A46C-476B-A233-BA9BA0B6D192}
 		{A881A03E-2931-44AB-BF0C-2873BF235A94} = {9A70D75E-42F3-4643-947B-BBAFF84FEDC2}
+		{B9732F6C-5DC4-41DE-89C0-380EF0462A94} = {9A70D75E-42F3-4643-947B-BBAFF84FEDC2}
+		{2313D7EC-991F-4747-98BE-71F6D8880BD6} = {F5A05E41-890F-4EBD-BD57-A62930689909}
 	EndGlobalSection
 EndGlobal

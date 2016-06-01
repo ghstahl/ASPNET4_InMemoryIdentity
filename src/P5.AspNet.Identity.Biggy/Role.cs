@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.AspNet.Identity;
+﻿using Microsoft.AspNet.Identity;
 
 namespace P5.AspNet.Identity.Biggy
 {

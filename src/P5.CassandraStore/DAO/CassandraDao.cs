@@ -9,8 +9,8 @@ using P5.CassandraStore.Settings;
 
 namespace P5.CassandraStore.DAO
 {
-   public class CassandraDao : ICassandraDAO
-    {
+   public class CassandraDao : ICassandraDAO, IDisposable
+   {
         private  Cluster _cluster;
 
        private Cluster Cluster
@@ -100,5 +100,12 @@ namespace P5.CassandraStore.DAO
                 return false;
             }
         }
-    }
+
+       public void Dispose()
+       {
+           _session = null;
+       }
+
+
+   }
 }

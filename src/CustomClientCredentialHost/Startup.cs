@@ -9,10 +9,11 @@ using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
 using Microsoft.Owin;
 using Owin;
+using P5.AspNet.Identity.Cassandra;
+using P5.CassandraStore;
 using P5.CassandraStore.Settings;
 using P5.IdentityServer3.BiggyJson;
 using P5.IdentityServer3.Cassandra;
-using P5.IdentityServer3.Cassandra.Configuration;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServerCore.IdSrv;
@@ -33,8 +34,16 @@ namespace CustomClientCredentialHost
             IdentityServerServiceFactory identityServerServiceFactory;
 
 #if CASSANDRA_STORE
+
+            app.UseAspNetCassandraStores(new CassandraOptions()
+            {
+                ContactPoints = new List<string> {"cassandra"},
+                Credentials = new CassandraCredentials() {Password = "", UserName = ""},
+                KeySpace = "aspnetidentity"
+            });
+
             app.UseIdentityServerCassandraStores(userService, out identityServerServiceFactory,
-                new IdentityServerCassandraOptions()
+                new CassandraOptions()
                 {
                     ContactPoints = new List<string> { "cassandra" },
                     Credentials = new CassandraCredentials() { Password = "", UserName = "" },

@@ -4,6 +4,7 @@ using IdentityServer3.Core.Configuration;
 using IdentityServer3.Core.Services;
 using Microsoft.Owin.Logging;
 using Owin;
+using P5.CassandraStore;
 using P5.CassandraStore.Settings;
 using P5.IdentityServer3.Cassandra.Configuration;
 using P5.IdentityServer3.Cassandra.DAO;
@@ -15,11 +16,11 @@ namespace P5.IdentityServer3.Cassandra
         public static IAppBuilder UseIdentityServerCassandraStores(this IAppBuilder app,
             Registration<IUserService> userService,
             out IdentityServerServiceFactory identityServerServiceFactory,
-            IdentityServerCassandraOptions options = null)
+            CassandraOptions options = null)
         {
             if (app == null) throw new ArgumentNullException("app");
             var loggerFactory = app.GetLoggerFactory();
-            options = options ?? new IdentityServerCassandraOptions()
+            options = options ?? new CassandraOptions()
             {
                 ContactPoints = new List<string> {"cassandra"},
                 Credentials = new CassandraCredentials() {Password = "", UserName = ""},
