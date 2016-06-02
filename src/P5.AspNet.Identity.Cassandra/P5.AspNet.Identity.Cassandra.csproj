@@ -101,6 +101,7 @@
   <ItemGroup>
     <EmbeddedResource Include="defaultschema.cql" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Schema\manual.cql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
