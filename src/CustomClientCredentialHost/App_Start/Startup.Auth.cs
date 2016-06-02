@@ -7,10 +7,11 @@ using Microsoft.Owin.Security.Google;
 using Owin;
 using CustomClientCredentialHost.Models;
 using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.Twitter;
+
 using P5.AspNet.Identity.Cassandra;
 using P5.CassandraStore.DAO;
 using P5.CassandraStore.Settings;
+using P5.Owin.Security.Twitter.Twitter;
 
 namespace CustomClientCredentialHost
 {
