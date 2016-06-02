@@ -61,17 +61,29 @@ gulp.task('copy:P5.IdentityServer3.Admin:assets', function () {
 });
 
 
+gulp.task('copy:DeveloperAuth:areas', function () {
+    return gulp.src(['../DeveloperAuth/Areas/**', '!../DeveloperAuth/Areas/*/{Controllers,Controllers/**}', '!../DeveloperAuth/Areas/**/*.cs'])
+        .pipe(gulp.dest('Areas/'));
+});
 
+gulp.task('copy:DeveloperAuth:assets', function () {
+    return gulp.src(['../DeveloperAuth/assets/**'])
+        .pipe(gulp.dest(paths.webroot + 'assets/'));
+});
 
 
 gulp.task('watch', [
 
         'copy:P5.IdentityServer3.Admin:areas',
-        'copy:P5.IdentityServer3.Admin:assets'
+        'copy:P5.IdentityServer3.Admin:assets',
+        'copy:DeveloperAuth:areas',
+        'copy:DeveloperAuth:assets'
 ],
     function () {
         gulp.watch(['../P5.IdentityServer3.Admin/Areas/**'], ['copy:P5.IdentityServer3.Admin:areas']);
         gulp.watch(['../P5.IdentityServer3.Admin/assets/**'], ['copy:P5.IdentityServer3.Admin:assets']);
+        gulp.watch(['../DeveloperAuth/Areas/**'], ['copy:DeveloperAuth:areas']);
+        gulp.watch(['../DeveloperAuth/assets/**'], ['copy:DeveloperAuth:assets']);
     });
 
 gulp.task("min", ["min:js", "min:css"]);
