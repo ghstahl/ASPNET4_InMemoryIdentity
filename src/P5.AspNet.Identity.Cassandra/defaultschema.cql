@@ -1,5 +1,4 @@
-﻿// Users, keyed by user id
-CREATE TABLE IF NOT EXISTS users (
+﻿CREATE TABLE IF NOT EXISTS users (
     userid uuid,
 	tenantid uuid,
     username text,

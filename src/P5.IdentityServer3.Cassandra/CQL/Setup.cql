@@ -3,6 +3,20 @@ WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
 
 use identityserver3;
 
+CREATE TABLE IF NOT EXISTS user_profile_by_id (
+    id uuid,
+    AllowedScopes text,
+    Enabled boolean,
+    UserName text,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS user_clientid_by_id (
+    id uuid,
+    ClientId text,
+    PRIMARY KEY (id,ClientId)
+);
+
 
 CREATE TABLE IF NOT EXISTS scopeclaims_by_name_and_scopeid (
 	Name text,
