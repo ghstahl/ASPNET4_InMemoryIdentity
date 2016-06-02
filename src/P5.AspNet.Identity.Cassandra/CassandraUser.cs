@@ -32,21 +32,17 @@ namespace P5.AspNet.Identity.Cassandra
         /// <summary>
         /// The unique Id of the user.
         /// </summary>
-        private Guid _id;
+       // private Guid _id;
 
         public Guid Id
         {
-            get
-            {
-                if (_id == Guid.Empty && !string.IsNullOrEmpty(UserName))
-                {
-                    _id = GuidGenerator.CreateGuid(IdGuid, UserName);
-                }
-                return _id;
-            }
-            private set { _id = value; }
+            get;set;
         }
 
+        public Guid GenerateIdFromUserData()
+        {
+            return GuidGenerator.CreateGuid(IdGuid, UserName);
+        }
         
         /// <summary>
         /// The tenant the user belongs to

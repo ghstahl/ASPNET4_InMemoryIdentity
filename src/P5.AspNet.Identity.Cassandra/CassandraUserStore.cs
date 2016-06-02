@@ -177,6 +177,7 @@ namespace P5.AspNet.Identity.Cassandra
 
             // TODO:  Support uniqueness for usernames/emails at the C* level using LWT?
 
+            var id = user.GenerateIdFromUserData();
             var createdDate = DateTimeOffset.UtcNow;
             user.Created = createdDate;
 
@@ -184,7 +185,7 @@ namespace P5.AspNet.Identity.Cassandra
             var batch = new BatchStatement();
 
             // INSERT INTO users ...
-            batch.Add(prepared[0].Bind(user.Id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
+            batch.Add(prepared[0].Bind(id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
                 user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed, user.Email,
                 user.IsEmailConfirmed, createdDate, null, user.Enabled, user.Source, user.SourceId));
 
@@ -192,7 +193,7 @@ namespace P5.AspNet.Identity.Cassandra
             if (string.IsNullOrEmpty(user.UserName) == false)
             {
                 // INSERT INTO users_by_username ...
-                batch.Add(prepared[1].Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
+                batch.Add(prepared[1].Bind(user.UserName, id, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
                     user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed, user.Email,
                     user.IsEmailConfirmed, createdDate, null, user.Enabled, user.Source, user.SourceId));
             }
@@ -200,7 +201,7 @@ namespace P5.AspNet.Identity.Cassandra
             if (string.IsNullOrEmpty(user.Email) == false)
             {
                 // INSERT INTO users_by_email ...
-                batch.Add(prepared[2].Bind(user.Email, user.Id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                batch.Add(prepared[2].Bind(user.Email, id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
                     user.AccessFailedCount, user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber,
                     user.IsPhoneNumberConfirmed, user.IsEmailConfirmed, createdDate, null, user.Enabled, user.Source, user.SourceId));
             }
@@ -214,6 +215,7 @@ namespace P5.AspNet.Identity.Cassandra
         public async Task UpdateAsync(CassandraUser user)
         {
             if (user == null) throw new ArgumentNullException("user");
+            var id = user.GenerateIdFromUserData();
 
             var modifiedDate = DateTimeOffset.UtcNow;
             user.Modified = modifiedDate;
@@ -224,7 +226,7 @@ namespace P5.AspNet.Identity.Cassandra
             // UPDATE users ...
             batch.Add(prepared[0].Bind(user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
                 user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed, user.Email,
-                user.IsEmailConfirmed, modifiedDate, user.Enabled, user.Source, user.SourceId, user.Id));
+                user.IsEmailConfirmed, modifiedDate, user.Enabled, user.Source, user.SourceId, id));
 
             // See if the username changed so we can decide whether we need a different users_by_username record
             string oldUserName;
@@ -246,7 +248,7 @@ namespace P5.AspNet.Identity.Cassandra
                 // INSERT INTO users_by_username ... (insert new record since username changed)
                 if (string.IsNullOrEmpty(user.UserName) == false)
                 {
-                    batch.Add(prepared[3].Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                    batch.Add(prepared[3].Bind(user.UserName, id, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
                         user.AccessFailedCount, user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber,
                         user.IsPhoneNumberConfirmed, user.Email, user.IsEmailConfirmed, user.Created, modifiedDate, user.Enabled, user.Source, user.SourceId));
                 }
@@ -272,7 +274,7 @@ namespace P5.AspNet.Identity.Cassandra
                 // INSERT INTO users_by_email ... (insert new record since email changed)
                 if (string.IsNullOrEmpty(user.Email) == false)
                 {
-                    batch.Add(prepared[6].Bind(user.Email, user.Id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                    batch.Add(prepared[6].Bind(user.Email, id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
                         user.AccessFailedCount, user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber,
                         user.IsPhoneNumberConfirmed, user.IsEmailConfirmed, user.Created, modifiedDate, user.Enabled, user.Source, user.SourceId));
                 }
@@ -287,12 +289,13 @@ namespace P5.AspNet.Identity.Cassandra
         public async Task DeleteAsync(CassandraUser user)
         {
             if (user == null) throw new ArgumentNullException("user");
+            var id = user.GenerateIdFromUserData();
 
             PreparedStatement[] prepared = await _deleteUser;
             var batch = new BatchStatement();
 
             // DELETE FROM users ...
-            batch.Add(prepared[0].Bind(user.Id));
+            batch.Add(prepared[0].Bind(id));
 
             // Make sure the username didn't change before deleting from users_by_username (not sure this is possible, but protect ourselves anyway)
             string userName;
@@ -348,15 +351,15 @@ namespace P5.AspNet.Identity.Cassandra
         {
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
-
+            var id = user.GenerateIdFromUserData();
             PreparedStatement[] prepared = await _addLogin;
             var batch = new BatchStatement();
 
             // INSERT INTO logins ...
-            batch.Add(prepared[0].Bind(user.Id, login.LoginProvider, login.ProviderKey));
+            batch.Add(prepared[0].Bind(id, login.LoginProvider, login.ProviderKey));
 
             // INSERT INTO logins_by_provider ...
-            batch.Add(prepared[1].Bind(login.LoginProvider, login.ProviderKey, user.Id));
+            batch.Add(prepared[1].Bind(login.LoginProvider, login.ProviderKey, id));
 
             await _session.ExecuteAsync(batch).ConfigureAwait(false);
         }
@@ -368,12 +371,13 @@ namespace P5.AspNet.Identity.Cassandra
         {
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
+            var id = user.GenerateIdFromUserData();
 
             PreparedStatement[] prepared = await _removeLogin;
             var batch = new BatchStatement();
 
             // DELETE FROM logins ...
-            batch.Add(prepared[0].Bind(user.Id, login.LoginProvider, login.ProviderKey));
+            batch.Add(prepared[0].Bind(id, login.LoginProvider, login.ProviderKey));
 
             // DELETE FROM logins_by_provider ...
             batch.Add(prepared[1].Bind(login.LoginProvider, login.ProviderKey));
@@ -387,9 +391,9 @@ namespace P5.AspNet.Identity.Cassandra
         public async Task<IList<UserLoginInfo>> GetLoginsAsync(CassandraUser user)
         {
             if (user == null) throw new ArgumentNullException("user");
-
+            var id = user.GenerateIdFromUserData();
             PreparedStatement prepared = await _getLogins;
-            BoundStatement bound = prepared.Bind(user.Id);
+            BoundStatement bound = prepared.Bind(id);
 
             RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
             return rows.Select(row => new UserLoginInfo(row.GetValue<string>("login_provider"), row.GetValue<string>("provider_key"))).ToList();
@@ -423,9 +427,9 @@ namespace P5.AspNet.Identity.Cassandra
         public async Task<IList<Claim>> GetClaimsAsync(CassandraUser user)
         {
             if (user == null) throw new ArgumentNullException("user");
-
+            var id = user.GenerateIdFromUserData();
             PreparedStatement prepared = await _getClaims;
-            BoundStatement bound = prepared.Bind(user.Id);
+            BoundStatement bound = prepared.Bind(id);
 
             RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
             return rows.Select(row => new Claim(row.GetValue<string>("type"), row.GetValue<string>("value"))).ToList();
@@ -438,9 +442,9 @@ namespace P5.AspNet.Identity.Cassandra
         {
             if (user == null) throw new ArgumentNullException("user");
             if (claim == null) throw new ArgumentNullException("claim");
-
+            var id = user.GenerateIdFromUserData();
             PreparedStatement prepared = await _addClaim;
-            BoundStatement bound = prepared.Bind(user.Id, claim.Type, claim.Value);
+            BoundStatement bound = prepared.Bind(id, claim.Type, claim.Value);
             await _session.ExecuteAsync(bound).ConfigureAwait(false);
         }
 
@@ -451,9 +455,10 @@ namespace P5.AspNet.Identity.Cassandra
         {
             if (user == null) throw new ArgumentNullException("user");
             if (claim == null) throw new ArgumentNullException("claim");
+            var id = user.GenerateIdFromUserData();
 
             PreparedStatement prepared = await _removeClaim;
-            BoundStatement bound = prepared.Bind(user.Id, claim.Type, claim.Value);
+            BoundStatement bound = prepared.Bind(id, claim.Type, claim.Value);
 
             await _session.ExecuteAsync(bound).ConfigureAwait(false);
         }
@@ -719,7 +724,7 @@ namespace P5.AspNet.Identity.Cassandra
         {
             if (user == null) throw new ArgumentNullException("user");
             if (roleName == null) throw new ArgumentNullException("roleName");
-
+            var id = user.GenerateIdFromUserData();
             var createdDate = DateTimeOffset.UtcNow;
             user.Created = createdDate;
 
@@ -727,11 +732,11 @@ namespace P5.AspNet.Identity.Cassandra
             var batch = new BatchStatement();
 
             // INSERT INTO user_roles ...
-            batch.Add(prepared[0].Bind(user.Id, roleName, createdDate));
+            batch.Add(prepared[0].Bind(id, roleName, createdDate));
 
 
             // INSERT INTO user_roles_by_role ...
-            batch.Add(prepared[1].Bind(roleName, user.Id, createdDate));
+            batch.Add(prepared[1].Bind(roleName, id, createdDate));
        
             await _session.ExecuteAsync(batch).ConfigureAwait(false);
         }
@@ -740,15 +745,15 @@ namespace P5.AspNet.Identity.Cassandra
         {
             if (user == null) throw new ArgumentNullException("user");
             if (roleName == null) throw new ArgumentNullException("roleName");
-
+            var id = user.GenerateIdFromUserData();
             PreparedStatement[] prepared = await _removeFromRoleAsync;
             var batch = new BatchStatement();
 
             // DELETE FROM user_roles ...
-            batch.Add(prepared[0].Bind(user.Id, roleName));
+            batch.Add(prepared[0].Bind(id, roleName));
 
             // DELETE FROM user_roles_by_role ...
-            batch.Add(prepared[1].Bind(roleName, user.Id));
+            batch.Add(prepared[1].Bind(roleName, id));
 
             await _session.ExecuteAsync(batch).ConfigureAwait(false);
         }
@@ -756,10 +761,10 @@ namespace P5.AspNet.Identity.Cassandra
         public async Task<IList<string>> GetRolesAsync(CassandraUser user)
         {
             if (user == null) throw new ArgumentNullException("user");
-
+            var id = user.GenerateIdFromUserData();
             // SELECT FROM user_roles ...
             PreparedStatement prepared = await _getRolesAsync;
-            BoundStatement bound = prepared.Bind(user.Id);
+            BoundStatement bound = prepared.Bind(id);
             RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
             return rows.Select(r => r.GetValue<string>("rolename")).ToList();
         }
@@ -768,10 +773,10 @@ namespace P5.AspNet.Identity.Cassandra
         {
             if (user == null) throw new ArgumentNullException("user");
             if (roleName == null) throw new ArgumentNullException("roleName");
-
+            var id = user.GenerateIdFromUserData();
             // SELECT FROM user_roles ...
             PreparedStatement prepared = await _isInRoleAsync;
-            BoundStatement bound = prepared.Bind(user.Id, roleName);
+            BoundStatement bound = prepared.Bind(id, roleName);
             RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
             return rows.Count() > 0;
         }

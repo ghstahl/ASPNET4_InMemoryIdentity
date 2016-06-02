@@ -1,0 +1,29 @@
+﻿@model DeveloperAuth.Models.AutoPostModel
+
+@{
+    ViewBag.Title = "Developer Auth AutoPost";
+}
+<h2>@ViewBag.Title</h2>
+
+<form id="e456bc53-bf12-495c-8660-6ea9ac240525"
+      action="@Model.URI"
+      method="post">
+
+    @foreach (var key in Model.FormDictionary.Keys)
+    {
+        var data = Model.FormDictionary[key];
+        <input type="hidden" name="@key" value="@data" />
+    }
+
+</form>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        function formAutoSubmit() {
+            var frm = document.getElementById("e456bc53-bf12-495c-8660-6ea9ac240525");
+            frm.submit();
+        }
+        window.onload = formAutoSubmit;
+    </script>
+}
