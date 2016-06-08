@@ -1,4 +1,7 @@
-﻿use notforproduction;
+﻿CREATE KEYSPACE IF NOT EXISTS notforproduction
+WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+
+use notforproduction;
 
 CREATE TABLE IF NOT EXISTS notforproduction_by_id (
 	id uuid,
