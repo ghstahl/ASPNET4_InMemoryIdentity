@@ -49,6 +49,8 @@ namespace CustomClientCredentialHost
                     Credentials = new CassandraCredentials() { Password = "", UserName = "" },
                     KeySpace = "identityserver3"
                 });
+            /*
+             * TODO: Cassandra may be down, need a robust app that can reconnect
             foreach (var client in Clients.Get())
             {
                 IdentityServer3CassandraDao.UpsertClientAsync(
@@ -58,6 +60,7 @@ namespace CustomClientCredentialHost
             {
                 IdentityServer3CassandraDao.UpsertScopeAsync(new FlattenedScopeRecord(new FlattenedScopeHandle(scope)));
             }
+             * */
 #endif
 #if BIGGY_STORE
             // Create and modify default settings

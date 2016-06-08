@@ -51,7 +51,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     if (_cassandraSession == null)
                     {
                         var dao = new CassandraDao(CassandraConfig);
-                        _cassandraSession = dao.GetSession();
+                        _cassandraSession = dao.GetSessionAsync().Result;
 
 
                         //-----------------------------------------------

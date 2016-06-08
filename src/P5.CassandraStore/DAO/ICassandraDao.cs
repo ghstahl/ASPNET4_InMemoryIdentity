@@ -1,9 +1,10 @@
-﻿using Cassandra;
+﻿using System.Threading.Tasks;
+using Cassandra;
 
 namespace P5.CassandraStore.DAO
 {
     public interface ICassandraDAO
     {
-        ISession GetSession();
+        Task<ISession> GetSessionAsync();
     }
 }

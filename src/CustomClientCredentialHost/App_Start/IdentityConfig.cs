@@ -60,7 +60,7 @@ namespace CustomClientCredentialHost
     public class ApplicationUserManager : UserManager<CassandraUser, Guid>
     {
         public ApplicationUserManager()
-            : base(new CassandraUserStore(new CassandraDao(CassandraAspNetIdentityOptions.CassandraConfig).GetSession(), CassandraAspNetApplicationConstants.TenantGuid))
+            : base(new CassandraUserStore(new CassandraDao(CassandraAspNetIdentityOptions.CassandraConfig), CassandraAspNetApplicationConstants.TenantGuid))
         {
         }
 

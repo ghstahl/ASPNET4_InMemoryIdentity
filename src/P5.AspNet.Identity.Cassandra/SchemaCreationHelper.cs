@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Cassandra;
 
 namespace P5.AspNet.Identity.Cassandra
@@ -14,6 +15,14 @@ namespace P5.AspNet.Identity.Cassandra
     {
         private static readonly Assembly CqlAssembly = typeof (SchemaCreationHelper).Assembly;
         private const string CqlScript = "P5.AspNet.Identity.Cassandra.defaultschema.cql";
+
+
+        public static async Task CreateSchemaIfNotExistsAsync(ISession session)
+        {
+            var task = Task.Run(() => CreateSchemaIfNotExists(session));
+            // do other stuff
+            await task;
+        }
 
         /// <summary>
         /// Creates the schema if it doesn't exist.
@@ -36,7 +45,7 @@ namespace P5.AspNet.Identity.Cassandra
                     {
                         // Do some basic parsing
                         currentLine = currentLine.Trim();
-                        
+
                         // Skip comment lines and empty lines
                         if (currentLine.StartsWith("//") || currentLine == string.Empty)
                             continue;
