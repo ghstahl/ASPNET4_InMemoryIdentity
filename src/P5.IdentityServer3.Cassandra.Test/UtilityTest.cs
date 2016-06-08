@@ -30,24 +30,31 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task TestUpdateAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            var result = await dao.FindClientIdAsync(insert[0].Id);
             Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
 
-            await IdentityServer3CassandraDao.TruncateTablesAsync();
-            result = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            await dao.TruncateTablesAsync();
+            result = await dao.FindClientIdAsync(insert[0].Id);
             Assert.IsNull(result);
 
         }
         [TestMethod]
         public async Task Test_CreateTablesAsync()
         {
-            await IdentityServer3CassandraDao.CreateTablesAsync();
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+            await dao.CreateTablesAsync();
         }
         [TestMethod]
         public async Task Test_TruncateTablesAsync()
         {
-            await IdentityServer3CassandraDao.TruncateTablesAsync();
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+            await dao.TruncateTablesAsync();
         }
 
         

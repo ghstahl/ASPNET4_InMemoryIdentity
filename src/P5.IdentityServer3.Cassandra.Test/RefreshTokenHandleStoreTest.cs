@@ -92,12 +92,15 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task TestCreateRefreshTokenHandleAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             IClientStore cs = new ClientStore();
             var insert = await CassandraTestHelper.InsertTestData_RefreshTokens(cs);
 
             foreach (var rth in insert)
             {
-                var result = await IdentityServer3CassandraDao.FindRefreshTokenByKey(rth.Key, cs);
+                var result = await dao.FindRefreshTokenByKey(rth.Key, cs);
                 Assert.AreEqual(result.ClientId,rth.ClientId);
             }
         }

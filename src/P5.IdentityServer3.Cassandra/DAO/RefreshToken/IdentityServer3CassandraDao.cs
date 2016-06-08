@@ -23,15 +23,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         #region PREPARED STATEMENTS for RefreshToken
 
-        private static AsyncLazy<PreparedStatement> _CreateRefreshTokenByClientId { get; set; }
-        private static AsyncLazy<PreparedStatement> _CreateRefreshTokenByKey { get; set; }
+        private  AsyncLazy<PreparedStatement> _CreateRefreshTokenByClientId { get; set; }
+        private  AsyncLazy<PreparedStatement> _CreateRefreshTokenByKey { get; set; }
 
-        private static AsyncLazy<PreparedStatement> _DeleteRefreshTokenByClientIdAndKey { get; set; }
-        private static AsyncLazy<PreparedStatement> _DeleteRefreshTokenByKey { get; set; }
+        private  AsyncLazy<PreparedStatement> _DeleteRefreshTokenByClientIdAndKey { get; set; }
+        private  AsyncLazy<PreparedStatement> _DeleteRefreshTokenByKey { get; set; }
 
         #endregion
 
-        public static void PrepareRefreshTokenStatements()
+        public void PrepareRefreshTokenStatements()
         {
             #region PREPARED STATEMENTS for RefreshToken
 
@@ -93,7 +93,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             #endregion            
 
         }
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
             IEnumerable<FlattenedRefreshTokenHandle> flattenedTokenHandles)
         {
 
@@ -129,7 +129,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return result;
         }
 
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForRefreshTokenHandleDelete(string clientId,
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForRefreshTokenHandleDelete(string clientId,
             string key)
         {
             var result = new List<BoundStatement>();
@@ -146,7 +146,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return result;
         }
 
-        public static async Task<bool> CreateRefreshTokenHandleAsync(FlattenedRefreshTokenHandle tokenHandle,
+        public async Task<bool> CreateRefreshTokenHandleAsync(FlattenedRefreshTokenHandle tokenHandle,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -161,7 +161,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> CreateManyRefreshTokenHandleAsync(
+        public async Task<bool> CreateManyRefreshTokenHandleAsync(
             IList<FlattenedRefreshTokenHandle> flattenedTokenHandles,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -190,7 +190,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<global::IdentityServer3.Core.Models.RefreshToken> FindRefreshTokenByKey(string key,
+        public async Task<global::IdentityServer3.Core.Models.RefreshToken> FindRefreshTokenByKey(string key,
             IClientStore clientStore,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -214,7 +214,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<IEnumerable<ITokenMetadata>> FindRefreshTokenMetadataBySubject(string subject,
+        public async Task<IEnumerable<ITokenMetadata>> FindRefreshTokenMetadataBySubject(string subject,
             IClientStore clientStore,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -244,7 +244,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> DeleteRefreshTokensByClientId(string client,
+        public async Task<bool> DeleteRefreshTokensByClientId(string client,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -280,7 +280,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> DeleteRefreshTokensByClientIdAndSubjectId(string client, string subject,
+        public async Task<bool> DeleteRefreshTokensByClientIdAndSubjectId(string client, string subject,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -316,7 +316,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> DeleteRefreshTokenByKey(string key,
+        public async Task<bool> DeleteRefreshTokenByKey(string key,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try

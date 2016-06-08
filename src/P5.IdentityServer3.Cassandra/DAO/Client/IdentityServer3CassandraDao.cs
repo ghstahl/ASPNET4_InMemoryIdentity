@@ -29,15 +29,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         #region PREPARED STATEMENTS for Client
 
-        private static AsyncLazy<PreparedStatement> _CreateClientById { get; set; }
-        private static AsyncLazy<PreparedStatement> _FindClientById { get; set; }
-        private static AsyncLazy<PreparedStatement> _DeleteClientById { get; set; }
+        private AsyncLazy<PreparedStatement> _CreateClientById { get; set; }
+        private AsyncLazy<PreparedStatement> _FindClientById { get; set; }
+        private AsyncLazy<PreparedStatement> _DeleteClientById { get; set; }
 
         private const string SelectClientQuery = @"SELECT * FROM clients_by_id";
 
         #endregion
 
-        public static void PrepareClientStatements()
+        public  void PrepareClientStatements()
         {
             #region PREPARED STATEMENTS for Client
 
@@ -111,7 +111,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             #endregion
         }
 
-        public static async Task<bool> DeleteClientByIdAsync(Guid id,
+        public async Task<bool> DeleteClientByIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -134,7 +134,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task<bool> DeleteClientByClientIdAsync(string clientId,
+        public async Task<bool> DeleteClientByClientIdAsync(string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -155,7 +155,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
 
-        public static async Task<bool> UpsertClientAsync(FlattenedClientRecord client,
+        public async Task<bool> UpsertClientAsync(FlattenedClientRecord client,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -179,7 +179,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task<bool> UpsertClientAsync(Client client,
+        public async Task<bool> UpsertClientAsync(Client client,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -198,7 +198,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task<global::IdentityServer3.Core.Models.Client> FindClientByClientIdAsync(string clientId,
+        public async Task<global::IdentityServer3.Core.Models.Client> FindClientByClientIdAsync(string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -219,7 +219,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<global::IdentityServer3.Core.Models.Client> FindClientIdAsync(Guid id,
+        public async Task<global::IdentityServer3.Core.Models.Client> FindClientIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -239,7 +239,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
             FlattenedClientRecord record)
         {
             var result = new List<BoundStatement>();
@@ -290,7 +290,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return result;
         }
 
-        public static async Task UpdateClientByIdAsync(string clientId, IEnumerable<PropertyValue> properties,
+        public async Task UpdateClientByIdAsync(string clientId, IEnumerable<PropertyValue> properties,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -304,7 +304,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task CleanupClientByIdAsync(string clientId,
+        public async Task CleanupClientByIdAsync(string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -332,7 +332,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task AddScopesToClientByIdAsync(string clientId, IEnumerable<string> scopes,
+        public async Task AddScopesToClientByIdAsync(string clientId, IEnumerable<string> scopes,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var scopeList = scopes.ToList();
@@ -358,7 +358,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteScopesFromClientByIdAsync(string clientId, IEnumerable<string> scopes,
+        public async Task DeleteScopesFromClientByIdAsync(string clientId, IEnumerable<string> scopes,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -372,7 +372,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task AddAllowedCorsOriginsToClientByClientIdAsync(string clientId,
+        public async Task AddAllowedCorsOriginsToClientByClientIdAsync(string clientId,
             IEnumerable<string> allowedCorsOrigins,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -385,7 +385,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteAllowedCorsOriginsFromClientByClientIdAsync(string clientId,
+        public async Task DeleteAllowedCorsOriginsFromClientByClientIdAsync(string clientId,
             IEnumerable<string> allowedCorsOrigins,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -399,7 +399,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task AddAllowedCustomGrantTypesByClientIdAsync(string clientId,
+        public async Task AddAllowedCustomGrantTypesByClientIdAsync(string clientId,
             IEnumerable<string> allowedCustomGrantTypes,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -412,7 +412,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteAllowedCustomGrantTypesFromClientByClientIdAsync(string clientId,
+        public async Task DeleteAllowedCustomGrantTypesFromClientByClientIdAsync(string clientId,
             IEnumerable<string> allowedCustomGrantTypes,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -427,7 +427,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
 
-        public static async Task AddIdentityProviderRestrictionsToClientByIdAsync(string clientId,
+        public async Task AddIdentityProviderRestrictionsToClientByIdAsync(string clientId,
             IEnumerable<string> identityProviderRestrictions,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -441,7 +441,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteIdentityProviderRestrictionsFromClientByIdAsync(string clientId,
+        public async Task DeleteIdentityProviderRestrictionsFromClientByIdAsync(string clientId,
             IEnumerable<string> identityProviderRestrictions,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -455,7 +455,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task AddPostLogoutRedirectUrisToClientByIdAsync(string clientId,
+        public async Task AddPostLogoutRedirectUrisToClientByIdAsync(string clientId,
             IEnumerable<string> postLogoutRedirectUris,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -469,7 +469,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeletePostLogoutRedirectUrisFromClientByIdAsync(string clientId,
+        public async Task DeletePostLogoutRedirectUrisFromClientByIdAsync(string clientId,
             IEnumerable<string> postLogoutRedirectUris,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -483,7 +483,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task AddRedirectUrisToClientByIdAsync(string clientId, IEnumerable<string> redirectUris,
+        public async Task AddRedirectUrisToClientByIdAsync(string clientId, IEnumerable<string> redirectUris,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -496,7 +496,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteRedirectUrisFromClientByIdAsync(string clientId, IEnumerable<string> redirectUris,
+        public async Task DeleteRedirectUrisFromClientByIdAsync(string clientId, IEnumerable<string> redirectUris,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -509,7 +509,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task AddClientSecretsToClientByIdAsync(string clientId,
+        public async Task AddClientSecretsToClientByIdAsync(string clientId,
             IEnumerable<Secret> clientSecrets,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -523,7 +523,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteClientSecretsFromClientByIdAsync(string clientId,
+        public async Task DeleteClientSecretsFromClientByIdAsync(string clientId,
             IEnumerable<Secret> clientSecrets,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -537,7 +537,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task AddClaimsToClientByIdAsync(string clientId, IEnumerable<Claim> claims,
+        public async Task AddClaimsToClientByIdAsync(string clientId, IEnumerable<Claim> claims,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -550,7 +550,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task DeleteClaimsFromClientByIdAsync(string clientId, IEnumerable<Claim> claims,
+        public async Task DeleteClaimsFromClientByIdAsync(string clientId, IEnumerable<Claim> claims,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -563,7 +563,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task UpdateClaimsInClientByIdAsync(string clientId, IEnumerable<Claim> claims,
+        public async Task UpdateClaimsInClientByIdAsync(string clientId, IEnumerable<Claim> claims,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var stored = await FindClientByClientIdAsync(clientId, cancellationToken);
@@ -579,7 +579,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await UpsertClientAsync(stored, cancellationToken);
         }
 
-        public static async Task<Store.Core.Models.IPage<FlattenedClientHandle>> PageClientsAsync(int pageSize, byte[] pagingState,
+        public async Task<Store.Core.Models.IPage<FlattenedClientHandle>> PageClientsAsync(int pageSize, byte[] pagingState,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try

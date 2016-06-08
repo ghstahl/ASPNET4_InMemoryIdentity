@@ -80,6 +80,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task TestCreateTokenHandleAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             int i = 0;
             var claims = new List<Claim>()
             {
@@ -106,8 +109,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             };
             IClientStore cs = new ClientStore();
             ITokenHandleStore ths = new TokenHandleStore();
-            var result = await IdentityServer3CassandraDao.CreateTokenHandleAsync(flat);
-            var result_of_find = await IdentityServer3CassandraDao.FindTokenByKey(flat.Key,cs);
+            var result = await dao.CreateTokenHandleAsync(flat);
+            var result_of_find = await dao.FindTokenByKey(flat.Key, cs);
             Token tt = result_of_find;
             Assert.AreEqual(flat.ClientId,result_of_find.ClientId);
 

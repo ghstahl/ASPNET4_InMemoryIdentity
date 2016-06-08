@@ -16,26 +16,33 @@ namespace P5.IdentityServer3.Cassandra.Test
     [DeploymentItem("source", "source")]
     public class ScopeStoreTest : TestBase
     {
-        private IdentityServer3CassandraDao _store;
+       
 
         [TestInitialize]
         public async void Setup()
         {
 
             base.Setup();
-            await IdentityServer3CassandraDao.CreateTablesAsync();
-            await IdentityServer3CassandraDao.TruncateTablesAsync();
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+
+            await dao.CreateTablesAsync();
+            await dao.TruncateTablesAsync();
         }
 
 
         [TestMethod]
         public async Task Test_GetScopesAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
             var queryNames = from item in insertResult
                 select item.Record.Name;
             var nameList = queryNames.ToList();
-            var result = await IdentityServer3CassandraDao.FindScopesAsync(true);
+            var result = await dao.FindScopesAsync(true);
             Assert.IsTrue(result.Any());
         }
 
@@ -43,11 +50,14 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_FindScopesAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
             var queryNames = from item in insertResult
                 select item.Record.Name;
             var nameList = queryNames.ToList();
-            var result = await IdentityServer3CassandraDao.FindScopesByNamesAsync(nameList);
+            var result = await dao.FindScopesByNamesAsync(nameList);
             Assert.AreEqual(result.Count(), insertResult.Count);
 
         }
@@ -55,6 +65,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_Create_Add_Delete_ScopesSecretsAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
             var queryNames = from item in insertResult
                 select item.Record.Name;
@@ -203,8 +216,12 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_Create_Add_Delete_ScopeClaimsAsync()
         {
-            await IdentityServer3CassandraDao.CreateTablesAsync();
-            await IdentityServer3CassandraDao.TruncateTablesAsync();
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+
+            await dao.CreateTablesAsync();
+            await dao.TruncateTablesAsync();
 
             var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
             var queryNames = from item in insertResult
@@ -261,8 +278,13 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_Create_Add_Update_ScopeClaimsAsync()
         {
-            await IdentityServer3CassandraDao.CreateTablesAsync();
-            await IdentityServer3CassandraDao.TruncateTablesAsync();
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+
+
+            await dao.CreateTablesAsync();
+            await dao.TruncateTablesAsync();
 
             var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
             var queryNames = from item in insertResult
@@ -334,6 +356,11 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_CreateAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+
+
             int i = 0;
 
             var name = Guid.NewGuid().ToString();
@@ -384,10 +411,10 @@ namespace P5.IdentityServer3.Cassandra.Test
             var scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(record));
             Guid id = scopeRecord.Id;
 
-            var result = await IdentityServer3CassandraDao.UpsertScopeAsync(scopeRecord);
+            var result = await dao.UpsertScopeAsync(scopeRecord);
             Assert.IsTrue(result);
 
-            var result2 = await IdentityServer3CassandraDao.FindScopeByIdAsync(id);
+            var result2 = await dao.FindScopeByIdAsync(id);
             Assert.IsNotNull(result2);
 
             scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(result2));

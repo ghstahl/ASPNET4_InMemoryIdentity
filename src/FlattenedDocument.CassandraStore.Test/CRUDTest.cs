@@ -52,8 +52,10 @@ namespace FlattenedDocument.CassandraStore.Test
 
         private async Task CreateAndTruncateTables()
         {
-            await FlattenedDocumentCassandraDao.CreateFlattenedDocumentTablesAsync();
-            await FlattenedDocumentCassandraDao.TruncateTablesAsync();
+            var dao = new FlattenedDocumentCassandraDao();
+            await dao.EstablishConnectionAsync();
+            await dao.CreateFlattenedDocumentTablesAsync();
+            await dao.TruncateTablesAsync();
         }
         [TestInitialize]
         public void Setup()

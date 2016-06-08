@@ -20,6 +20,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 {
     public partial class IdentityServer3CassandraDao
     {
+
         static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public static CassandraConfig _CassandraConfig;
@@ -39,65 +40,68 @@ namespace P5.IdentityServer3.Cassandra.DAO
             set { _CassandraConfig = value; }
         }
 
-        private static ISession _cassandraSession = null;
+        private ISession _cassandraSession = null;
+        public IdentityServer3CassandraDao() { }
 
-
-        public static ISession CassandraSession
+        public async Task EstablishConnectionAsync()
         {
-            get
+            try
             {
-                try
+                if (CassandraSession == null)
                 {
-                    if (_cassandraSession == null)
-                    {
-                        var dao = new CassandraDao(CassandraConfig);
-                        _cassandraSession = dao.GetSessionAsync().Result;
+                    var dao = new CassandraDao(CassandraConfig);
+                    CassandraSession = await dao.GetSessionAsync();
 
 
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for Utility
-                        //-----------------------------------------------
-                        PrepareUtilityStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for Utility
+                    //-----------------------------------------------
+                    PrepareUtilityStatements();
 
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for Scope
-                        //-----------------------------------------------
-                        PrepareScopeStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for Scope
+                    //-----------------------------------------------
+                    PrepareScopeStatements();
 
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for Client
-                        //-----------------------------------------------
-                        PrepareClientStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for Client
+                    //-----------------------------------------------
+                    PrepareClientStatements();
 
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for Token
-                        //-----------------------------------------------
-                        PrepareTokenHandleStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for Token
+                    //-----------------------------------------------
+                    PrepareTokenHandleStatements();
 
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for RefreshToken
-                        //-----------------------------------------------
-                        PrepareRefreshTokenStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for RefreshToken
+                    //-----------------------------------------------
+                    PrepareRefreshTokenStatements();
 
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for Consent
-                        //-----------------------------------------------
-                        PrepareConsentStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for Consent
+                    //-----------------------------------------------
+                    PrepareConsentStatements();
 
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for AuthorizationCode
-                        //-----------------------------------------------
-                        PrepareAuthorizationCodeStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for AuthorizationCode
+                    //-----------------------------------------------
+                    PrepareAuthorizationCodeStatements();
 
 
-                    }
                 }
-                catch (Exception e)
-                {
-                    _cassandraSession = null;
-                }
-                return _cassandraSession;
             }
+            catch (Exception e)
+            {
+                CassandraSession = null;
+            }
+           
+        }
+       
+        public  ISession CassandraSession
+        {
+            get { return _cassandraSession; }
+            private set { _cassandraSession = value; }
         }
     }
 }

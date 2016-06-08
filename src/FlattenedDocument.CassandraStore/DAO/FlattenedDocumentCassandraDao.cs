@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Threading.Tasks;
 using Cassandra;
 using log4net;
 using P5.CassandraStore.DAO;
@@ -74,8 +75,38 @@ namespace FlattenedDocument.CassandraStore.DAO
             set { _CassandraStoreOptions = value; }
         }
 
-        private static ISession _cassandraSession = null;
+        private  ISession _cassandraSession = null;
+        public ISession CassandraSession
+        {
+            get { return _cassandraSession; }
+            private set { _cassandraSession = value; }
+        }
+        public async Task EstablishConnectionAsync()
+        {
+            try
+            {
+                if (CassandraSession == null)
+                {
+                    var dao = new CassandraDao(CassandraStoreOptions.CassandraConfig);
+               
+                    CassandraSession = await dao.GetSessionAsync();
 
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for FlattenedDocument
+                    //-----------------------------------------------
+                    PrepareFlattenedDocumentStatements(CassandraStoreOptions.TableName);
+                    PrepareFlattenedDocumentUtilityStatements(CassandraStoreOptions.TableName);
+
+
+                }
+            }
+            catch (Exception e)
+            {
+                CassandraSession = null;
+            }
+
+        }
+     
         internal static string TableByIdName(string seedTableName)
         {
             return seedTableName + "_by_id";
@@ -86,31 +117,6 @@ namespace FlattenedDocument.CassandraStore.DAO
             return seedTableName + "_by_type_and_version";
         }
 
-        public static ISession CassandraSession
-        {
-            get
-            {
-                try
-                {
-                    if (_cassandraSession == null)
-                    {
-                        var dao = new CassandraDao(CassandraStoreOptions.CassandraConfig);
-                        _cassandraSession = dao.GetSession();
-
-                        //-----------------------------------------------
-                        // PREPARED STATEMENTS for FlattenedDocument
-                        //-----------------------------------------------
-                        PrepareFlattenedDocumentStatements(CassandraStoreOptions.TableName);
-                        PrepareFlattenedDocumentUtilityStatements(CassandraStoreOptions.TableName);
-
-                    }
-                }
-                catch (Exception e)
-                {
-                    _cassandraSession = null;
-                }
-                return _cassandraSession;
-            }
-        }
+       
     }
 }

@@ -25,7 +25,7 @@ namespace P5.AspNet.Identity.Cassandra
         private static readonly Task<bool> FalseTask = Task.FromResult(false);
         private static readonly Task CompletedTask = TrueTask;
 
-        private async Task EstablishSession()
+        private async Task EstablishSessionAsync()
         {
             if (_resilientSession == null)
             {
@@ -593,28 +593,30 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public Guid TenantId { get { return _tenantId; } }
 
+        TryWithAwaitInCatchExcpetionHandleResult<T> HandleCassandraException<T>(Exception ex)
+        {
+            var nhae = ex as NoHostAvailableException;
+            if (nhae != null)
+            {
+                _resilientSession = null;
+            }
+            return new TryWithAwaitInCatchExcpetionHandleResult<T>
+            {
+                RethrowException = true
+            };
+        }
         /// <summary>
         /// Insert a new user.
         /// </summary>
         public async Task CreateAsync(CassandraUser user)
         {
-
-            Exception ex = null;
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.CreateAsync(user);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<Task>(ex));
 
         }
         /// <summary>
@@ -622,22 +624,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task UpdateAsync(CassandraUser user)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.UpdateAsync(user);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<Task>(ex));
         }
 
         /// <summary>
@@ -645,22 +639,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task DeleteAsync(CassandraUser user)
         {
-            Exception ex = null;
+           
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.DeleteAsync(user);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<Task>(ex));
         }
 
 
@@ -670,23 +656,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindByIdAsync(Guid userId)
         {
-            Exception ex = null;
+            
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.FindByIdAsync(userId);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<CassandraUser>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<CassandraUser>(ex));
             return result;
         }
 
@@ -697,28 +674,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindByNameAsync(string userName)
         {
-            Exception ex = null;
+            
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.FindByNameAsync(userName);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    var nhae = ex as NoHostAvailableException;
-                    if (nhae != null)
-                    {
-                        _resilientSession = null;
-                    }
-                    return new TryWithAwaitInCatchExcpetionHandleResult<CassandraUser>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<CassandraUser>(ex));
             return result;
         }
 
@@ -729,22 +692,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task AddLoginAsync(CassandraUser user, UserLoginInfo login)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.AddLoginAsync(user, login);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<Task>(ex));
         }
 
 
@@ -754,22 +709,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task RemoveLoginAsync(CassandraUser user, UserLoginInfo login)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.RemoveLoginAsync(user, login);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<Task>(ex));
         }
 
 
@@ -779,23 +726,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<IList<UserLoginInfo>> GetLoginsAsync(CassandraUser user)
         {
-            Exception ex = null;
+            
             IList<UserLoginInfo> result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<UserLoginInfo>>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.GetLoginsAsync(user);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<IList<UserLoginInfo>>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<IList<UserLoginInfo>>(ex));
             return result;
         }
 
@@ -806,23 +744,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindAsync(UserLoginInfo login)
         {
-            Exception ex = null;
+            
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.FindAsync(login);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<CassandraUser>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<CassandraUser>(ex));
             return result;
         }
 
@@ -833,23 +762,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<IList<Claim>> GetClaimsAsync(CassandraUser user)
         {
-            Exception ex = null;
+            
             IList<Claim> result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<Claim>>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.GetClaimsAsync(user);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<IList<Claim>>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<IList<Claim>>(ex));
             return result;
         }
 
@@ -860,22 +780,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task AddClaimAsync(CassandraUser user, Claim claim)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.AddClaimAsync(user, claim);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                 async (ex) => HandleCassandraException<Task>(ex));
         }
 
         /// <summary>
@@ -883,22 +795,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task RemoveClaimAsync(CassandraUser user, Claim claim)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.RemoveClaimAsync(user, claim);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                 async (ex) => HandleCassandraException<Task>(ex));
         }
 
 
@@ -908,22 +812,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task SetPasswordHashAsync(CassandraUser user, string passwordHash)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.SetPasswordHashAsync(user, passwordHash);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                 async (ex) => HandleCassandraException<Task>(ex));
         }
 
 
@@ -933,23 +829,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<string> GetPasswordHashAsync(CassandraUser user)
         {
-            Exception ex = null;
+            
             string result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<string>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.GetPasswordHashAsync(user);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<string>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                 async (ex) => HandleCassandraException<string>(ex));
             return result;
         }
 
@@ -959,23 +846,14 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindByEmailAsync(string email)
         {
-            Exception ex = null;
+            
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.FindByEmailAsync(email);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<CassandraUser>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<CassandraUser>(ex));
             return result;
         }
 
@@ -997,68 +875,43 @@ namespace P5.AspNet.Identity.Cassandra
 
         public async Task AddToRoleAsync(CassandraUser user, string roleName)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.AddToRoleAsync(user, roleName);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<Task>(ex));
         }
 
 
 
         public async Task RemoveFromRoleAsync(CassandraUser user, string roleName)
         {
-            Exception ex = null;
+            
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     await _resilientSession.RemoveFromRoleAsync(user, roleName);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<Task>
-                    {
-                        RethrowException = true
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<Task>(ex));
         }
 
 
 
         public async Task<IList<string>> GetRolesAsync(CassandraUser user)
         {
-            Exception ex = null;
+            
             IList<string> result = null;
             result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<string>>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.GetRolesAsync(user);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<IList<string>>
-                    {
-                        RethrowException = true,
-                        DefaultResult = null
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<IList<string>>(ex));
             return result;
         }
 
@@ -1066,23 +919,14 @@ namespace P5.AspNet.Identity.Cassandra
 
         public async Task<bool> IsInRoleAsync(CassandraUser user, string roleName)
         {
-            Exception ex = null;
+            
             bool result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<bool>(
                 async () =>
                 {
-                    await EstablishSession();
+                    await EstablishSessionAsync();
                     return await _resilientSession.IsInRoleAsync(user, roleName);
                 },
-                async (e) =>
-                {
-                    ex = e;
-                    return new TryWithAwaitInCatchExcpetionHandleResult<bool>
-                    {
-                        RethrowException = true,
-                        DefaultResult = false
-                    };
-                }
-                );
+                async (ex) => HandleCassandraException<bool>(ex));
             return result;
         }
 

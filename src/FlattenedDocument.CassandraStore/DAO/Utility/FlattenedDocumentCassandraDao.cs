@@ -21,13 +21,13 @@ namespace FlattenedDocument.CassandraStore.DAO
 
 		#region PREPARED STATEMENTS for FlattenedDocument
 
-		private static string CreateFlattenedDocumentTableById { get; set; }
-		private static string CreateFlattenedDocumentTableByTypeAndVersion { get; set; }
-		private static List<string> FlattenedTables { get; set; }
+		private string CreateFlattenedDocumentTableById { get; set; }
+		private string CreateFlattenedDocumentTableByTypeAndVersion { get; set; }
+		private List<string> FlattenedTables { get; set; }
 
 		#endregion
 
-		public static void PrepareFlattenedDocumentUtilityStatements(string seedTableName)
+		public  void PrepareFlattenedDocumentUtilityStatements(string seedTableName)
 		{
 			#region PREPARED STATEMENTS for FlattenedDocument
 			string tableById = TableByIdName(seedTableName);
@@ -61,14 +61,14 @@ namespace FlattenedDocument.CassandraStore.DAO
 			#endregion
 
 		}
-		public static async Task<bool> TruncateTablesAsync(
+		public async Task<bool> TruncateTablesAsync(
 		CancellationToken cancellationToken = default(CancellationToken))
 		{
 			var session = CassandraSession;
 			return await CassandraDao.TruncateTablesAsync(session, FlattenedTables, cancellationToken);
 		}
 
-		public static async Task CreateFlattenedDocumentTablesAsync(
+		public async Task CreateFlattenedDocumentTablesAsync(
 			CancellationToken cancellationToken = default(CancellationToken))
 		{
 			try

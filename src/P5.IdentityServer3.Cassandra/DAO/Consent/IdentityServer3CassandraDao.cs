@@ -20,11 +20,11 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         #region PREPARED STATEMENTS for Consent
 
-        private static AsyncLazy<PreparedStatement> _CreateConsentById { get; set; }
-        private static AsyncLazy<PreparedStatement> _CreateConsentByClientId { get; set; }
+        private  AsyncLazy<PreparedStatement> _CreateConsentById { get; set; }
+        private  AsyncLazy<PreparedStatement> _CreateConsentByClientId { get; set; }
 
         #endregion
-        public static void PrepareConsentStatements()
+        public void PrepareConsentStatements()
         {
             #region PREPARED STATEMENTS for Consent
 
@@ -60,7 +60,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             #endregion
 
         }
-        private static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+        private  async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
           IList<FlattenedConsentRecord> flattenedConsentRecords)
         {
             try
@@ -94,7 +94,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 throw;
             }
         }
-        public static async Task<bool> CreateConsentHandleAsync(FlattenedConsentHandle flat,
+        public  async Task<bool> CreateConsentHandleAsync(FlattenedConsentHandle flat,
      CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -109,7 +109,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> CreateManyConsentHandleAsync(IList<FlattenedConsentHandle> flatteneds,
+        public  async Task<bool> CreateManyConsentHandleAsync(IList<FlattenedConsentHandle> flatteneds,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -120,7 +120,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 if (flatteneds.Count == 0)
                     throw new ArgumentException("flattened is empty");
 
-                var session = DAO.IdentityServer3CassandraDao.CassandraSession;
+                var session = CassandraSession;
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var batch = new BatchStatement();
@@ -139,13 +139,13 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task<global::IdentityServer3.Core.Models.Consent> FindConsentByIdAsync(Guid id,
+        public  async Task<global::IdentityServer3.Core.Models.Consent> FindConsentByIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
                 MyMappings.Init();
-                var session = DAO.IdentityServer3CassandraDao.CassandraSession;
+                var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
@@ -159,14 +159,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<global::IdentityServer3.Core.Models.Consent> FindConsentBySubjectAndClientIdAsync(
+        public  async Task<global::IdentityServer3.Core.Models.Consent> FindConsentBySubjectAndClientIdAsync(
             string subject, string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
                 MyMappings.Init();
-                var session = DAO.IdentityServer3CassandraDao.CassandraSession;
+                var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
@@ -182,14 +182,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> DeleteConsentBySubjectAndClientIdAsync(
+        public  async Task<bool> DeleteConsentBySubjectAndClientIdAsync(
             string subject, string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
                 MyMappings.Init();
-                var session = DAO.IdentityServer3CassandraDao.CassandraSession;
+                var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 await
@@ -202,14 +202,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<IEnumerable<global::IdentityServer3.Core.Models.Consent>> FindConsentsBySubjectAsync(
+        public  async Task<IEnumerable<global::IdentityServer3.Core.Models.Consent>> FindConsentsBySubjectAsync(
             string subject,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
                 MyMappings.Init();
-                var session = DAO.IdentityServer3CassandraDao.CassandraSession;
+                var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
@@ -231,14 +231,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<IEnumerable<global::IdentityServer3.Core.Models.Consent>> FindConsentsByClientIdAsync(
+        public  async Task<IEnumerable<global::IdentityServer3.Core.Models.Consent>> FindConsentsByClientIdAsync(
             string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
                 MyMappings.Init();
-                var session = DAO.IdentityServer3CassandraDao.CassandraSession;
+                var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =

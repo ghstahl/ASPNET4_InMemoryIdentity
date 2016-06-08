@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
- 
+using P5.CassandraStore.DAO;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 
@@ -11,35 +11,77 @@ namespace P5.IdentityServer3.Cassandra
 {
     public class TokenHandleStore : ITokenHandleStore
     {
-        public TokenHandleStore() { }
+        private ResilientSessionContainer _resilientSessionContainer;
+
+        ResilientSessionContainer ResilientSessionContainer
+        {
+            get { return _resilientSessionContainer ?? (_resilientSessionContainer = new ResilientSessionContainer()); }
+        }
+
+        public TokenHandleStore()
+        {
+        }
+
         public async Task StoreAsync(string key, Token value)
         {
-            var flat = new FlattenedTokenHandle(key, value);
-            var result = await IdentityServer3CassandraDao.CreateTokenHandleAsync(flat);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    var flat = new FlattenedTokenHandle(key, value);
+                    await ResilientSessionContainer.ResilientSession.CreateTokenHandleAsync(flat);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }
 
         public async Task<Token> GetAsync(string key)
         {
-            IClientStore cs = new ClientStore();
-            var result_of_find = await IdentityServer3CassandraDao.FindTokenByKey(key, cs);
-            return result_of_find;
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                   async () =>
+                   {
+                       await ResilientSessionContainer.EstablishSessionAsync();
+                       IClientStore cs = new ClientStore();
+                       return await ResilientSessionContainer.ResilientSession.FindTokenByKey(key, cs);
+                   },
+                   async (ex) => ResilientSessionContainer.HandleCassandraException<Token>(ex));
+            return result;
         }
 
         public async Task RemoveAsync(string key)
         {
-            var result_of_find = await IdentityServer3CassandraDao.DeleteTokenByKey(key);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                  async () =>
+                  {
+                      await ResilientSessionContainer.EstablishSessionAsync();
+                      await ResilientSessionContainer.ResilientSession.DeleteTokenByKey(key);
+                  },
+                  async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }
 
         public async Task<IEnumerable<ITokenMetadata>> GetAllAsync(string subject)
         {
-             IClientStore cs = new ClientStore();
-              var result_of_find = await IdentityServer3CassandraDao.FindTokenMetadataBySubject(subject, cs);
-            return result_of_find;
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                     async () =>
+                     {
+                         await ResilientSessionContainer.EstablishSessionAsync();
+                         IClientStore cs = new ClientStore();
+                         return await ResilientSessionContainer.ResilientSession.FindTokenMetadataBySubject(subject, cs);
+                     },
+                     async (ex) => ResilientSessionContainer.HandleCassandraException<IEnumerable<ITokenMetadata>>(ex));
+            return result;
+
         }
 
         public async Task RevokeAsync(string subject, string client)
         {
-            var result_of_find = await IdentityServer3CassandraDao.DeleteTokensByClientIdAndSubjectId(client,subject);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    await ResilientSessionContainer.ResilientSession.DeleteTokensByClientIdAndSubjectId(client, subject);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
+
         }
     }
 }

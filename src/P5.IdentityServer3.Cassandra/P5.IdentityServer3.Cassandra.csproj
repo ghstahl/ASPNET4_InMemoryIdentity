@@ -77,6 +77,7 @@
     <Compile Include="Client\ClientStore.cs" />
     <Compile Include="Client\IdentityServer3AdminStore.cs" />
     <Compile Include="Client\IIdentityServer3AdminClientStore.cs" />
+    <Compile Include="ResilientSessionContainer.cs" />
     <Compile Include="IIdentityServer3AdminStore.cs" />
     <Compile Include="PropertyValue.cs" />
     <Compile Include="CommonStore\CassandraStore.cs" />

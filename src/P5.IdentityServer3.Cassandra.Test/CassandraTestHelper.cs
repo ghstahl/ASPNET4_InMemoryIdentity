@@ -19,6 +19,9 @@ namespace P5.IdentityServer3.Cassandra.Test
     {
         public static async Task<List<FlattenedScopeRecord>> InsertTestData_Scopes(int count = 1)
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var result = new List<FlattenedScopeRecord>();
             for (int i = 0; i < count; ++i)
             {
@@ -70,16 +73,19 @@ namespace P5.IdentityServer3.Cassandra.Test
                     }
                 };
                 var scopeRecord = new FlattenedScopeRecord(new FlattenedScopeHandle(record));
-                await IdentityServer3CassandraDao.UpsertScopeAsync(scopeRecord);
+                await dao.UpsertScopeAsync(scopeRecord);
                 result.Add(scopeRecord);
 
             }
-         //   await IdentityServer3CassandraDao.UpsertManyScopeAsync(result);
+            //   await dao.UpsertManyScopeAsync(result);
             return result;
         }
 
         public static async Task<List<FlattenedClientRecord>> InsertTestData_Clients(int count = 1)
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var insertScope = await InsertTestData_Scopes(3);
             var scopeNames = (from item in insertScope
                 let c = item.Record.Name
@@ -158,7 +164,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                     }
                 };
                 FlattenedClientRecord clientrecord = new FlattenedClientRecord(new FlattenedClientHandle(client));
-                await IdentityServer3CassandraDao.UpsertClientAsync(clientrecord);
+                await dao.UpsertClientAsync(clientrecord);
 
                 result.Add(clientrecord);
             }
@@ -168,6 +174,9 @@ namespace P5.IdentityServer3.Cassandra.Test
 
         public static async Task<List<FlattenedRefreshTokenHandle>> InsertTestData_RefreshTokens(IClientStore store, int count = 1)
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var tokenInsert = InsertTestData_Tokens(count);
             var result = new List<FlattenedRefreshTokenHandle>();
             foreach (var token in tokenInsert.Result)
@@ -183,13 +192,16 @@ namespace P5.IdentityServer3.Cassandra.Test
                 var rth = new FlattenedRefreshTokenHandle(token.Key,rt);
                 result.Add(rth);
             }
-            await IdentityServer3CassandraDao.CreateManyRefreshTokenHandleAsync(result);
+            await dao.CreateManyRefreshTokenHandleAsync(result);
 
             return result;
         }
 
         public static async Task<List<FlattenedAuthorizationCodeHandle>> InsertTestData_AuthorizationCode(int count = 1)
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             IClientStore clientStore = new ClientStore();
             var insertTokens = await CassandraTestHelper.InsertTestData_Tokens(count); // only add one client
             var clientId = insertTokens[0].ClientId;
@@ -233,13 +245,16 @@ namespace P5.IdentityServer3.Cassandra.Test
                 ++i;
                 result.Add(handle);
             }
-            await IdentityServer3CassandraDao.CreateManyAuthorizationCodeHandleAsync(result);
+            await dao.CreateManyAuthorizationCodeHandleAsync(result);
             return result;
 
         }
 
         public static async Task<List<FlattenedTokenHandle>> InsertTestData_Tokens(int count = 1)
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var insertClients = await CassandraTestHelper.InsertTestData_Clients(1); // only add one client
             // we are going to associate a bunch of tokens to this one client
 
@@ -273,7 +288,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
                 result.Add(flat);
             }
-            await IdentityServer3CassandraDao.CreateManyTokenHandleAsync(result);
+            await dao.CreateManyTokenHandleAsync(result);
             return result;
         }
 
@@ -288,6 +303,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         }
         public static async Task<List<FlattenedConsentHandle>> InsertTestData_Consents(string clientId,string subject,int count = 1)
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             List<FlattenedConsentHandle> result = new List<FlattenedConsentHandle>();
             for (int i = 0; i < count; ++i)
             {
@@ -303,7 +321,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                 });
                 result.Add(flat);
             }
-            await IdentityServer3CassandraDao.CreateManyConsentHandleAsync(result);
+            await dao.CreateManyConsentHandleAsync(result);
             return result;
         }
     }

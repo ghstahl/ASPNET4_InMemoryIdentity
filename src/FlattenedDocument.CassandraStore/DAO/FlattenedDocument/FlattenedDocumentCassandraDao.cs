@@ -22,19 +22,19 @@ namespace FlattenedDocument.CassandraStore.DAO
 
         #region PREPARED STATEMENTS for FlattenedDocument
 
-        private static AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentById { get; set; }
-        private static AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentByTypeAndVersion { get; set; }
-        private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentById { get; set; }
-        private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByType { get; set; }
-        private static AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByTypeAndVersion { get; set; }
-        private static string FindFlattenedDocumentQuery { get; set; }
-        private static string FindFlattenedDocumentByIdQuery { get; set; }
-        private static string FindFlattenedDocumentByType { get; set; }
-        private static string FindFlattenedDocumentByTypeAndVersion { get; set; }
+        private AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentById { get; set; }
+        private AsyncLazy<PreparedStatement> _UpsertFlattenedDocumentByTypeAndVersion { get; set; }
+        private AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentById { get; set; }
+        private AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByType { get; set; }
+        private AsyncLazy<PreparedStatement> _DeleteFlattenedDocumentByTypeAndVersion { get; set; }
+        private string FindFlattenedDocumentQuery { get; set; }
+        private string FindFlattenedDocumentByIdQuery { get; set; }
+        private string FindFlattenedDocumentByType { get; set; }
+        private string FindFlattenedDocumentByTypeAndVersion { get; set; }
 
         #endregion
 
-        public static void PrepareFlattenedDocumentStatements(string seedTableName)
+        public  void PrepareFlattenedDocumentStatements(string seedTableName)
         {
             #region PREPARED STATEMENTS for FlattenedDocument
 
@@ -120,7 +120,7 @@ Document text,
             #endregion
         }
 
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForUpsert(
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForUpsert(
             IEnumerable<IDocumentRecord> items)
         {
 
@@ -148,7 +148,7 @@ Document text,
             return result;
         }
 
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForFlattenedDocumentDelete(Guid id,
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForFlattenedDocumentDelete(Guid id,
             string documentType,
             string documentVersion)
         {
@@ -166,7 +166,7 @@ Document text,
             return result;
         }
 
-        public static async Task<bool> DeleteFlattenedDocumentByTypeAsync(string type,
+        public async Task<bool> DeleteFlattenedDocumentByTypeAsync(string type,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -201,7 +201,7 @@ Document text,
             }
         }
 
-        public static async Task<bool> DeleteFlattenedDocumentByTypeAndVersionAsync(string type, string version,
+        public async Task<bool> DeleteFlattenedDocumentByTypeAndVersionAsync(string type, string version,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -229,7 +229,7 @@ Document text,
             }
         }
 
-        public static async Task<bool> DeleteFlattenedDocumentByIdAsync(Guid id,
+        public async Task<bool> DeleteFlattenedDocumentByIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -257,7 +257,7 @@ Document text,
             }
         }
 
-        public static async Task<bool> UpsertFlattenedDocumentAsync(IDocumentRecord documentRecord,
+        public async Task<bool> UpsertFlattenedDocumentAsync(IDocumentRecord documentRecord,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -272,7 +272,7 @@ Document text,
             }
         }
 
-        public static async Task<bool> UpsertManyFlattenedDocumentAsync(
+        public async Task<bool> UpsertManyFlattenedDocumentAsync(
             IEnumerable<IDocumentRecord> documentRecords,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -299,7 +299,7 @@ Document text,
             }
         }
 
-        public static async Task<IDocumentRecord> FindFlattenedDocumentByIdAsync(Guid id,
+        public async Task<IDocumentRecord> FindFlattenedDocumentByIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -322,7 +322,7 @@ Document text,
             }
         }
 
-        public static async Task<IDocumentRecord> FindFlattenedDocumentByTypeAndVersionAsync(string type, string version,
+        public async Task<IDocumentRecord> FindFlattenedDocumentByTypeAndVersionAsync(string type, string version,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -345,7 +345,7 @@ Document text,
             }
         }
 
-        public static async Task<IEnumerable<IDocumentRecord>> FindFlattenedDocumentsByTypeAsync(string type,
+        public async Task<IEnumerable<IDocumentRecord>> FindFlattenedDocumentsByTypeAsync(string type,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -365,7 +365,7 @@ Document text,
             }
         }
 
-        public static async Task<P5.Store.Core.Models.IPage<DocumentRecord>> PageFlattenedDocumentsAsync(
+        public async Task<P5.Store.Core.Models.IPage<DocumentRecord>> PageFlattenedDocumentsAsync(
             int pageSize, byte[] pagingState,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -401,7 +401,7 @@ Document text,
             }
         }
 
-        public static async Task<P5.Store.Core.Models.IPage<DocumentRecord>> PageFlattenedDocumentsByTypeAsync(
+        public async Task<P5.Store.Core.Models.IPage<DocumentRecord>> PageFlattenedDocumentsByTypeAsync(
             string type,
             int pageSize, byte[] pagingState,
             CancellationToken cancellationToken = default(CancellationToken))

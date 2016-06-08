@@ -12,14 +12,19 @@ namespace FlattenedDocument.CassandraStore.Test
         [TestMethod]
         public async Task TestTruncateTables()
         {
+            var dao = new FlattenedDocumentCassandraDao();
+            await dao.EstablishConnectionAsync();
+
             // create Tables, in case they don't exist
-            await FlattenedDocumentCassandraDao.CreateFlattenedDocumentTablesAsync();
-            await FlattenedDocumentCassandraDao.TruncateTablesAsync();
+            await dao.CreateFlattenedDocumentTablesAsync();
+            await dao.TruncateTablesAsync();
         }
         [TestMethod]
         public async Task TestCreateTables()
         {
-            await FlattenedDocumentCassandraDao.CreateFlattenedDocumentTablesAsync();
+            var dao = new FlattenedDocumentCassandraDao();
+            await dao.EstablishConnectionAsync();
+            await dao.CreateFlattenedDocumentTablesAsync();
         }
     }
 }

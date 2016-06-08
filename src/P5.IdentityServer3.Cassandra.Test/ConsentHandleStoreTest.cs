@@ -54,12 +54,15 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task TestCreateTokenHandleAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var store = new ConsentStore();
 
             var insert = await CassandraTestHelper.InsertTestData_Consents(1);
             var flat = insert[0];
             FlattenedConsentRecord fcr = new FlattenedConsentRecord(flat);
-            var result = await IdentityServer3CassandraDao.FindConsentByIdAsync(fcr.Id);
+            var result = await dao.FindConsentByIdAsync(fcr.Id);
             Assert.AreEqual(result.ClientId, flat.ClientId);
             Assert.AreEqual(result.Subject, flat.Subject);
 

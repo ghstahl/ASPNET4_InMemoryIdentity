@@ -33,8 +33,8 @@ namespace P5.IdentityServer3.Cassandra.Test
         public async void Setup()
         {
             base.Setup();
-     //       await IdentityServer3CassandraDao.CreateTablesAsync();
-     //       await IdentityServer3CassandraDao.TruncateTablesAsync();
+            //       await dao.CreateTablesAsync();
+            //       await dao.TruncateTablesAsync();
         }
 
 
@@ -312,6 +312,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_Create_Modify_ClientAsync()
         {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
             var adminStore = new IdentityServer3AdminStore();
             global::IdentityServer3.Core.Models.Client dd = new global::IdentityServer3.Core.Models.Client();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
@@ -514,9 +517,9 @@ namespace P5.IdentityServer3.Cassandra.Test
             };
 #endregion
 
-            await IdentityServer3CassandraDao.UpdateClientByIdAsync(result.ClientId, propertyList);
+            await dao.UpdateClientByIdAsync(result.ClientId, propertyList);
 
-            var result2 = await IdentityServer3CassandraDao.FindClientIdAsync(insert[0].Id);
+            var result2 = await dao.FindClientIdAsync(insert[0].Id);
 
             foreach (var property in propertyList)
             {
@@ -968,7 +971,10 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_Create_Page_ByClientIdAsync()
         {
-            await IdentityServer3CassandraDao.TruncateTablesAsync();
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+            await dao.TruncateTablesAsync();
             int nNumber = 100;
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(nNumber);

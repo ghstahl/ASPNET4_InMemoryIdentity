@@ -6,60 +6,123 @@ using IdentityServer3.Core.Services;
 using P5.IdentityServer3.Cassandra.DAO;
 using System.Linq;
 using IdentityServer3.Core.Models;
+using P5.CassandraStore.DAO;
 using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.Cassandra
 {
     public class ScopeStore : IIdentityServer3AdminScopeStore
     {
-        public async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> FindScopesAsync(
+        private ResilientSessionContainer _resilientSessionContainer;
+        ResilientSessionContainer ResilientSessionContainer
+        {
+            get { return _resilientSessionContainer ?? (_resilientSessionContainer = new ResilientSessionContainer()); }
+        }
+        public async Task<IEnumerable<Scope>> FindScopesAsync(
             IEnumerable<string> scopeNames)
         {
-            var scopeRecords = await IdentityServer3CassandraDao.FindScopesByNamesAsync(scopeNames);
-            return scopeRecords;
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                   async () =>
+                   {
+                       await ResilientSessionContainer.EstablishSessionAsync();
+                       return await ResilientSessionContainer.ResilientSession.FindScopesByNamesAsync(scopeNames);
+                   },
+                   async (ex) => ResilientSessionContainer.HandleCassandraException<IEnumerable<Scope>>(ex));
+            return result;
         }
 
-        public async Task<IEnumerable<global::IdentityServer3.Core.Models.Scope>> GetScopesAsync(bool publicOnly = true)
+        public async Task<IEnumerable<Scope>> GetScopesAsync(bool publicOnly = true)
         {
-            var scopeRecords = await IdentityServer3CassandraDao.FindScopesAsync(publicOnly);
-            return scopeRecords;
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                   async () =>
+                   {
+                       await ResilientSessionContainer.EstablishSessionAsync();
+                       return await ResilientSessionContainer.ResilientSession.FindScopesAsync(publicOnly);
+                   },
+                   async (ex) => ResilientSessionContainer.HandleCassandraException<IEnumerable<Scope>>(ex));
+            return result;
         }
 
         public async Task UpdateScopeByNameAsync(string name, IEnumerable<PropertyValue> properties)
         {
-            await IdentityServer3CassandraDao.UpdateScopeByNameAsync(name, properties);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    await ResilientSessionContainer.ResilientSession.UpdateScopeByNameAsync(name, properties);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));     
         }
 
         public async Task CreateScopeAsync(Scope scope)
         {
-            await IdentityServer3CassandraDao.UpsertScopeAsync(scope);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                   async () =>
+                   {
+                       await ResilientSessionContainer.EstablishSessionAsync();
+                       await ResilientSessionContainer.ResilientSession.UpsertScopeAsync(scope);
+                   },
+                   async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));    
         }
 
        
         public async Task AddScopeSecretsAsync(string name, IEnumerable<Secret> secrets)
         {
-            await IdentityServer3CassandraDao.AddScopeSecretsByNameAsync(name, secrets);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                      async () =>
+                      {
+                          await ResilientSessionContainer.EstablishSessionAsync();
+                          await ResilientSessionContainer.ResilientSession.AddScopeSecretsByNameAsync(name, secrets);
+                      },
+                      async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex)); 
         }
 
         public async Task DeleteScopeSecretsAsync(string name, IEnumerable<Secret> secrets)
         {
-            await IdentityServer3CassandraDao.DeleteScopeSecretsFromScopeByNameAsync(name, secrets);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    await
+                        ResilientSessionContainer.ResilientSession.DeleteScopeSecretsFromScopeByNameAsync(name, secrets);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }
 
 
         public async Task AddScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
         {
-            await IdentityServer3CassandraDao.AddScopeClaimsToScopeByNameAsync(name, claims);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    await ResilientSessionContainer.ResilientSession.AddScopeClaimsToScopeByNameAsync(name, claims);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }
 
         public async Task DeleteScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
         {
-            await IdentityServer3CassandraDao.DeleteScopeClaimsFromScopeByNameAsync(name, claims);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                   async () =>
+                   {
+                       await ResilientSessionContainer.EstablishSessionAsync();
+                       await ResilientSessionContainer.ResilientSession.DeleteScopeClaimsFromScopeByNameAsync(name, claims);
+                   },
+                   async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
+           
         }
 
         public async Task UpdateScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
         {
-            await IdentityServer3CassandraDao.UpdateScopeClaimsInScopeByNameAsync(name, claims);
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    await ResilientSessionContainer.ResilientSession.UpdateScopeClaimsInScopeByNameAsync(name, claims);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
+
         }
     }
 }

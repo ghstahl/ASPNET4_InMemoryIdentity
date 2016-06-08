@@ -15,8 +15,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
 		#region PREPARED STATEMENTS for Token
 
-		private static List<string> IndexStatements;
-		private static List<string> CreateTableStatemens;
+		private  List<string> IndexStatements;
+		private  List<string> CreateTableStatemens;
 
 
 		private static List<string> _tables = new List<string>()
@@ -40,7 +40,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
 		#endregion
 
-		public static void PrepareUtilityStatements()
+		public  void PrepareUtilityStatements()
 		{
 			#region PREPARED STATEMENTS for Utility
 
@@ -346,7 +346,7 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 
 
 
-		public static async Task CreateTablesAsync(
+        public async Task CreateTablesAsync(
 			CancellationToken cancellationToken = default(CancellationToken))
 		{
 			try
@@ -386,7 +386,7 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 			}
 		}
 
-		public static async Task<bool> TruncateTablesAsync(
+        public async Task<bool> TruncateTablesAsync(
 			CancellationToken cancellationToken = default(CancellationToken))
 		{
 			var session = CassandraSession;

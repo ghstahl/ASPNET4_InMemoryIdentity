@@ -22,15 +22,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         #region PREPARED STATEMENTS for AuthorizationCode
 
-        private static AsyncLazy<PreparedStatement> _CreateAuthorizationCodeByClientId { get; set; }
-        private static AsyncLazy<PreparedStatement> _CreateAuthorizationCodeByKey { get; set; }
+        private  AsyncLazy<PreparedStatement> _CreateAuthorizationCodeByClientId { get; set; }
+        private  AsyncLazy<PreparedStatement> _CreateAuthorizationCodeByKey { get; set; }
 
-        private static AsyncLazy<PreparedStatement> _DeleteAuthorizationCodeByClientIdAndKey { get; set; }
-        private static AsyncLazy<PreparedStatement> _DeleteAuthorizationCodeByKey { get; set; }
+        private  AsyncLazy<PreparedStatement> _DeleteAuthorizationCodeByClientIdAndKey { get; set; }
+        private  AsyncLazy<PreparedStatement> _DeleteAuthorizationCodeByKey { get; set; }
 
         #endregion
 
-        public static void PrepareAuthorizationCodeStatements()
+        public  void PrepareAuthorizationCodeStatements()
         {
             #region PREPARED STATEMENTS for AuthorizationCode
 
@@ -96,7 +96,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
             IEnumerable<FlattenedAuthorizationCodeHandle> flats)
         {
 
@@ -138,7 +138,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return result;
         }
 
-        public static async Task<List<BoundStatement>> BuildBoundStatements_ForAuthorizationCodeHandleDelete(string clientId,
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForAuthorizationCodeHandleDelete(string clientId,
             string key)
         {
             var result = new List<BoundStatement>();
@@ -156,14 +156,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
         }
 
 
-        public static async Task<bool> CreateAuthorizationCodeHandleAsync(string key,global::IdentityServer3.Core.Models.AuthorizationCode value,
+        public async Task<bool> CreateAuthorizationCodeHandleAsync(string key, global::IdentityServer3.Core.Models.AuthorizationCode value,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var fRecord = new FlattenedAuthorizationCodeHandle(key, value);
             return await CreateAuthorizationCodeHandleAsync(fRecord);
         }
 
-        public static async Task<bool> CreateAuthorizationCodeHandleAsync(FlattenedAuthorizationCodeHandle tokenHandle,
+        public async Task<bool> CreateAuthorizationCodeHandleAsync(FlattenedAuthorizationCodeHandle tokenHandle,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -178,7 +178,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> CreateManyAuthorizationCodeHandleAsync(
+        public async Task<bool> CreateManyAuthorizationCodeHandleAsync(
             IList<FlattenedAuthorizationCodeHandle> flattenedAuthorizationCodeHandles,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -207,7 +207,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<global::IdentityServer3.Core.Models.AuthorizationCode> FindAuthorizationCodeByKey(
+        public async Task<global::IdentityServer3.Core.Models.AuthorizationCode> FindAuthorizationCodeByKey(
             string key,
             IClientStore clientStore,
             IScopeStore scopeStore,
@@ -233,7 +233,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<IEnumerable<ITokenMetadata>> FindAuthorizationCodeMetadataBySubject(string subject,
+        public async Task<IEnumerable<ITokenMetadata>> FindAuthorizationCodeMetadataBySubject(string subject,
             IClientStore clientStore,
             IScopeStore scopeStore,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -263,7 +263,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> DeleteAuthorizationCodesByClientId(string client,
+        public async Task<bool> DeleteAuthorizationCodesByClientId(string client,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -299,7 +299,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> DeleteAuthorizationCodesByClientIdAndSubjectId(string client, string subject,
+        public async Task<bool> DeleteAuthorizationCodesByClientIdAndSubjectId(string client, string subject,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -335,7 +335,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public static async Task<bool> DeleteAuthorizationCodeByKey(string key,
+        public async Task<bool> DeleteAuthorizationCodeByKey(string key,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
