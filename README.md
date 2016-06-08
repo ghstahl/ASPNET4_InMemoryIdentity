@@ -15,10 +15,10 @@
 
 2. Setup your keyspaces
 
-	CREATE KEYSPACE IF NOT EXISTS notforproduction
-	WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+		CREATE KEYSPACE IF NOT EXISTS notforproduction
+		WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
 
-	CREATE KEYSPACE IF NOT EXISTS identityserver3
-	WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+		CREATE KEYSPACE IF NOT EXISTS identityserver3
+		WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
 
 3. Run the unit tests.
