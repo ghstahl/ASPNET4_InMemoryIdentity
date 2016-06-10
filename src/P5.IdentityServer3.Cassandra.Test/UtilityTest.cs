@@ -34,11 +34,11 @@ namespace P5.IdentityServer3.Cassandra.Test
             await dao.EstablishConnectionAsync();
 
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await dao.FindClientIdAsync(insert[0].Id);
+            var result = await dao.FindClientByIdAsync(insert[0].Id);
             Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
 
             await dao.TruncateTablesAsync();
-            result = await dao.FindClientIdAsync(insert[0].Id);
+            result = await dao.FindClientByIdAsync(insert[0].Id);
             Assert.IsNull(result);
 
         }

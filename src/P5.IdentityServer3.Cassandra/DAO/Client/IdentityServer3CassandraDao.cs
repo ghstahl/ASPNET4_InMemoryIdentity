@@ -210,7 +210,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 var record =
                     await mapper.SingleAsync<FlattenedClientHandle>("SELECT * FROM clients_by_id WHERE id = ?", id);
                 IClientHandle ch = record;
-                var result = await ch.MakeClientAsyc();
+                var result = await ch.MakeClientAsync();
                 return result;
             }
             catch (Exception e)
@@ -219,7 +219,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public async Task<global::IdentityServer3.Core.Models.Client> FindClientIdAsync(Guid id,
+        public async Task<global::IdentityServer3.Core.Models.Client> FindClientByIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -230,7 +230,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 var record =
                     await mapper.SingleAsync<FlattenedClientHandle>("SELECT * FROM clients_by_id WHERE id = ?", id);
                 IClientHandle ch = record;
-                var result = await ch.MakeClientAsyc();
+                var result = await ch.MakeClientAsync();
                 return result;
             }
             catch (Exception e)

@@ -65,7 +65,7 @@ namespace P5.IdentityServer3.Common
         public abstract TSecrets Serialize(List<Secret> secrets);
         public abstract Task<List<Secret>> DeserializeSecretsAsync(TSecrets obj);
 
-        public async Task<Client> MakeClientAsyc()
+        public async Task<Client> MakeClientAsync()
         {
             var allowedCorsOrigins = await DeserializeStringsAsync(AllowedCorsOrigins);
             var allowedCustomGrantTypes = await DeserializeStringsAsync(AllowedCustomGrantTypes);

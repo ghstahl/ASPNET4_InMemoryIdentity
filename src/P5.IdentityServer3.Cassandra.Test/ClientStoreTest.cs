@@ -519,7 +519,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             await dao.UpdateClientByIdAsync(result.ClientId, propertyList);
 
-            var result2 = await dao.FindClientIdAsync(insert[0].Id);
+            var result2 = await dao.FindClientByIdAsync(insert[0].Id);
 
             foreach (var property in propertyList)
             {

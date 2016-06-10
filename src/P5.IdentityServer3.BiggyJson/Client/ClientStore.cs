@@ -37,7 +37,7 @@ namespace P5.IdentityServer3.BiggyJson
         {
             var cr = new ClientRecord(record: new ClientHandle(){ClientId = clientId});
             var result = await RetrieveAsync(cr.Id);
-            var client = await result.MakeClientAsyc();
+            var client = await result.MakeClientAsync();
             return client;
         }
     }

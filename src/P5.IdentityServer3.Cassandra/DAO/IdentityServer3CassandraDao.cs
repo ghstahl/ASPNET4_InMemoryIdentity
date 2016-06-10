@@ -52,7 +52,21 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     var dao = new CassandraDao(CassandraConfig);
                     CassandraSession = await dao.GetSessionAsync();
 
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for User
+                    //-----------------------------------------------
+                    PrepareClientIdByUserStatements();
 
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for User
+                    //-----------------------------------------------
+                    PrepareAllowedScopesByUserStatements();
+
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for User
+                    //-----------------------------------------------
+                    PrepareUserStatements();
+                    
                     //-----------------------------------------------
                     // PREPARED STATEMENTS for Utility
                     //-----------------------------------------------

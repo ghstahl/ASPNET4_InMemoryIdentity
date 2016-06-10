@@ -77,6 +77,11 @@
     <Compile Include="Client\ClientStore.cs" />
     <Compile Include="Client\IdentityServer3AdminStore.cs" />
     <Compile Include="Client\IIdentityServer3AdminClientStore.cs" />
+    <Compile Include="DAO\User\Client\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\User\Scope\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\User\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\User\Scope\IdentityServerUserAllowedScope.cs" />
+    <Compile Include="DAO\User\Client\IdentityServerUserClientId.cs" />
     <Compile Include="ResilientSessionContainer.cs" />
     <Compile Include="IIdentityServer3AdminStore.cs" />
     <Compile Include="PropertyValue.cs" />
@@ -103,12 +108,18 @@
     <Compile Include="Scope\ScopeStore.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleStore.cs" />
     <Compile Include="Token\TokenHandleStore.cs" />
+    <Compile Include="User\IdentityServer3AdminStore.cs" />
+    <Compile Include="User\IdentityServer3UserStore.cs" />
+    <Compile Include="User\IIdentityServer3UserStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CQL\Setup.cql" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="User\Client\" />
+    <Folder Include="User\Scope\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
       <Project>{51566eae-2937-41d2-a6c8-d055a74a6209}</Project>

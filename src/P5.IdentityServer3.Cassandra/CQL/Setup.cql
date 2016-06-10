@@ -5,16 +5,22 @@ use identityserver3;
 
 CREATE TABLE IF NOT EXISTS user_profile_by_id (
     id uuid,
-    AllowedScopes text,
     Enabled boolean,
+    UserId text,
     UserName text,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS user_clientid_by_id (
-    id uuid,
+
+CREATE TABLE IF NOT EXISTS user_clientid (
     ClientId text,
-    PRIMARY KEY (id,ClientId)
+   	UserId text,
+    PRIMARY KEY (UserId,ClientId)
+);
+CREATE TABLE IF NOT EXISTS user_scopename (
+    ScopeName text,
+    UserId text,
+    PRIMARY KEY (UserId,ScopeName)
 );
 
 
@@ -238,3 +244,8 @@ ON TokenHandle_By_ClientId (Key);
 
 CREATE INDEX IF NOT EXISTS
 ON scopes_by_id (ShowInDiscoveryDocument);
+
+CREATE INDEX IF NOT EXISTS
+ON user_profile_by_id (UserId);
+
+

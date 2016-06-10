@@ -116,6 +116,13 @@
     <Compile Include="Token\TokenHandle.cs" />
     <Compile Include="Token\TokenHandleExtensions.cs" />
     <Compile Include="Token\TokenHandleRecord.cs" />
+    <Compile Include="User\AbstractIdentityServerUserHandle.cs" />
+    <Compile Include="User\IdentityServerUser.cs" />
+    <Compile Include="User\IdentityServerUserConstants.cs" />
+    <Compile Include="User\IdentityServerUserExtensions.cs" />
+    <Compile Include="User\IdentityServerUserHandle.cs" />
+    <Compile Include="User\IdentityServerUserRecord.cs" />
+    <Compile Include="User\IIdentityServerUserHandle.cs" />
     <Compile Include="WrappedRecord.cs" />
   </ItemGroup>
   <ItemGroup>
