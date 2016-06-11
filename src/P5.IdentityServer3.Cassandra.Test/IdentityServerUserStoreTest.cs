@@ -76,10 +76,8 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestMethod]
         public async Task Test_Add_ClientIds_To_NonExisting_User_Async()
         {
-
             var userId = Guid.NewGuid().ToString();
             var adminStore = new IdentityServer3AdminStore();
-             
 
             List<string> clientIdsToAdd = new List<string> { "clientid1", "clientid2" };
             var appliedInfo = await adminStore.AddIdentityServerUsersClientIdsByUserIdAsync(userId, clientIdsToAdd);
@@ -210,6 +208,20 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsNull(appliedInfo.Exception);
             var result = await adminStore.FindIdentityServerUserByUserIdAsync(userId);
             Assert.AreEqual(user.UserId, result.UserId);
+
+            List<string> clientIdsToAdd = new List<string> { "clientid1", "clientid2", "clientid3", "clientid4" };
+            await adminStore.AddIdentityServerUsersClientIdsByUserIdAsync(userId, clientIdsToAdd);
+            var clientIds = await adminStore.FindIdentityServerUsersClientIdsByUserIdAsync(userId);
+            Assert.AreEqual(clientIds.Count(), clientIdsToAdd.Count);
+            var finalList = clientIds.ToList().Except(clientIdsToAdd);
+            Assert.IsFalse(finalList.Any());
+
+            List<string> scopesToAdd = new List<string> { "scope1", "scope2", "scope3", "scope4" };
+            await adminStore.AddIdentityServerUsersAllowedScopesByUserIdAsync(userId, scopesToAdd);
+            var scopes = await adminStore.FindIdentityServerUsersAllowedScopesByUserIdAsync(userId);
+            Assert.AreEqual(scopes.Count(), scopesToAdd.Count);
+            finalList = scopes.ToList().Except(scopesToAdd);
+            Assert.IsFalse(finalList.Any());
 
             appliedInfo = await adminStore.DeleteIdentityServerUserAsync(userId);
             Assert.IsTrue(appliedInfo.Applied);

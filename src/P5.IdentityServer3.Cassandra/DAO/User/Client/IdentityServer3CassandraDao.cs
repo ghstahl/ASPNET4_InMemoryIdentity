@@ -35,8 +35,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task<IdentityServerStoreAppliedInfo> DeleteClientIdFromUserAsync(IdentityServerUserClientId userClientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var user = await FindIdentityServerUserByUserIdAsync(userClientId.UserId, cancellationToken);
-            if (user == null)
+            var userExists = await FindDoesUserExistByUserIdAsync(userClientId.UserId, cancellationToken);
+            if (!userExists)
             {
                 // not allowed
                 return new IdentityServerStoreAppliedInfo
@@ -57,8 +57,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task<IdentityServerStoreAppliedInfo> UpsertClientIdIntoUsersAsync(IdentityServerUserClientId userClientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var user = await FindIdentityServerUserByUserIdAsync(userClientId.UserId, cancellationToken);
-            if (user == null)
+            var userExists = await FindDoesUserExistByUserIdAsync(userClientId.UserId, cancellationToken);
+            if (!userExists)
             {
                 // not allowed
                 return new IdentityServerStoreAppliedInfo
@@ -72,7 +72,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             IMapper mapper = new Mapper(session);
             cancellationToken.ThrowIfCancellationRequested();
             var record = await
-                mapper.InsertIfNotExistsAsync(user);
+                mapper.InsertIfNotExistsAsync(userClientId);
             return new IdentityServerStoreAppliedInfo(record.Applied); 
         }
     }

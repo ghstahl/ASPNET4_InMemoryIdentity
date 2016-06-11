@@ -32,17 +32,21 @@ namespace P5.IdentityServer3.Cassandra.DAO
             // Define mappings in the constructor of your class
             // that inherits from Mappings
 
+
+            For<IdentityServerUserRecordCassandra>()
+                .TableName(WellKnownUserProfileById);
+
             For<IdentityServerUserClientId>()
-              .TableName(WellKnownUserClientId); 
+                .TableName(WellKnownUserClientId);
 
             For<IdentityServerUserAllowedScope>()
-              .TableName(WellKnownUserScopename); 
-            
+                .TableName(WellKnownUserScopename);
+
             For<IdentityServerUserHandle>()
-              .TableName(WellKnownUserProfileById); 
-            
+                .TableName(WellKnownUserProfileById);
+
             For<FlattenedClientHandle>()
-               .TableName(WellKnownClientsById);
+                .TableName(WellKnownClientsById);
 
             For<FlattenedTokenHandle>()
                 .TableName(WellKnownTokenhandleByKey);

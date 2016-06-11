@@ -15,6 +15,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 {
     public partial class IdentityServer3CassandraDao
     {
+     
         //-----------------------------------------------
         // PREPARED STATEMENTS for User
         //-----------------------------------------------
@@ -25,6 +26,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private AsyncLazy<PreparedStatement> _CreateUserById { get; set; }
         private AsyncLazy<PreparedStatement> _FindUserById { get; set; }
         private AsyncLazy<PreparedStatement> _DeleteUserId { get; set; }
+        private AsyncLazy<PreparedStatement> _DeleteUserIdFromClientIds;
+        private AsyncLazy<PreparedStatement> _DeleteUserIdFromAllowedScopes;
 
         private const string SelectUserQuery = @"SELECT * FROM user_profile_by_id";
 
@@ -71,9 +74,91 @@ namespace P5.IdentityServer3.Cassandra.DAO
                         return result;
                     });
 
+         
 
+            _DeleteUserIdFromClientIds =
+              new AsyncLazy<PreparedStatement>(
+                  () =>
+                  {
+                      var result = _cassandraSession.PrepareAsync(
+                          @"Delete FROM user_clientid " +
+                          @"WHERE userid = ?");
+                      return result;
+                  });
+
+            _DeleteUserIdFromAllowedScopes =
+                          new AsyncLazy<PreparedStatement>(
+                              () =>
+                              {
+                                  var result = _cassandraSession.PrepareAsync(
+                                      @"Delete FROM user_scopename " +
+                                      @"WHERE userid = ?");
+                                  return result;
+                              });
             #endregion
         }
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForUserDelete(string userId)
+        {
+            var result = new List<BoundStatement>();
+            PreparedStatement prepared;
+            BoundStatement bound;
+
+            var id = userId.UserIdToGuid();
+            
+            prepared = await _DeleteUserId;
+            bound = prepared.Bind(id);
+            result.Add(bound);
+
+
+            prepared = await _DeleteUserIdFromClientIds;
+            bound = prepared.Bind(userId);
+            result.Add(bound);
+
+            prepared = await _DeleteUserIdFromAllowedScopes;
+            bound = prepared.Bind(userId);
+            result.Add(bound);
+        
+            return result;
+        }
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+        IdentityServerUserRecord record)
+        {
+
+            var result = new List<BoundStatement>();
+            // @"user_profile_by_id (id,Enabled,UserId,UserName) " +
+            var user = record.Record;
+            PreparedStatement prepared = await _CreateUserById;
+            BoundStatement bound = prepared.Bind(
+                record.Id,
+                user.Enabled,
+                user.UserId,
+                user.UserName
+                );
+            result.Add(bound);
+            return result;
+        }
+        public async Task<bool> FindDoesUserExistByUserIdAsync(string userId,
+         CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                Guid id = userId.UserIdToGuid();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                cancellationToken.ThrowIfCancellationRequested();
+                var record =
+                    await mapper.SingleAsync<string>("SELECT userid FROM user_profile_by_id WHERE id = ?", id);
+
+                return !string.IsNullOrEmpty(record);
+            }
+            catch (Exception e)
+            {
+                //TODO: need to get better info for records not there.
+                return false;
+            }
+        }
+
+
         public async Task<IdentityServerUser> FindIdentityServerUserByUserIdAsync(string userId,
          CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -112,7 +197,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
-                    await mapper.SingleAsync<IdentityServerUserHandle>("SELECT * FROM user_profile_by_id WHERE id = ?", id);
+                    await mapper.SingleAsync<IdentityServerUserHandle>("WHERE id = ?", id);
                 IIdentityServerUserHandle ch = record;
                 var result = await ch.MakeIdentityServerUserAsync();
                 return result;
@@ -123,36 +208,28 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
-          IdentityServerUserRecord record)
-        {
-            var result = new List<BoundStatement>();
-            // @"user_profile_by_id (id,Enabled,UserId,UserName) " +
-            var user = record.Record;
-            PreparedStatement prepared = await _CreateUserById;
-            BoundStatement bound = prepared.Bind(
-                record.Id,
-                user.Enabled,
-                user.UserId,
-                user.UserName
-                );
-            result.Add(bound);
-            return result;
-        }
+      
 
         public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUserRecord user,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-                if (user == null)
-                    throw new ArgumentNullException("user");
-                var session = CassandraSession;
-                cancellationToken.ThrowIfCancellationRequested();
+            if (user == null)
+                throw new ArgumentNullException("user");
+            IdentityServerUserRecordCassandra insertRecord = new IdentityServerUserRecordCassandra(user);
+            var session = CassandraSession;
+            IMapper mapper = new Mapper(session);
+            cancellationToken.ThrowIfCancellationRequested();
 
-                var batch = new BatchStatement();
-                var boundStatements = await BuildBoundStatements_ForCreate(user);
-                batch.AddRange(boundStatements);
-                await session.ExecuteAsync(batch).ConfigureAwait(false);
-                return new IdentityServerStoreAppliedInfo(true);
+            var record = await mapper.InsertIfNotExistsAsync(insertRecord);
+            return new IdentityServerStoreAppliedInfo(record.Applied);
+            /*
+                        var batch = new BatchStatement();
+                        var boundStatements = await BuildBoundStatements_ForCreate(user);
+                        batch.AddRange(boundStatements);
+                        await session.ExecuteAsync(batch).ConfigureAwait(false);
+             *   return new IdentityServerStoreAppliedInfo(true);
+             * */
+
         }
 
         public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUser user,
@@ -166,34 +243,21 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 cancellationToken);
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> DeleteUserByIdAsync(Guid id,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (id == Guid.Empty)
-                throw new ArgumentNullException("id");
-            var session = CassandraSession;
-            cancellationToken.ThrowIfCancellationRequested();
-
-            PreparedStatement prepared = await _DeleteUserId;
-            BoundStatement bound = prepared.Bind(id);
-
-            await session.ExecuteAsync(bound).ConfigureAwait(false);
-            return new IdentityServerStoreAppliedInfo(true);
-        }
-
         public async Task<IdentityServerStoreAppliedInfo> DeleteUserByUserIdAsync(string userId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
                 throw new ArgumentNullException("userId");
-            var record =
-                new IdentityServerUserRecord(
-                    new IdentityServerUserHandle(
-                        new IdentityServerUser()
-                        {
-                            UserId = userId
-                        }));
-            return await DeleteUserByIdAsync(record.Id, cancellationToken);
+            var session = CassandraSession;
+            cancellationToken.ThrowIfCancellationRequested();
+
+
+            var batch = new BatchStatement();
+            var boundStatements = await BuildBoundStatements_ForUserDelete(userId);
+            batch.AddRange(boundStatements);
+
+            await session.ExecuteAsync(batch).ConfigureAwait(false);
+            return new IdentityServerStoreAppliedInfo(true);
         }
 
         

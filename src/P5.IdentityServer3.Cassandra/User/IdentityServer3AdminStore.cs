@@ -24,6 +24,11 @@ namespace P5.IdentityServer3.Cassandra
             return await IdentityServer3UserStore.CreateIdentityServerUserAsync(user);
         }
 
+        public async Task<bool> FindDoesUserExistByUserIdAsync(string userId)
+        {
+            return await IdentityServer3UserStore.FindDoesUserExistByUserIdAsync(userId);
+        }
+
         public async Task<IdentityServerUser> FindIdentityServerUserByUserIdAsync(string userId)
         {
            return await IdentityServer3UserStore.FindIdentityServerUserByUserIdAsync(userId);

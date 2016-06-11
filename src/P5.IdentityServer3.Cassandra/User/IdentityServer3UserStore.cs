@@ -29,6 +29,18 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
+        public async Task<bool> FindDoesUserExistByUserIdAsync(string userId)
+        {
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    return await ResilientSessionContainer.ResilientSession.FindDoesUserExistByUserIdAsync(userId);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<bool>(ex));
+            return result;
+        }
+
         public async Task<IdentityServerUser> FindIdentityServerUserByUserIdAsync(string userId)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(

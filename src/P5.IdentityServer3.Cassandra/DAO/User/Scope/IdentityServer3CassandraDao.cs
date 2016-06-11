@@ -37,8 +37,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task<IdentityServerStoreAppliedInfo> DeleteAllowedScopeFromUserAsync(IdentityServerUserAllowedScope userAllowedScope,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var user = await FindIdentityServerUserByUserIdAsync(userAllowedScope.UserId, cancellationToken);
-            if (user == null)
+            var userExists = await FindDoesUserExistByUserIdAsync(userAllowedScope.UserId, cancellationToken);
+            if (!userExists)
             {
                 // not allowed
                 return new IdentityServerStoreAppliedInfo
@@ -59,8 +59,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task<IdentityServerStoreAppliedInfo> UpsertAllowedScopeIntoUsersAsync(IdentityServerUserAllowedScope userAllowedScope,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var user = await FindIdentityServerUserByUserIdAsync(userAllowedScope.UserId, cancellationToken);
-            if (user == null)
+            var userExists = await FindDoesUserExistByUserIdAsync(userAllowedScope.UserId, cancellationToken);
+            if (!userExists)
             {
                 // not allowed
                 return new IdentityServerStoreAppliedInfo

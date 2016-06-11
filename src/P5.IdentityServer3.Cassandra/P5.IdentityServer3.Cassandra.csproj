@@ -78,6 +78,7 @@
     <Compile Include="Client\IdentityServer3AdminStore.cs" />
     <Compile Include="Client\IIdentityServer3AdminClientStore.cs" />
     <Compile Include="DAO\User\Client\IdentityServer3CassandraDao.cs" />
+    <Compile Include="DAO\User\IdentityServerUserRecordCassandra.cs" />
     <Compile Include="IdentityServerStoreAppliedInfo.cs" />
     <Compile Include="DAO\User\Scope\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\User\IdentityServer3CassandraDao.cs" />
