@@ -140,7 +140,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return result;
         }
 
-        public async Task<bool> UpsertIdentityServerUserAsync(IdentityServerUserRecord user,
+        public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUserRecord user,
             CancellationToken cancellationToken = default(CancellationToken))
         {
                 if (user == null)
@@ -152,10 +152,10 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 var boundStatements = await BuildBoundStatements_ForCreate(user);
                 batch.AddRange(boundStatements);
                 await session.ExecuteAsync(batch).ConfigureAwait(false);
-                return true;
+                return new IdentityServerStoreAppliedInfo(true);
         }
 
-        public async Task<bool> UpsertIdentityServerUserAsync(IdentityServerUser user,
+        public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUser user,
             CancellationToken cancellationToken = default(CancellationToken))
         {
 
@@ -166,7 +166,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 cancellationToken);
         }
 
-        public async Task<bool> DeleteUserByIdAsync(Guid id,
+        public async Task<IdentityServerStoreAppliedInfo> DeleteUserByIdAsync(Guid id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (id == Guid.Empty)
@@ -178,10 +178,10 @@ namespace P5.IdentityServer3.Cassandra.DAO
             BoundStatement bound = prepared.Bind(id);
 
             await session.ExecuteAsync(bound).ConfigureAwait(false);
-            return true;
+            return new IdentityServerStoreAppliedInfo(true);
         }
 
-        public async Task<bool> DeleteUserByUserIdAsync(string userId,
+        public async Task<IdentityServerStoreAppliedInfo> DeleteUserByUserIdAsync(string userId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (userId == null)
@@ -195,5 +195,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                         }));
             return await DeleteUserByIdAsync(record.Id, cancellationToken);
         }
+
+        
     }
 }

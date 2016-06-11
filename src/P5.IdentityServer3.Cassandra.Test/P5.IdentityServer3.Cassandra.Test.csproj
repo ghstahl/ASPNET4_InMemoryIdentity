@@ -70,6 +70,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CassandraTestHelper.cs" />
+    <Compile Include="IdentityServerUserStoreTest.cs" />
     <Compile Include="UtilityTest.cs" />
     <Compile Include="ConsentHandleStoreTest.cs" />
     <Compile Include="AuthorizationHandleStoreTest.cs" />

@@ -78,10 +78,12 @@
     <Compile Include="Client\IdentityServer3AdminStore.cs" />
     <Compile Include="Client\IIdentityServer3AdminClientStore.cs" />
     <Compile Include="DAO\User\Client\IdentityServer3CassandraDao.cs" />
+    <Compile Include="IdentityServerStoreAppliedInfo.cs" />
     <Compile Include="DAO\User\Scope\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\User\IdentityServer3CassandraDao.cs" />
     <Compile Include="DAO\User\Scope\IdentityServerUserAllowedScope.cs" />
     <Compile Include="DAO\User\Client\IdentityServerUserClientId.cs" />
+    <Compile Include="DAO\User\Exceptions\UserDoesNotExitException.cs" />
     <Compile Include="ResilientSessionContainer.cs" />
     <Compile Include="IIdentityServer3AdminStore.cs" />
     <Compile Include="PropertyValue.cs" />

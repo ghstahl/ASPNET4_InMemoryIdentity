@@ -32,26 +32,48 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return record;
         }
 
-        public async Task DeleteClientIdFromUserAsync(IdentityServerUserClientId userClientId,
+        public async Task<IdentityServerStoreAppliedInfo> DeleteClientIdFromUserAsync(IdentityServerUserClientId userClientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            var user = await FindIdentityServerUserByUserIdAsync(userClientId.UserId, cancellationToken);
+            if (user == null)
+            {
+                // not allowed
+                return new IdentityServerStoreAppliedInfo
+                {
+                    Applied = false,
+                    Exception = new UserDoesNotExitException()
+                };
+            }
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
             cancellationToken.ThrowIfCancellationRequested();
             var record = await
-                mapper.DeleteIfAsync<IdentityServerUserAllowedScope>(
+                mapper.DeleteIfAsync<IdentityServerUserClientId>(
                     "WHERE clientid = ? AND userid = ?", userClientId.ClientId, userClientId.UserId);
+            return new IdentityServerStoreAppliedInfo(record.Applied);
         }
 
-        public async Task<AppliedInfo<IdentityServerUserClientId>> UpsertClientIdIntoUsersAsync(IdentityServerUserClientId user,
+        public async Task<IdentityServerStoreAppliedInfo> UpsertClientIdIntoUsersAsync(IdentityServerUserClientId userClientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            var user = await FindIdentityServerUserByUserIdAsync(userClientId.UserId, cancellationToken);
+            if (user == null)
+            {
+                // not allowed
+                return new IdentityServerStoreAppliedInfo
+                {
+                    Applied = false,
+                    Exception = new UserDoesNotExitException()
+                };
+            }
+
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
             cancellationToken.ThrowIfCancellationRequested();
             var record = await
                 mapper.InsertIfNotExistsAsync(user);
-            return record;
+            return new IdentityServerStoreAppliedInfo(record.Applied); 
         }
     }
 }

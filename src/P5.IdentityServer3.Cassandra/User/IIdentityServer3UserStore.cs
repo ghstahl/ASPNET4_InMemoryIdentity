@@ -15,10 +15,20 @@ namespace P5.IdentityServer3.Cassandra
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        Task CreateIdentityServerUserAsync(IdentityServerUser user);
+        Task<IdentityServerStoreAppliedInfo> CreateIdentityServerUserAsync(IdentityServerUser user);
 
 
         Task<IdentityServerUser> FindIdentityServerUserByUserIdAsync(string userId);
+        Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUserAsync(string userId);
+
+        Task<IEnumerable<string>> FindIdentityServerUsersAllowedScopesByUserIdAsync(string userId);
+        Task<IEnumerable<string>> FindIdentityServerUsersClientIdsByUserIdAsync(string userId);
+
+        Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersAllowedScopesByUserIdAsync(string userId, IEnumerable<string> scopes);
+        Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds);
+
+        Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersAllowedScopesByUserIdAsync(string userId, IEnumerable<string> scopes);
+        Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds);
 
     }
 
