@@ -32,11 +32,19 @@ namespace P5.AspNet.Identity.Cassandra
         /// <summary>
         /// The unique Id of the user.
         /// </summary>
-       // private Guid _id;
+       private Guid _id;
 
         public Guid Id
         {
-            get;set;
+            get
+            {
+                if (_id == Guid.Empty)
+                {
+                    _id = GenerateIdFromUserData();
+                }
+                return _id;
+            }
+            set { _id = value; }
         }
 
         public Guid GenerateIdFromUserData()

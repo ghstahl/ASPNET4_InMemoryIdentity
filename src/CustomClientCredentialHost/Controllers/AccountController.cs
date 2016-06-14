@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Drawing.Printing;
 using System.Globalization;
+using System.IdentityModel.Protocols.WSTrust;
+using System.IdentityModel.Tokens;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
+using System.ServiceModel.Security.Tokens;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
@@ -13,6 +20,111 @@ using P5.AspNet.Identity.Cassandra;
 
 namespace CustomClientCredentialHost.Controllers
 {
+    
+    public  class IdentityTokenHelper
+    {
+        public const string WellKnown_VerifyAccountEmailAction = "b3d17698-011b-4a74-aa0d-1301e01bbb8f";
+        public const string WellKnown_NortonAction = "norton::action";
+
+        public static ClaimsPrincipal ValidateJWT(string tokenString,out SecurityToken validatedToken)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters()
+            {
+                ValidAudiences = new[] { "https://www.norton.com" },
+                IssuerSigningToken = new BinarySecretSecurityToken(EncryptionKey),
+                ValidIssuer = "Norton",
+                ValidateLifetime = true
+            };
+            var principal = tokenHandler.ValidateToken(tokenString, validationParameters, out validatedToken);
+            return principal;
+        }
+        public static string BuildUrlEncodedEmailVerifyJWT(HttpRequestBase Request, string nameIdentifier, Lifetime lifetime)
+        {
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                        {
+                            new Claim(ClaimTypes.NameIdentifier, nameIdentifier),
+                            new Claim(WellKnown_NortonAction,WellKnown_VerifyAccountEmailAction),
+                        }),
+                TokenIssuerName = "Norton",
+                AppliesToAddress = "https://www.norton.com",
+                Lifetime = lifetime,
+                SigningCredentials = new SigningCredentials(
+                    new InMemorySymmetricSecurityKey(EncryptionKey),
+                    "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256",
+                    "http://www.w3.org/2001/04/xmlenc#sha256"),
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+            byte[] tokenBytes = Encoding.UTF8.GetBytes(tokenString);
+            var tokenBytesEncoded = HttpServerUtility.UrlTokenEncode(tokenBytes);
+            return tokenString;
+
+        }
+        static byte[] _encryptionKey;
+        public static byte[] EncryptionKey
+        {
+            get
+            {
+                if (_encryptionKey == null)
+                {
+                    string originalString = "664b9909-71c1-432c-b655-553ae2e2b5eb";
+                    byte[] myUnprotectedBytes = Encoding.UTF8.GetBytes(originalString);
+                    byte[] myProtectedBytes = MachineKey.Protect(myUnprotectedBytes, originalString);
+                    var urlProtected = HttpServerUtility.UrlTokenEncode(myProtectedBytes);
+                    var symmetricKey = Encoding.UTF8.GetBytes(urlProtected);
+                    return symmetricKey;
+                }
+                return _encryptionKey;
+                
+            }
+        }
+        static SigningCredentials _signingCredentials ;
+
+        public static SigningCredentials SigningCredentials
+        {
+            get
+            {
+                if (_signingCredentials == null)
+                {
+                    _signingCredentials = new SigningCredentials(
+                        new InMemorySymmetricSecurityKey(EncryptionKey),
+                        "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256",
+                        "http://www.w3.org/2001/04/xmlenc#sha256");
+                }
+                return _signingCredentials;
+            }
+        }
+
+        public static bool IsLocalIpAddress(string host)
+        {
+            try
+            { // get host IP addresses
+                IPAddress[] hostIPs = Dns.GetHostAddresses(host);
+                // get local IP addresses
+                IPAddress[] localIPs = Dns.GetHostAddresses(Dns.GetHostName());
+
+                // test if any host IP equals to any local IP or to localhost
+                foreach (IPAddress hostIP in hostIPs)
+                {
+                    // is localhost
+                    if (IPAddress.IsLoopback(hostIP)) return true;
+                    // is local address
+                    foreach (IPAddress localIP in localIPs)
+                    {
+                        if (hostIP.Equals(localIP)) return true;
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+
+
+    }
     [Authorize]
     public class AccountController : Controller
     {
@@ -162,9 +274,12 @@ namespace CustomClientCredentialHost.Controllers
                     
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                    
+
+                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    
+                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                    await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking here: " + callbackUrl);
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -184,7 +299,12 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return View("Error");
             }
-            var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);
+ 
+            var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);     
+ 
+            code = HttpUtility.UrlDecode(code);
+         
+            //var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 

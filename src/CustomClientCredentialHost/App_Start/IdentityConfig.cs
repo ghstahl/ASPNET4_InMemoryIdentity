@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.Identity;
@@ -16,11 +19,67 @@ using P5.CassandraStore.DAO;
 
 namespace CustomClientCredentialHost
 {
+
     public class EmailService : IIdentityMessageService
     {
         public Task SendAsync(IdentityMessage message)
         {
             // Plug in your email service here to send an email.
+            return Task.FromResult(0);
+        }
+    }
+    public class MailtrapEmailService : IIdentityMessageService
+    {
+        public Task SendAsync(IdentityMessage message)
+        {
+            // Plug in your email service here to send an email.
+            var client = new SmtpClient("mailtrap.io", 2525)
+            {
+                Credentials = new NetworkCredential("305e9a87cd4651", "16416ff1adf3f7"),
+                EnableSsl = true
+            };
+
+            var @from = new MailAddress("no-reply@CustomClientCredentialHost.info", "My Awesome Email Admin");
+            var to = new MailAddress(message.Destination);
+
+            var mail = new MailMessage(@from, to)
+            {
+                Subject = message.Subject,
+                Body = message.Body,
+                IsBodyHtml = true,
+            };
+
+            client.Send(mail);
+
+            return Task.FromResult(0);
+
+
+        }
+    }
+    public class PapercutEmailService : IIdentityMessageService
+    {
+        public Task SendAsync(IdentityMessage message)
+        {
+            var @from = new MailAddress("no-reply@CustomClientCredentialHost.info", "My Awesome Email Admin");
+            var to = new MailAddress(message.Destination);
+
+            var mailMessage = new MailMessage(@from, to)
+            {
+                Subject = message.Subject,
+                Body = message.Body,
+                BodyEncoding = Encoding.UTF8,
+                IsBodyHtml = false
+            };
+
+            mailMessage.Bcc.Add("boss@company.com");
+            SmtpClient client = new SmtpClient("127.0.0.1", 32525);
+            NetworkCredential info = new NetworkCredential("mail@jonathanchannon.com", "reallysecurepassword");
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            client.UseDefaultCredentials = false;
+            client.Credentials = info;
+
+            client.Send(mailMessage);
+
             return Task.FromResult(0);
         }
     }
@@ -33,6 +92,65 @@ namespace CustomClientCredentialHost
             return Task.FromResult(0);
         }
     }
+
+    public class PapercutSmsService : IIdentityMessageService
+    {
+        public Task SendAsync(IdentityMessage message)
+        {
+            var @from = new MailAddress("no-reply@CustomClientCredentialHost.info", "My Awesome SMS Admin");
+            var to = new MailAddress("someguy@somedomain.com");
+
+            var mailMessage = new MailMessage(@from, to)
+            {
+                Subject = message.Subject,
+                Body = message.Body,
+                BodyEncoding = Encoding.UTF8,
+                IsBodyHtml = false
+            };
+
+            mailMessage.Bcc.Add("boss@company.com");
+            SmtpClient client = new SmtpClient("127.0.0.1", 32525);
+            NetworkCredential info = new NetworkCredential("mail@jonathanchannon.com", "reallysecurepassword");
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            client.UseDefaultCredentials = false;
+            client.Credentials = info;
+
+            // Plug in your SMS service here to send a text message.
+
+
+            client.Send(mailMessage);
+
+            return Task.FromResult(0);
+        }
+    }
+
+    public class MailtrapSmsService : IIdentityMessageService
+    {
+        public Task SendAsync(IdentityMessage message)
+        {
+            // Plug in your SMS service here to send a text message.
+            var client = new SmtpClient("mailtrap.io", 2525)
+            {
+                Credentials = new NetworkCredential("305e9a87cd4651", "16416ff1adf3f7"),
+                EnableSsl = true
+            };
+
+            var @from = new MailAddress("no-reply@CustomClientCredentialHost.info", "My Awesome SMS Admin");
+            var to = new MailAddress("someguy@somedomain.com");
+
+            var mail = new MailMessage(@from, to)
+            {
+                Subject = message.Subject,
+                Body = message.Body,
+                IsBodyHtml = true,
+            };
+
+            client.Send(mail);
+
+            return Task.FromResult(0);
+        }
+    }
+
 
     public class CassandraAspNetApplicationConstants
     {
@@ -55,6 +173,19 @@ namespace CustomClientCredentialHost
         public static ApplicationSignInManager Create(IdentityFactoryOptions<ApplicationSignInManager> options, IOwinContext context)
         {
             return new ApplicationSignInManager(context.GetUserManager<ApplicationUserManager>(), context.Authentication);
+        }
+        public override Guid ConvertIdFromString(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return Guid.Empty;
+
+            return new Guid(id);
+        }
+
+        public override string ConvertIdToString(Guid id)
+        {
+            if (id.Equals(Guid.Empty)) return string.Empty;
+
+            return id.ToString();
         }
     }
     public class ApplicationUserManager : UserManager<CassandraUser, Guid>
@@ -100,8 +231,8 @@ namespace CustomClientCredentialHost
                 Subject = "Security Code",
                 BodyFormat = "Your security code is {0}"
             });
-            manager.EmailService = new EmailService();
-            manager.SmsService = new SmsService();
+            manager.EmailService = new PapercutEmailService();
+            manager.SmsService = new PapercutSmsService();
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
