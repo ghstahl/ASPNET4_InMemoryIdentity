@@ -167,6 +167,7 @@ namespace CustomClientCredentialHost.Controllers
             }
         }
 
+       
         //
         // GET: /Account/Login
         [AllowAnonymous]
@@ -175,7 +176,6 @@ namespace CustomClientCredentialHost.Controllers
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
-
         //
         // POST: /Account/Login
         [HttpPost]
@@ -186,6 +186,11 @@ namespace CustomClientCredentialHost.Controllers
             if (!ModelState.IsValid)
             {
                 return View(model);
+            }
+            var user = await UserManager.FindByNameAsync(model.Email);
+            if (!(await UserManager.IsEmailConfirmedAsync(user.Id)))
+            {
+                return RedirectToAction("SendEmailConfirmationCode", "Account", new {userId = user.Id.ToString(),email = model.Email });
             }
 
             // This doesn't count login failures towards account lockout
@@ -291,6 +296,42 @@ namespace CustomClientCredentialHost.Controllers
         }
 
         //
+        // GET: /Account/EmailConfirmationSent
+        [AllowAnonymous]
+        public ActionResult EmailConfirmationSent(string email)
+        {
+            return View(new ConfirmEmailViewModel { Email = email });
+        }
+
+        // GET: /Account/SendEmailConfirmationCode
+        [AllowAnonymous]
+        public async Task<ActionResult> SendEmailConfirmationCode(string userId, string email)
+        {
+            return View(new ConfirmEmailViewModel { UserId = userId, Email = email });
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> SendEmailConfirmationCode(ConfirmEmailViewModel confirmEmailViewModel)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+            var userId = confirmEmailViewModel.UserId.ToGuid();
+
+            string code = await UserManager.GenerateEmailConfirmationTokenAsync(userId);
+
+            var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = confirmEmailViewModel.UserId, code = code }, protocol: Request.Url.Scheme);
+            await UserManager.SendEmailAsync(userId, "Confirm your account", "Please confirm your account by clicking here: " + callbackUrl);
+
+            // Generate the token and send it
+            return RedirectToAction("EmailConfirmationSent", "Account", new { email = confirmEmailViewModel.Email });
+
+
+        }
+        //
         // GET: /Account/ConfirmEmail
         [AllowAnonymous]
         public async Task<ActionResult> ConfirmEmail(string userId, string code)
@@ -299,12 +340,7 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return View("Error");
             }
- 
             var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);     
- 
-            code = HttpUtility.UrlDecode(code);
-         
-            //var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
@@ -449,6 +485,11 @@ namespace CustomClientCredentialHost.Controllers
             if (loginInfo == null)
             {
                 return RedirectToAction("Login");
+            }
+            var user = await UserManager.FindByNameAsync(loginInfo.Email);
+            if (!(await UserManager.IsEmailConfirmedAsync(user.Id)))
+            {
+                return RedirectToAction("SendEmailConfirmationCode", "Account", new { userId = user.Id.ToString(), email = loginInfo.Email });
             }
 
             // Sign in the user with this external login provider if the user already has a login
