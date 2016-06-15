@@ -275,6 +275,10 @@ namespace CustomClientCredentialHost.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    return RedirectToAction("SendEmailConfirmationCode", "Account", new { userId = user.Id.ToString(), email = model.Email });
+
+                   /*
+
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
                     
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
@@ -287,6 +291,7 @@ namespace CustomClientCredentialHost.Controllers
                     await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking here: " + callbackUrl);
 
                     return RedirectToAction("Index", "Home");
+                    * */
                 }
                 AddErrors(result);
             }
