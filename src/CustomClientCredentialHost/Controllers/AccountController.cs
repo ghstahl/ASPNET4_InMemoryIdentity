@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing.Printing;
 using System.Globalization;
 using System.IdentityModel.Protocols.WSTrust;
@@ -20,25 +21,52 @@ using P5.AspNet.Identity.Cassandra;
 
 namespace CustomClientCredentialHost.Controllers
 {
-    
-    public  class IdentityTokenHelper
+
+    public static class IdentityTokenHelper
     {
         public const string WellKnown_VerifyAccountEmailAction = "b3d17698-011b-4a74-aa0d-1301e01bbb8f";
         public const string WellKnown_NortonAction = "norton::action";
+        public const string ValidIssuer = "Norton";
 
-        public static ClaimsPrincipal ValidateJWT(string tokenString,out SecurityToken validatedToken)
+        public static ClaimsPrincipal ValidateJWT(string tokenString,TokenValidationParameters tokenValidationParameters, out SecurityToken validatedToken)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = new TokenValidationParameters()
+            var principal = tokenHandler.ValidateToken(tokenString, tokenValidationParameters, out validatedToken);
+            return principal;
+        }
+
+        public static ClaimsPrincipal ValidateJWT(string tokenString, out SecurityToken validatedToken)
+        {
+            var tokenValidationParameters = new TokenValidationParameters()
             {
                 ValidAudiences = new[] { "https://www.norton.com" },
                 IssuerSigningToken = new BinarySecretSecurityToken(EncryptionKey),
                 ValidIssuer = "Norton",
                 ValidateLifetime = true
             };
-            var principal = tokenHandler.ValidateToken(tokenString, validationParameters, out validatedToken);
-            return principal;
+            return ValidateJWT(tokenString, tokenValidationParameters, out validatedToken);
         }
+
+        public static string BuildJWT(IEnumerable<Claim> claims, string issuer, string appliesToAddress,
+            Lifetime lifetime)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                TokenIssuerName = issuer,
+                AppliesToAddress = appliesToAddress,
+                Lifetime = lifetime,
+                SigningCredentials = new SigningCredentials(
+                    new InMemorySymmetricSecurityKey(EncryptionKey),
+                    "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256",
+                    "http://www.w3.org/2001/04/xmlenc#sha256"),
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+            return tokenString;
+        }
+
         public static string BuildUrlEncodedEmailVerifyJWT(HttpRequestBase Request, string nameIdentifier, Lifetime lifetime)
         {
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -72,14 +100,15 @@ namespace CustomClientCredentialHost.Controllers
                 if (_encryptionKey == null)
                 {
                     string originalString = "664b9909-71c1-432c-b655-553ae2e2b5eb";
+                    Guid key = Guid.Parse(originalString);
                     byte[] myUnprotectedBytes = Encoding.UTF8.GetBytes(originalString);
                     byte[] myProtectedBytes = MachineKey.Protect(myUnprotectedBytes, originalString);
                     var urlProtected = HttpServerUtility.UrlTokenEncode(myProtectedBytes);
                     var symmetricKey = Encoding.UTF8.GetBytes(urlProtected);
-                    return symmetricKey;
+                    _encryptionKey = key.ToByteArray();
                 }
                 return _encryptionKey;
-                
+
             }
         }
         static SigningCredentials _signingCredentials ;
@@ -128,7 +157,7 @@ namespace CustomClientCredentialHost.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-      
+
 
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
@@ -149,9 +178,9 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -167,7 +196,7 @@ namespace CustomClientCredentialHost.Controllers
             }
         }
 
-       
+
         //
         // GET: /Account/Login
         [AllowAnonymous]
@@ -236,9 +265,9 @@ namespace CustomClientCredentialHost.Controllers
                 return View(model);
             }
 
-            // The following code protects for brute force attacks against the two factor codes. 
-            // If a user enters incorrect codes for a specified amount of time then the user account 
-            // will be locked out for a specified amount of time. 
+            // The following code protects for brute force attacks against the two factor codes.
+            // If a user enters incorrect codes for a specified amount of time then the user account
+            // will be locked out for a specified amount of time.
             // You can configure the account lockout settings in IdentityConfig
             var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent:  model.RememberMe, rememberBrowser: model.RememberBrowser);
             switch (result)
@@ -280,13 +309,13 @@ namespace CustomClientCredentialHost.Controllers
                    /*
 
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
+
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
-                    
+
 
                     string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    
+
                     var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking here: " + callbackUrl);
 
@@ -314,6 +343,10 @@ namespace CustomClientCredentialHost.Controllers
         {
             return View(new ConfirmEmailViewModel { UserId = userId, Email = email });
         }
+
+        const string EmailConfirmationAudience = "https://www.cassandrahost.com/aud/EmailConfirmation";
+        const string EmailCodeClaim = "EmailCode";
+        const string ValidIssuer = "CassandraHost";
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -327,9 +360,27 @@ namespace CustomClientCredentialHost.Controllers
             var userId = confirmEmailViewModel.UserId.ToGuid();
 
             string code = await UserManager.GenerateEmailConfirmationTokenAsync(userId);
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, confirmEmailViewModel.UserId),
+                new Claim(EmailCodeClaim, code),
+            };
+            var now = DateTime.UtcNow;
+            var lifetime = new Lifetime(now, now.AddMinutes(30));
+            var jwt = IdentityTokenHelper.BuildJWT(claims, ValidIssuer, EmailConfirmationAudience, lifetime);
+            var validationParameters = new TokenValidationParameters()
+            {
+                ValidAudiences = new[] { EmailConfirmationAudience },
+                IssuerSigningToken = new BinarySecretSecurityToken(IdentityTokenHelper.EncryptionKey),
+                ValidIssuer = ValidIssuer,
+                ValidateLifetime = true
+            };
+            SecurityToken securityToken;
+            var principal = IdentityTokenHelper.ValidateJWT(jwt, validationParameters, out securityToken);
 
-            var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = confirmEmailViewModel.UserId, code = code }, protocol: Request.Url.Scheme);
-            await UserManager.SendEmailAsync(userId, "Confirm your account", "Please confirm your account by clicking here: " + callbackUrl);
+
+            var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = confirmEmailViewModel.UserId, code = jwt }, protocol: Request.Url.Scheme);
+            await UserManager.SendEmailAsync(userId, "Confirm your account", "You have 30 minutes to confirm your account by clicking here: " + callbackUrl);
 
             // Generate the token and send it
             return RedirectToAction("EmailConfirmationSent", "Account", new { email = confirmEmailViewModel.Email });
@@ -345,7 +396,53 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return View("Error");
             }
-            var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);     
+
+            var validationParameters = new TokenValidationParameters()
+            {
+                ValidAudiences = new[] { EmailConfirmationAudience },
+                IssuerSigningToken = new BinarySecretSecurityToken(IdentityTokenHelper.EncryptionKey),
+                ValidIssuer = ValidIssuer,
+                ValidateLifetime = true
+            };
+            SecurityToken securityToken;
+            var principal = IdentityTokenHelper.ValidateJWT(code, validationParameters, out securityToken);
+            
+            var query = from item in principal.Claims
+                where item.Type == ClaimTypes.NameIdentifier
+                select item;
+            userId = query.Single().Value;
+
+            query = from item in principal.Claims
+                    where item.Type == EmailCodeClaim
+                        select item;
+            code = query.Single().Value;
+
+
+            var user = await UserManager.FindByIdAsync(userId.ToGuid());
+            if (user.IsEmailConfirmed)
+            {
+                return View("ConfirmEmail");
+            }
+            var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);
+            if (result.Succeeded)
+            {
+                /*
+                 * 1. Find any external providers associated with this user
+                 * 2. Create a new user that has all these same associations, and set email confirmed to true
+                 * 3. Delete the old user, as this was only a placeholder until we got an email verification.
+                 */
+                var email = user.Email;
+                var logins = await UserManager.GetLoginsAsync(userId.ToGuid());
+                var del = await UserManager.DeleteAsync(user);
+                user.IsEmailConfirmed = true;
+                var dd = await UserManager.CreateAsync(user);
+                user = await UserManager.FindByEmailAsync(email);
+                foreach (var login in logins)
+                {
+                    await UserManager.AddLoginAsync(user.Id, login);
+                }
+            }
+
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
@@ -376,7 +473,7 @@ namespace CustomClientCredentialHost.Controllers
                 // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                 // Send an email with this link
                 // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
+                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                 // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
                 // return RedirectToAction("ForgotPasswordConfirmation", "Account");
             }
@@ -491,14 +588,26 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return RedirectToAction("Login");
             }
-            var user = await UserManager.FindByNameAsync(loginInfo.Email);
-            if (!(await UserManager.IsEmailConfirmedAsync(user.Id)))
+            CassandraUser user = null;
+            if (!string.IsNullOrEmpty(loginInfo.Email))
+            {
+                user = await UserManager.FindByNameAsync(loginInfo.Email);
+            }
+             
+
+            if (user != null && !(await UserManager.IsEmailConfirmedAsync(user.Id)))
             {
                 return RedirectToAction("SendEmailConfirmationCode", "Account", new { userId = user.Id.ToString(), email = loginInfo.Email });
             }
 
             // Sign in the user with this external login provider if the user already has a login
             var result = await SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
+            if (result == SignInStatus.Failure && user != null)
+            {
+                // Auto association
+                var dd = await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
+                result = await SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
+            }
             switch (result)
             {
                 case SignInStatus.Success:
@@ -509,6 +618,7 @@ namespace CustomClientCredentialHost.Controllers
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = false });
                 case SignInStatus.Failure:
                 default:
+                     
                     // If the user does not have an account, then prompt the user to create an account
                     ViewBag.ReturnUrl = returnUrl;
                     ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
