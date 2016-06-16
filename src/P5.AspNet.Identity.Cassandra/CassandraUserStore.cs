@@ -2,17 +2,51 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using Cassandra;
+using Cassandra.Mapping;
 using Microsoft.AspNet.Identity;
+using P5.CassandraStore;
 using P5.CassandraStore.DAO;
 
 namespace P5.AspNet.Identity.Cassandra
 {
-    public class CassandraUserStore : IUserStore<CassandraUser, Guid>, IUserLoginStore<CassandraUser, Guid>, IUserClaimStore<CassandraUser, Guid>,
-        IUserPasswordStore<CassandraUser, Guid>, IUserSecurityStampStore<CassandraUser, Guid>,
-        IUserTwoFactorStore<CassandraUser, Guid>, IUserLockoutStore<CassandraUser, Guid>,
-        IUserPhoneNumberStore<CassandraUser, Guid>, IUserEmailStore<CassandraUser, Guid>, IUserRoleStore<CassandraUser, Guid>
+    // Summary:
+    //     Interface that exposes basic user management apis
+    //
+    // Type parameters:
+    //   TUser:
+    //
+    //   TKey:
+    public interface IUserStoreAdmin<TUser, in TKey> : IDisposable where TUser : class, Microsoft.AspNet.Identity.IUser<TKey>
+    {
+        // Summary:
+        //     page the user database
+        //
+        // Parameters:
+        //   user:
+        Task<Store.Core.Models.IPage<TUser>> PageUsersAsync(int pageSize, byte[] pagingState);
+        // Summary:
+        //     page the user database
+        //
+        // Parameters:
+        //   user:
+        Task<IEnumerable<TUser>> PageUsersAsync(int offset, int limit); 
+    }
+
+    public class CassandraUserStore : 
+        IUserStore<CassandraUser, Guid>, 
+        IUserLoginStore<CassandraUser, Guid>, 
+        IUserClaimStore<CassandraUser, Guid>,
+        IUserPasswordStore<CassandraUser, Guid>, 
+        IUserSecurityStampStore<CassandraUser, Guid>,
+        IUserTwoFactorStore<CassandraUser, Guid>, 
+        IUserLockoutStore<CassandraUser, Guid>,
+        IUserPhoneNumberStore<CassandraUser, Guid>, 
+        IUserEmailStore<CassandraUser, Guid>, 
+        IUserRoleStore<CassandraUser, Guid>,
+        IUserStoreAdmin<CassandraUser, Guid>
     {
         private ICassandraDAO _dao;
         private readonly bool _disposeOfSession;
@@ -34,6 +68,7 @@ namespace P5.AspNet.Identity.Cassandra
                 _resilientSession = rs;
             }
         }
+
         class ResilientSession
         {
             private ISession _session;
@@ -42,33 +77,35 @@ namespace P5.AspNet.Identity.Cassandra
             private readonly bool _disposeOfSession;
             private readonly bool _createSchema;
             // Reusable prepared statements, lazy evaluated
-            private  AsyncLazy<PreparedStatement> _createUserByUserName;
-            private  AsyncLazy<PreparedStatement> _createUserByEmail;
-            private  AsyncLazy<PreparedStatement> _deleteUserByUserName;
-            private  AsyncLazy<PreparedStatement> _deleteUserByEmail;
+            private AsyncLazy<PreparedStatement> _createUserByUserName;
+            private AsyncLazy<PreparedStatement> _createUserByEmail;
+            private AsyncLazy<PreparedStatement> _deleteUserByUserName;
+            private AsyncLazy<PreparedStatement> _deleteUserByEmail;
 
-            private  AsyncLazy<PreparedStatement[]> _createUser;
-            private  AsyncLazy<PreparedStatement[]> _updateUser;
-            private  AsyncLazy<PreparedStatement[]> _deleteUser;
+            private AsyncLazy<PreparedStatement[]> _createUser;
+            private AsyncLazy<PreparedStatement[]> _updateUser;
+            private AsyncLazy<PreparedStatement[]> _deleteUser;
 
-            private  AsyncLazy<PreparedStatement> _findById;
-            private  AsyncLazy<PreparedStatement> _findByName;
-            private  AsyncLazy<PreparedStatement> _findByEmail;
+            private AsyncLazy<PreparedStatement> _findById;
+            private AsyncLazy<PreparedStatement> _findByName;
+            private AsyncLazy<PreparedStatement> _findByEmail;
 
-            private  AsyncLazy<PreparedStatement[]> _addLogin;
-            private  AsyncLazy<PreparedStatement[]> _removeLogin;
-            private  AsyncLazy<PreparedStatement> _getLogins;
-            private  AsyncLazy<PreparedStatement> _getLoginsByProvider;
+            private AsyncLazy<PreparedStatement[]> _addLogin;
+            private AsyncLazy<PreparedStatement[]> _removeLogin;
+            private AsyncLazy<PreparedStatement> _getLogins;
+            private AsyncLazy<PreparedStatement> _getLoginsByProvider;
 
-            private  AsyncLazy<PreparedStatement> _getClaims;
-            private  AsyncLazy<PreparedStatement> _addClaim;
-            private  AsyncLazy<PreparedStatement> _removeClaim;
+            private AsyncLazy<PreparedStatement> _getClaims;
+            private AsyncLazy<PreparedStatement> _addClaim;
+            private AsyncLazy<PreparedStatement> _removeClaim;
 
-            private  AsyncLazy<PreparedStatement[]> _addToRoleAsync;
-            private  AsyncLazy<PreparedStatement[]> _removeFromRoleAsync;
-            private  AsyncLazy<PreparedStatement> _getRolesAsync;
-            private  AsyncLazy<PreparedStatement> _isInRoleAsync;
-            public ResilientSession(ICassandraDAO dao, Guid tenantId, bool disposeOfSession = false, bool createSchema = true)
+            private AsyncLazy<PreparedStatement[]> _addToRoleAsync;
+            private AsyncLazy<PreparedStatement[]> _removeFromRoleAsync;
+            private AsyncLazy<PreparedStatement> _getRolesAsync;
+            private AsyncLazy<PreparedStatement> _isInRoleAsync;
+
+            public ResilientSession(ICassandraDAO dao, Guid tenantId, bool disposeOfSession = false,
+                bool createSchema = true)
             {
                 _dao = dao;
                 _tenantId = tenantId;
@@ -83,6 +120,7 @@ namespace P5.AspNet.Identity.Cassandra
                     _session.Dispose();
                 }
             }
+
             public async Task EstablishConnectionAsync()
             {
 
@@ -238,7 +276,8 @@ namespace P5.AspNet.Identity.Cassandra
 
             public async Task CreateAsync(CassandraUser user)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
 
                 // TODO:  Support uniqueness for usernames/emails at the C* level using LWT?
 
@@ -251,32 +290,40 @@ namespace P5.AspNet.Identity.Cassandra
                 var batch = new BatchStatement();
 
                 // INSERT INTO users ...
-                batch.Add(prepared[0].Bind(id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
-                    user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed, user.Email,
+                batch.Add(prepared[0].Bind(id, user.UserName, user.PasswordHash, user.SecurityStamp,
+                    user.IsTwoFactorEnabled, user.AccessFailedCount,
+                    user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed,
+                    user.Email,
                     user.IsEmailConfirmed, createdDate, null, user.Enabled, user.Source, user.SourceId));
 
                 // Only insert into username and email tables if those have a value
                 if (string.IsNullOrEmpty(user.UserName) == false)
                 {
                     // INSERT INTO users_by_username ...
-                    batch.Add(prepared[1].Bind(user.UserName, id, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
-                        user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed, user.Email,
+                    batch.Add(prepared[1].Bind(user.UserName, id, user.PasswordHash, user.SecurityStamp,
+                        user.IsTwoFactorEnabled, user.AccessFailedCount,
+                        user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed,
+                        user.Email,
                         user.IsEmailConfirmed, createdDate, null, user.Enabled, user.Source, user.SourceId));
                 }
 
                 if (string.IsNullOrEmpty(user.Email) == false)
                 {
                     // INSERT INTO users_by_email ...
-                    batch.Add(prepared[2].Bind(user.Email, id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                    batch.Add(prepared[2].Bind(user.Email, id, user.UserName, user.PasswordHash, user.SecurityStamp,
+                        user.IsTwoFactorEnabled,
                         user.AccessFailedCount, user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber,
-                        user.IsPhoneNumberConfirmed, user.IsEmailConfirmed, createdDate, null, user.Enabled, user.Source, user.SourceId));
+                        user.IsPhoneNumberConfirmed, user.IsEmailConfirmed, createdDate, null, user.Enabled, user.Source,
+                        user.SourceId));
                 }
 
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
             }
+
             public async Task UpdateAsync(CassandraUser user)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
                 var id = user.GenerateIdFromUserData();
 
                 var modifiedDate = DateTimeOffset.UtcNow;
@@ -286,8 +333,10 @@ namespace P5.AspNet.Identity.Cassandra
                 var batch = new BatchStatement();
 
                 // UPDATE users ...
-                batch.Add(prepared[0].Bind(user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
-                    user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed, user.Email,
+                batch.Add(prepared[0].Bind(user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                    user.AccessFailedCount,
+                    user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed,
+                    user.Email,
                     user.IsEmailConfirmed, modifiedDate, user.Enabled, user.Source, user.SourceId, id));
 
                 // See if the username changed so we can decide whether we need a different users_by_username record
@@ -295,8 +344,10 @@ namespace P5.AspNet.Identity.Cassandra
                 if (user.HasUserNameChanged(out oldUserName) == false && string.IsNullOrEmpty(user.UserName) == false)
                 {
                     // UPDATE users_by_username ... (since username hasn't changed)
-                    batch.Add(prepared[1].Bind(user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
-                        user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed, user.Email,
+                    batch.Add(prepared[1].Bind(user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                        user.AccessFailedCount,
+                        user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed,
+                        user.Email,
                         user.IsEmailConfirmed, modifiedDate, user.Enabled, user.Source, user.SourceId, user.UserName));
                 }
                 else
@@ -310,9 +361,11 @@ namespace P5.AspNet.Identity.Cassandra
                     // INSERT INTO users_by_username ... (insert new record since username changed)
                     if (string.IsNullOrEmpty(user.UserName) == false)
                     {
-                        batch.Add(prepared[3].Bind(user.UserName, id, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                        batch.Add(prepared[3].Bind(user.UserName, id, user.PasswordHash, user.SecurityStamp,
+                            user.IsTwoFactorEnabled,
                             user.AccessFailedCount, user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber,
-                            user.IsPhoneNumberConfirmed, user.Email, user.IsEmailConfirmed, user.Created, modifiedDate, user.Enabled, user.Source, user.SourceId));
+                            user.IsPhoneNumberConfirmed, user.Email, user.IsEmailConfirmed, user.Created, modifiedDate,
+                            user.Enabled, user.Source, user.SourceId));
                     }
                 }
 
@@ -321,7 +374,8 @@ namespace P5.AspNet.Identity.Cassandra
                 if (user.HasEmailChanged(out oldEmail) == false && string.IsNullOrEmpty(user.Email) == false)
                 {
                     // UPDATE users_by_email ... (since email hasn't changed)
-                    batch.Add(prepared[4].Bind(user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled, user.AccessFailedCount,
+                    batch.Add(prepared[4].Bind(user.UserName, user.PasswordHash, user.SecurityStamp,
+                        user.IsTwoFactorEnabled, user.AccessFailedCount,
                         user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.IsPhoneNumberConfirmed,
                         user.IsEmailConfirmed, modifiedDate, user.Enabled, user.Source, user.SourceId, user.Email));
                 }
@@ -336,17 +390,21 @@ namespace P5.AspNet.Identity.Cassandra
                     // INSERT INTO users_by_email ... (insert new record since email changed)
                     if (string.IsNullOrEmpty(user.Email) == false)
                     {
-                        batch.Add(prepared[6].Bind(user.Email, id, user.UserName, user.PasswordHash, user.SecurityStamp, user.IsTwoFactorEnabled,
+                        batch.Add(prepared[6].Bind(user.Email, id, user.UserName, user.PasswordHash, user.SecurityStamp,
+                            user.IsTwoFactorEnabled,
                             user.AccessFailedCount, user.IsLockoutEnabled, user.LockoutEndDate, user.PhoneNumber,
-                            user.IsPhoneNumberConfirmed, user.IsEmailConfirmed, user.Created, modifiedDate, user.Enabled, user.Source, user.SourceId));
+                            user.IsPhoneNumberConfirmed, user.IsEmailConfirmed, user.Created, modifiedDate, user.Enabled,
+                            user.Source, user.SourceId));
                     }
                 }
 
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
             }
+
             public async Task DeleteAsync(CassandraUser user)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
                 var id = user.GenerateIdFromUserData();
 
                 PreparedStatement[] prepared = await _deleteUser;
@@ -375,6 +433,7 @@ namespace P5.AspNet.Identity.Cassandra
 
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
             }
+
             public async Task<CassandraUser> FindByIdAsync(Guid userId)
             {
                 PreparedStatement prepared = await _findById;
@@ -383,9 +442,11 @@ namespace P5.AspNet.Identity.Cassandra
                 RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
                 return CassandraUser.FromRow(rows.SingleOrDefault());
             }
+
             public async Task<CassandraUser> FindByNameAsync(string userName)
             {
-                if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentException("userName cannot be null or empty", "userName");
+                if (string.IsNullOrWhiteSpace(userName))
+                    throw new ArgumentException("userName cannot be null or empty", "userName");
 
                 PreparedStatement prepared = await _findByName;
                 BoundStatement bound = prepared.Bind(userName);
@@ -393,10 +454,13 @@ namespace P5.AspNet.Identity.Cassandra
                 RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
                 return CassandraUser.FromRow(rows.SingleOrDefault());
             }
+
             public async Task AddLoginAsync(CassandraUser user, UserLoginInfo login)
             {
-                if (user == null) throw new ArgumentNullException("user");
-                if (login == null) throw new ArgumentNullException("login");
+                if (user == null)
+                    throw new ArgumentNullException("user");
+                if (login == null)
+                    throw new ArgumentNullException("login");
                 var id = user.GenerateIdFromUserData();
                 PreparedStatement[] prepared = await _addLogin;
                 var batch = new BatchStatement();
@@ -409,10 +473,13 @@ namespace P5.AspNet.Identity.Cassandra
 
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
             }
+
             public async Task RemoveLoginAsync(CassandraUser user, UserLoginInfo login)
             {
-                if (user == null) throw new ArgumentNullException("user");
-                if (login == null) throw new ArgumentNullException("login");
+                if (user == null)
+                    throw new ArgumentNullException("user");
+                if (login == null)
+                    throw new ArgumentNullException("login");
                 var id = user.GenerateIdFromUserData();
 
                 PreparedStatement[] prepared = await _removeLogin;
@@ -426,19 +493,27 @@ namespace P5.AspNet.Identity.Cassandra
 
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
             }
+
             public async Task<IList<UserLoginInfo>> GetLoginsAsync(CassandraUser user)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
                 var id = user.GenerateIdFromUserData();
                 PreparedStatement prepared = await _getLogins;
                 BoundStatement bound = prepared.Bind(id);
 
                 RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
-                return rows.Select(row => new UserLoginInfo(row.GetValue<string>("login_provider"), row.GetValue<string>("provider_key"))).ToList();
+                return
+                    rows.Select(
+                        row =>
+                            new UserLoginInfo(row.GetValue<string>("login_provider"),
+                                row.GetValue<string>("provider_key"))).ToList();
             }
+
             public async Task<CassandraUser> FindAsync(UserLoginInfo login)
             {
-                if (login == null) throw new ArgumentNullException("login");
+                if (login == null)
+                    throw new ArgumentNullException("login");
 
                 PreparedStatement prepared = await _getLoginsByProvider;
                 BoundStatement bound = prepared.Bind(login.LoginProvider, login.ProviderKey);
@@ -454,29 +529,38 @@ namespace P5.AspNet.Identity.Cassandra
                 RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
                 return CassandraUser.FromRow(rows.SingleOrDefault());
             }
+
             public async Task<IList<Claim>> GetClaimsAsync(CassandraUser user)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
                 var id = user.GenerateIdFromUserData();
                 PreparedStatement prepared = await _getClaims;
                 BoundStatement bound = prepared.Bind(id);
 
                 RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
-                return rows.Select(row => new Claim(row.GetValue<string>("type"), row.GetValue<string>("value"))).ToList();
+                return
+                    rows.Select(row => new Claim(row.GetValue<string>("type"), row.GetValue<string>("value"))).ToList();
             }
+
             public async Task AddClaimAsync(CassandraUser user, Claim claim)
             {
-                if (user == null) throw new ArgumentNullException("user");
-                if (claim == null) throw new ArgumentNullException("claim");
+                if (user == null)
+                    throw new ArgumentNullException("user");
+                if (claim == null)
+                    throw new ArgumentNullException("claim");
                 var id = user.GenerateIdFromUserData();
                 PreparedStatement prepared = await _addClaim;
                 BoundStatement bound = prepared.Bind(id, claim.Type, claim.Value);
                 await _session.ExecuteAsync(bound).ConfigureAwait(false);
             }
+
             public async Task RemoveClaimAsync(CassandraUser user, Claim claim)
             {
-                if (user == null) throw new ArgumentNullException("user");
-                if (claim == null) throw new ArgumentNullException("claim");
+                if (user == null)
+                    throw new ArgumentNullException("user");
+                if (claim == null)
+                    throw new ArgumentNullException("claim");
                 var id = user.GenerateIdFromUserData();
 
                 PreparedStatement prepared = await _removeClaim;
@@ -484,22 +568,29 @@ namespace P5.AspNet.Identity.Cassandra
 
                 await _session.ExecuteAsync(bound).ConfigureAwait(false);
             }
+
             public async Task SetPasswordHashAsync(CassandraUser user, string passwordHash)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
 
                 // Password hash can be null when removing a password from a user
                 user.PasswordHash = passwordHash;
             }
+
             public async Task<string> GetPasswordHashAsync(CassandraUser user)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
                 return user.PasswordHash;
             }
+
             public async Task AddToRoleAsync(CassandraUser user, string roleName)
             {
-                if (user == null) throw new ArgumentNullException("user");
-                if (roleName == null) throw new ArgumentNullException("roleName");
+                if (user == null)
+                    throw new ArgumentNullException("user");
+                if (roleName == null)
+                    throw new ArgumentNullException("roleName");
                 var id = user.GenerateIdFromUserData();
                 var createdDate = DateTimeOffset.UtcNow;
                 user.Created = createdDate;
@@ -516,9 +607,11 @@ namespace P5.AspNet.Identity.Cassandra
 
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
             }
+
             public async Task<CassandraUser> FindByEmailAsync(string email)
             {
-                if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("email cannot be null or empty", "email");
+                if (string.IsNullOrWhiteSpace(email))
+                    throw new ArgumentException("email cannot be null or empty", "email");
 
                 PreparedStatement prepared = await _findByEmail;
                 BoundStatement bound = prepared.Bind(email);
@@ -526,10 +619,13 @@ namespace P5.AspNet.Identity.Cassandra
                 RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
                 return CassandraUser.FromRow(rows.SingleOrDefault());
             }
+
             public async Task RemoveFromRoleAsync(CassandraUser user, string roleName)
             {
-                if (user == null) throw new ArgumentNullException("user");
-                if (roleName == null) throw new ArgumentNullException("roleName");
+                if (user == null)
+                    throw new ArgumentNullException("user");
+                if (roleName == null)
+                    throw new ArgumentNullException("roleName");
                 var id = user.GenerateIdFromUserData();
                 PreparedStatement[] prepared = await _removeFromRoleAsync;
                 var batch = new BatchStatement();
@@ -542,9 +638,11 @@ namespace P5.AspNet.Identity.Cassandra
 
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
             }
+
             public async Task<IList<string>> GetRolesAsync(CassandraUser user)
             {
-                if (user == null) throw new ArgumentNullException("user");
+                if (user == null)
+                    throw new ArgumentNullException("user");
                 var id = user.GenerateIdFromUserData();
                 // SELECT FROM user_roles ...
                 PreparedStatement prepared = await _getRolesAsync;
@@ -552,10 +650,13 @@ namespace P5.AspNet.Identity.Cassandra
                 RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
                 return rows.Select(r => r.GetValue<string>("rolename")).ToList();
             }
+
             public async Task<bool> IsInRoleAsync(CassandraUser user, string roleName)
             {
-                if (user == null) throw new ArgumentNullException("user");
-                if (roleName == null) throw new ArgumentNullException("roleName");
+                if (user == null)
+                    throw new ArgumentNullException("user");
+                if (roleName == null)
+                    throw new ArgumentNullException("roleName");
                 var id = user.GenerateIdFromUserData();
                 // SELECT FROM user_roles ...
                 PreparedStatement prepared = await _isInRoleAsync;
@@ -564,9 +665,65 @@ namespace P5.AspNet.Identity.Cassandra
                 return rows.Count() > 0;
             }
 
+            private const string SelectUsersQuery = @"SELECT * FROM users";
+            private const string SelectUsersQueryWithOffset = @"SELECT * FROM users OFFSET {0} LIMIT {1};";
+            public async Task<IEnumerable<CassandraUser>> PageUsersAsync(int offset, int limit,
+                CancellationToken cancellationToken = default(CancellationToken))
+            {
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var session = _session;
+                    IMapper mapper = new Mapper(session);       
+                    var cqlQuery = string.Format(SelectUsersQueryWithOffset, offset, limit);
+                    var result = await mapper.FetchAsync<CassandraUser>(cqlQuery);
+                    return result;
+                }
+                catch (Exception e)
+                {
+                    // only here to catch during a debug unit test.
+                    throw;
+                }
+            }
+
+            public async Task<Store.Core.Models.IPage<CassandraUser>> PageUsersAsync(int pageSize, byte[] pagingState,
+                    CancellationToken cancellationToken = default(CancellationToken))
+            {
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var session = _session;
+                    IMapper mapper = new Mapper(session);
+                    IPage<CassandraUser> page;
+                    if (pagingState == null)
+                    {
+                        page = await mapper.FetchPageAsync<CassandraUser>(
+                            Cql.New(SelectUsersQuery).WithOptions(opt =>
+                                opt.SetPageSize(pageSize)));
+                    }
+                    else
+                    {
+                        page = await mapper.FetchPageAsync<CassandraUser>(
+                            Cql.New(SelectUsersQuery).WithOptions(opt =>
+                                opt.SetPageSize(pageSize).SetPagingState(pagingState)));
+                    }
+
+                    // var result = CreatePageProxy(page);
+                    var result = new PageProxy<CassandraUser>(page);
+
+                    return result;
+                }
+                catch (Exception e)
+                {
+                    // only here to catch during a debug unit test.
+                    throw;
+                }
+            }
+
         }
 
-        
+
 
 
 
@@ -1138,6 +1295,33 @@ namespace P5.AspNet.Identity.Cassandra
 
             user.IsPhoneNumberConfirmed = confirmed;
             return CompletedTask;
+        }
+
+        public async Task<Store.Core.Models.IPage<CassandraUser>> PageUsersAsync(int pageSize, byte[] pagingState)
+        {
+            Store.Core.Models.IPage<CassandraUser> result =
+                await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<Store.Core.Models.IPage<CassandraUser>>(
+                    async () =>
+                    {
+                        await EstablishSessionAsync();
+                        return await _resilientSession.PageUsersAsync(pageSize, pagingState);
+
+                    },
+                    async (ex) => HandleCassandraException<Store.Core.Models.IPage<CassandraUser>>(ex));
+            return result;
+        }
+
+        public async Task<IEnumerable<CassandraUser>> PageUsersAsync(int offset, int limit)
+        {
+            var result =
+                  await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IEnumerable<CassandraUser>>(
+                      async () =>
+                      {
+                          await EstablishSessionAsync();
+                          return await _resilientSession.PageUsersAsync(offset, limit);
+                      },
+                      async (ex) => HandleCassandraException<IEnumerable<CassandraUser>>(ex));
+            return result;
         }
     }
 }

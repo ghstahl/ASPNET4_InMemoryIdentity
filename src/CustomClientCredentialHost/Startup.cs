@@ -1,7 +1,10 @@
 ﻿#define CASSANDRA_STORE
 using System.Collections.Generic;
+using System.Reflection;
 using System.Web.Hosting;
 using System.Web.Http;
+using Autofac;
+using Autofac.Integration.WebApi;
 using CustomClientCredentialHost.Config;
 using IdentityServer3.AccessTokenValidation;
 using IdentityServer3.Core.Configuration;
@@ -26,6 +29,8 @@ namespace CustomClientCredentialHost
     {
         public void Configuration(IAppBuilder app)
         {
+            var builder = new ContainerBuilder();
+
             ConfigureAuth(app);
 
             var path = HostingEnvironment.MapPath("~/App_Data");
@@ -125,13 +130,30 @@ namespace CustomClientCredentialHost
             });
 
             HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapHttpRoute(
+  /*          config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new {id = RouteParameter.Optional}
                 );
+            */
+            // Register your Web API controllers.
+            builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+            builder.RegisterType<ApplicationUserManager>();
+          
+            // Run other optional steps, like registering filters,
+            // per-controller-type services, etc., then set the dependency resolver
+            // to be Autofac.
+            var container = builder.Build();
+            config.DependencyResolver = new AutofacWebApiDependencyResolver(container);
 
+            // OWIN WEB API SETUP:
+
+            // Register the Autofac middleware FIRST, then the Autofac Web API middleware,
+            // and finally the standard Web API middleware.
+            app.UseAutofacMiddleware(container);
+            app.UseAutofacWebApi(config);
             app.UseWebApi(config);
+
         }
     }
 }

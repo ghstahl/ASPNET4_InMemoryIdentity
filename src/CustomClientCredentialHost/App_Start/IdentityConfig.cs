@@ -195,6 +195,10 @@ namespace CustomClientCredentialHost
         {
         }
 
+        public IUserStoreAdmin<CassandraUser, Guid> AdminStore
+        {
+            get { return this.Store as IUserStoreAdmin<CassandraUser, Guid>; }
+        }
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
             var manager = new ApplicationUserManager();

@@ -8,6 +8,32 @@ using P5.Store.Core.Models;
 
 namespace P5.CassandraStore
 {
+    public static class PageProxyHandleExtensions
+    {
+        public static PageProxyHandle<T> ToPageProxyHandle<T>(this IPage<T> page)
+        {
+            return new PageProxyHandle<T>(page);
+        }
+    }
+
+    // this is for giving out to the UI pages
+    public class PageProxyHandle<T>
+    {
+      
+        public PageProxyHandle(IPage<T> page)
+        {
+            Count = page.Count;
+            IsReadOnly = page.IsReadOnly;
+            CurrentPagingState = page.CurrentPagingState == null?"":Convert.ToBase64String(page.CurrentPagingState);
+            PagingState = page.PagingState == null?"":Convert.ToBase64String(page.PagingState);
+            Data = page;
+        }
+        public int Count { get; set; }
+        public bool IsReadOnly { get; set; }
+        public string CurrentPagingState { get; set; }
+        public string PagingState { get; set; }
+        public IEnumerable<T> Data { get; set; }
+    }
     //  good old hardcoded mapping vs the Castle intercepter with reflection.
     public class PageProxy<T> : IPage<T>
     {
@@ -55,5 +81,6 @@ namespace P5.CassandraStore
         public bool IsReadOnly { get { return _cassandraPage.IsReadOnly; } }
         public byte[] CurrentPagingState { get { return _cassandraPage.CurrentPagingState; } }
         public byte[] PagingState { get { return _cassandraPage.PagingState; } }
+
     }
 }
