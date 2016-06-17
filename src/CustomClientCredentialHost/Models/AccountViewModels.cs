@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNet.Identity;
 
 namespace CustomClientCredentialHost.Models
 {
@@ -9,6 +10,7 @@ namespace CustomClientCredentialHost.Models
         [Required]
         [Display(Name = "Email")]
         public string Email { get; set; }
+
     }
 
     public class ExternalLoginListViewModel
@@ -117,7 +119,7 @@ namespace CustomClientCredentialHost.Models
         [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required]
         public string UserId { get; set; }
+
     }
 }

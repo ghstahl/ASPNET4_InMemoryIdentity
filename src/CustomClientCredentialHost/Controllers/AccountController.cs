@@ -17,6 +17,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using CustomClientCredentialHost.Models;
+using Newtonsoft.Json;
 using P5.AspNet.Identity.Cassandra;
 
 namespace CustomClientCredentialHost.Controllers
@@ -344,9 +345,18 @@ namespace CustomClientCredentialHost.Controllers
             return View(new ConfirmEmailViewModel { UserId = userId, Email = email });
         }
 
-        const string EmailConfirmationAudience = "https://www.cassandrahost.com/aud/EmailConfirmation";
-        const string EmailCodeClaim = "EmailCode";
-        const string ValidIssuer = "CassandraHost";
+        static class WellKnown
+        {
+            public const string EmailConfirmationAudience = "https://www.cassandrahost.com/aud/EmailConfirmation";
+            public const string EmailCodeClaim = "EmailCode";
+            public const string ValidIssuer = "CassandraHost";
+
+
+            public const string UserLoginInfoClaim = "UserLoginInfo";
+
+        }
+
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -357,36 +367,32 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return View();
             }
-            var userId = confirmEmailViewModel.UserId.ToGuid();
 
-            string code = await UserManager.GenerateEmailConfirmationTokenAsync(userId);
             List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, confirmEmailViewModel.UserId),
-                new Claim(EmailCodeClaim, code),
+                new Claim(ClaimTypes.Email, confirmEmailViewModel.Email)
             };
             var now = DateTime.UtcNow;
             var lifetime = new Lifetime(now, now.AddMinutes(30));
-            var jwt = IdentityTokenHelper.BuildJWT(claims, ValidIssuer, EmailConfirmationAudience, lifetime);
-            var validationParameters = new TokenValidationParameters()
+            var jwt = IdentityTokenHelper.BuildJWT(claims, WellKnown.ValidIssuer, WellKnown.EmailConfirmationAudience,
+                lifetime);
+
+
+            var callbackUrl = Url.Action("ConfirmEmail", "Account",
+                new {userId = confirmEmailViewModel.UserId, code = jwt}, protocol: Request.Url.Scheme);
+            await UserManager.EmailService.SendAsync(new IdentityMessage()
             {
-                ValidAudiences = new[] { EmailConfirmationAudience },
-                IssuerSigningToken = new BinarySecretSecurityToken(IdentityTokenHelper.EncryptionKey),
-                ValidIssuer = ValidIssuer,
-                ValidateLifetime = true
-            };
-            SecurityToken securityToken;
-            var principal = IdentityTokenHelper.ValidateJWT(jwt, validationParameters, out securityToken);
-
-
-            var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = confirmEmailViewModel.UserId, code = jwt }, protocol: Request.Url.Scheme);
-            await UserManager.SendEmailAsync(userId, "Confirm your account", "You have 30 minutes to confirm your account by clicking here: " + callbackUrl);
+                Destination = confirmEmailViewModel.Email,
+                Subject = "Confirm your account!",
+                Body = "You have 30 minutes to confirm your account by clicking here: " + callbackUrl
+            }); 
 
             // Generate the token and send it
-            return RedirectToAction("EmailConfirmationSent", "Account", new { email = confirmEmailViewModel.Email });
+            return RedirectToAction("EmailConfirmationSent", "Account", new {email = confirmEmailViewModel.Email});
 
 
         }
+
         //
         // GET: /Account/ConfirmEmail
         [AllowAnonymous]
@@ -399,51 +405,60 @@ namespace CustomClientCredentialHost.Controllers
 
             var validationParameters = new TokenValidationParameters()
             {
-                ValidAudiences = new[] { EmailConfirmationAudience },
+                ValidAudiences = new[] { WellKnown.EmailConfirmationAudience },
                 IssuerSigningToken = new BinarySecretSecurityToken(IdentityTokenHelper.EncryptionKey),
-                ValidIssuer = ValidIssuer,
+                ValidIssuer = WellKnown.ValidIssuer,
                 ValidateLifetime = true
             };
             SecurityToken securityToken;
             var principal = IdentityTokenHelper.ValidateJWT(code, validationParameters, out securityToken);
-            
+
             var query = from item in principal.Claims
-                where item.Type == ClaimTypes.NameIdentifier
+                where item.Type == ClaimTypes.Email
                 select item;
-            userId = query.Single().Value;
-
-            query = from item in principal.Claims
-                    where item.Type == EmailCodeClaim
-                        select item;
-            code = query.Single().Value;
-
-
-            var user = await UserManager.FindByIdAsync(userId.ToGuid());
-            if (user.IsEmailConfirmed)
+            if(!query.Any())
             {
+                return View("Error");
+            }
+            var email = query.Single().Value;
+
+            // Optional.  If this is not here, we simply attempt an email confirmation on an existing
+            query = from item in principal.Claims
+                    where item.Type == WellKnown.UserLoginInfoClaim
+                        select item;
+            UserLoginInfo userLoginInfo = null;
+            if (query.Any())
+            {
+                userLoginInfo = JsonConvert.DeserializeObject<UserLoginInfo>(query.Single().Value);
+            }
+             
+
+            // if the user exists, then simply do an email confirmation on this.
+            var user = await UserManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                if (!user.IsEmailConfirmed)
+                {
+                    user.IsEmailConfirmed = true;
+                    await UserManager.UpdateAsync(user);
+                }
                 return View("ConfirmEmail");
             }
-            var result = await UserManager.ConfirmEmailAsync(userId.ToGuid(), code);
-            if (result.Succeeded)
+            if (userLoginInfo != null)
             {
-                /*
-                 * 1. Find any external providers associated with this user
-                 * 2. Create a new user that has all these same associations, and set email confirmed to true
-                 * 3. Delete the old user, as this was only a placeholder until we got an email verification.
-                 */
-                var email = user.Email;
-                var logins = await UserManager.GetLoginsAsync(userId.ToGuid());
-                var del = await UserManager.DeleteAsync(user);
-                user.IsEmailConfirmed = true;
-                var dd = await UserManager.CreateAsync(user);
-                user = await UserManager.FindByEmailAsync(email);
-                foreach (var login in logins)
+                // User does not exist, and we have an email confirmation, so lets create
+                user = new ApplicationUser { UserName = email, Email = email, IsEmailConfirmed = true };
+                var createResult = await UserManager.CreateAsync(user);
+                if (createResult.Succeeded)
                 {
-                    await UserManager.AddLoginAsync(user.Id, login);
+                    createResult = await UserManager.AddLoginAsync(user.Id, userLoginInfo);
                 }
-            }
+                AddErrors(createResult);
 
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
+                return View(createResult.Succeeded ? "ConfirmEmail" : "Error");
+                
+            }
+            return View("Error");
         }
 
         //
@@ -583,30 +598,41 @@ namespace CustomClientCredentialHost.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
         {
+           
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync();
             if (loginInfo == null)
             {
                 return RedirectToAction("Login");
             }
-            CassandraUser user = null;
-            if (!string.IsNullOrEmpty(loginInfo.Email))
+            CassandraUser user = await UserManager.FindAsync(loginInfo.Login);
+            if (user != null && !user.IsEmailConfirmed)
             {
-                user = await UserManager.FindByNameAsync(loginInfo.Email);
+                return
+                    await
+                        SendEmailConfirmationCode(new ConfirmEmailViewModel() { Email = user.Email, UserId = user.Id.ToString() });
             }
-             
-
-            if (user != null && !(await UserManager.IsEmailConfirmedAsync(user.Id)))
+            // Try an auto association.  If this login provider provides and email, than try a match
+            if (user == null && !string.IsNullOrEmpty(loginInfo.Email))
             {
-                return RedirectToAction("SendEmailConfirmationCode", "Account", new { userId = user.Id.ToString(), email = loginInfo.Email });
+                user = await UserManager.FindByEmailAsync(loginInfo.Email);
+                if (user != null)
+                {
+                    // got a match. lets auto associate
+                     await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
+                }
             }
 
             // Sign in the user with this external login provider if the user already has a login
             var result = await SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
-            if (result == SignInStatus.Failure && user != null)
+
+            if (result == SignInStatus.Success)
             {
-                // Auto association
-                var dd = await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
-                result = await SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
+                if (!user.IsEmailConfirmed)
+                {
+                    return
+                        await
+                            SendEmailConfirmationCode(new ConfirmEmailViewModel() {Email = user.Email, UserId = user.Id.ToString()});
+                }
             }
             switch (result)
             {
@@ -618,10 +644,11 @@ namespace CustomClientCredentialHost.Controllers
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = false });
                 case SignInStatus.Failure:
                 default:
-                     
+
                     // If the user does not have an account, then prompt the user to create an account
                     ViewBag.ReturnUrl = returnUrl;
                     ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
+                    Session["UserLoginInfo"] = loginInfo.Login;
                     return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
             }
         }
@@ -640,6 +667,34 @@ namespace CustomClientCredentialHost.Controllers
 
             if (ModelState.IsValid)
             {
+                var loginInfo = Session["UserLoginInfo"] as UserLoginInfo;
+                if (loginInfo == null)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+
+                List<Claim> claims = new List<Claim>()
+                {
+                    new Claim(ClaimTypes.Email, model.Email),
+                    new Claim(WellKnown.UserLoginInfoClaim, JsonConvert.SerializeObject(loginInfo)),
+                };
+                var now = DateTime.UtcNow;
+                var lifetime = new Lifetime(now, now.AddMinutes(30));
+                var jwt = IdentityTokenHelper.BuildJWT(claims, WellKnown.ValidIssuer, WellKnown.EmailConfirmationAudience, lifetime);
+
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = "na", code = jwt }, protocol: Request.Url.Scheme);
+                await UserManager.EmailService.SendAsync(new IdentityMessage()
+                {
+                    Destination = model.Email,
+                    Subject = "Confirm your account!",
+                    Body = "You have 30 minutes to confirm your account by clicking here: " + callbackUrl
+                });
+                return RedirectToAction("EmailConfirmationSent", "Account", new { email = model.Email });
+
+             //   await UserManager.SendEmailAsync(userId, "Confirm your account", "You have 30 minutes to confirm your account by clicking here: " + callbackUrl);
+
+                /*
+
                 // Get the information about the user from the external login provider
                 var info = await AuthenticationManager.GetExternalLoginInfoAsync();
                 if (info == null)
@@ -658,6 +713,7 @@ namespace CustomClientCredentialHost.Controllers
                     }
                 }
                 AddErrors(result);
+                 */
             }
 
             ViewBag.ReturnUrl = returnUrl;
