@@ -83,7 +83,14 @@ namespace CustomClientCredentialHost.Models
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
     }
+    public class RegisterEmailViewModel
+    {
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
 
+    }
     public class ResetPasswordViewModel
     {
         [Required]
@@ -112,6 +119,13 @@ namespace CustomClientCredentialHost.Models
         [Display(Name = "Email")]
         public string Email { get; set; }
     }
+
+    public enum ConfirmEmailPurpose
+    {
+        ConfirmEmailPurpose_ConfirmationOnly = 0,
+        ConfirmEmailPurpose_CreateLocalAccount,
+        ConfirmEmailPurpose_CreateExternalAccount,
+    }
     public class ConfirmEmailViewModel
     {
         [Required]
@@ -120,6 +134,7 @@ namespace CustomClientCredentialHost.Models
         public string Email { get; set; }
 
         public string UserId { get; set; }
+        public ConfirmEmailPurpose ConfirmEmailPurpose { get; set; }
 
     }
 }

@@ -285,13 +285,84 @@ namespace CustomClientCredentialHost.Controllers
         }
 
         //
+        // GET: /Account/OnboardVerifiedEmail
+        [AllowAnonymous]
+        public async Task<ActionResult> OnboardVerifiedEmail()
+        {
+            var confirmEmailViewModel = Session[WellKnown.ConfirmEmailViewModelClaim] as ConfirmEmailViewModel;
+            return View("OnboardVerifiedEmail",new RegisterViewModel(){Email = confirmEmailViewModel.Email});
+        }
+        //
+        // POST: /Account/OnboardVerifiedEmail
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> OnboardVerifiedEmail(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await UserManager.FindByEmailAsync(model.Email);
+                if (user != null)
+                {
+                    return View("Error");
+                }
+
+                user = new ApplicationUser {UserName = model.Email, Email = model.Email, IsEmailConfirmed = true};
+                var result = await UserManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                    return RedirectToAction("Index", "Home");
+                }
+                AddErrors(result);
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+        //
+        // GET: /Account/RegisterEmail
+        [AllowAnonymous]
+        public ActionResult RegisterEmail()
+        {
+            return View();
+        }     
+        //
+        // POST: /Account/RegisterEmail
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> RegisterEmail(RegisterEmailViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                ViewBag.RegisterError = null;
+                var user = await UserManager.FindByEmailAsync(model.Email);
+                if (user != null)
+                {
+                    ViewBag.RegisterError = string.Format("The email:{0} is already registered.", model.Email);
+                    return View("RegisterEmail");
+                }
+                return
+                    await
+                        SendEmailConfirmationCode(new ConfirmEmailViewModel()
+                        {
+                            ConfirmEmailPurpose = ConfirmEmailPurpose.ConfirmEmailPurpose_CreateLocalAccount,
+                            Email = model.Email
+                        });
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+        //
         // GET: /Account/Register
         [AllowAnonymous]
+
         public ActionResult Register()
         {
             return View();
         }
-
         //
         // POST: /Account/Register
         [HttpPost]
@@ -350,7 +421,7 @@ namespace CustomClientCredentialHost.Controllers
             public const string EmailConfirmationAudience = "https://www.cassandrahost.com/aud/EmailConfirmation";
             public const string EmailCodeClaim = "EmailCode";
             public const string ValidIssuer = "CassandraHost";
-
+            public const string ConfirmEmailViewModelClaim = "ConfirmEmailViewModel";
 
             public const string UserLoginInfoClaim = "UserLoginInfo";
 
@@ -370,7 +441,7 @@ namespace CustomClientCredentialHost.Controllers
 
             List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Email, confirmEmailViewModel.Email)
+               new Claim(WellKnown.ConfirmEmailViewModelClaim,JsonConvert.SerializeObject(confirmEmailViewModel))
             };
             var now = DateTime.UtcNow;
             var lifetime = new Lifetime(now, now.AddMinutes(30));
@@ -398,7 +469,7 @@ namespace CustomClientCredentialHost.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> ConfirmEmail(string userId, string code)
         {
-            if (userId == null || code == null)
+            if ( code == null)
             {
                 return View("Error");
             }
@@ -414,14 +485,18 @@ namespace CustomClientCredentialHost.Controllers
             var principal = IdentityTokenHelper.ValidateJWT(code, validationParameters, out securityToken);
 
             var query = from item in principal.Claims
-                where item.Type == ClaimTypes.Email
+                where item.Type == WellKnown.ConfirmEmailViewModelClaim
                 select item;
             if(!query.Any())
             {
                 return View("Error");
             }
-            var email = query.Single().Value;
-
+            var confirmEmailViewModel = JsonConvert.DeserializeObject<ConfirmEmailViewModel>(query.Single().Value);
+            if (confirmEmailViewModel.ConfirmEmailPurpose == ConfirmEmailPurpose.ConfirmEmailPurpose_CreateLocalAccount)
+            {
+                Session[WellKnown.ConfirmEmailViewModelClaim] = confirmEmailViewModel;
+                return await OnboardVerifiedEmail();
+            }
             // Optional.  If this is not here, we simply attempt an email confirmation on an existing
             query = from item in principal.Claims
                     where item.Type == WellKnown.UserLoginInfoClaim
@@ -434,7 +509,7 @@ namespace CustomClientCredentialHost.Controllers
              
 
             // if the user exists, then simply do an email confirmation on this.
-            var user = await UserManager.FindByEmailAsync(email);
+            var user = await UserManager.FindByEmailAsync(confirmEmailViewModel.Email);
             if (user != null)
             {
                 if (!user.IsEmailConfirmed)
@@ -447,7 +522,7 @@ namespace CustomClientCredentialHost.Controllers
             if (userLoginInfo != null)
             {
                 // User does not exist, and we have an email confirmation, so lets create
-                user = new ApplicationUser { UserName = email, Email = email, IsEmailConfirmed = true };
+                user = new ApplicationUser { UserName = confirmEmailViewModel.Email, Email = confirmEmailViewModel.Email, IsEmailConfirmed = true };
                 var createResult = await UserManager.CreateAsync(user);
                 if (createResult.Succeeded)
                 {
@@ -609,7 +684,7 @@ namespace CustomClientCredentialHost.Controllers
             {
                 return
                     await
-                        SendEmailConfirmationCode(new ConfirmEmailViewModel() { Email = user.Email, UserId = user.Id.ToString() });
+                        SendEmailConfirmationCode(new ConfirmEmailViewModel() { ConfirmEmailPurpose = ConfirmEmailPurpose.ConfirmEmailPurpose_CreateExternalAccount,  Email = user.Email, UserId = user.Id.ToString() });
             }
             // Try an auto association.  If this login provider provides and email, than try a match
             if (user == null && !string.IsNullOrEmpty(loginInfo.Email))
@@ -631,7 +706,7 @@ namespace CustomClientCredentialHost.Controllers
                 {
                     return
                         await
-                            SendEmailConfirmationCode(new ConfirmEmailViewModel() {Email = user.Email, UserId = user.Id.ToString()});
+                            SendEmailConfirmationCode(new ConfirmEmailViewModel() {ConfirmEmailPurpose =  ConfirmEmailPurpose.ConfirmEmailPurpose_ConfirmationOnly,  Email = user.Email, UserId = user.Id.ToString()});
                 }
             }
             switch (result)
@@ -675,7 +750,13 @@ namespace CustomClientCredentialHost.Controllers
 
                 List<Claim> claims = new List<Claim>()
                 {
-                    new Claim(ClaimTypes.Email, model.Email),
+                    new Claim(WellKnown.ConfirmEmailViewModelClaim,
+                        JsonConvert.SerializeObject(new ConfirmEmailViewModel()
+                        {
+                            ConfirmEmailPurpose = ConfirmEmailPurpose.ConfirmEmailPurpose_CreateExternalAccount,
+                            Email = model.Email
+                        })),
+
                     new Claim(WellKnown.UserLoginInfoClaim, JsonConvert.SerializeObject(loginInfo)),
                 };
                 var now = DateTime.UtcNow;
