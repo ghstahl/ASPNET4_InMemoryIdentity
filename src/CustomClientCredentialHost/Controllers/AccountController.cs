@@ -673,19 +673,16 @@ namespace CustomClientCredentialHost.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
         {
-           
+            var confirmEmailViewModel = Session[WellKnown.ConfirmEmailViewModelClaim] as ConfirmEmailViewModel;
+            Session[WellKnown.ConfirmEmailViewModelClaim] = null;
+
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync();
             if (loginInfo == null)
             {
                 return RedirectToAction("Login");
             }
             CassandraUser user = await UserManager.FindAsync(loginInfo.Login);
-            if (user != null && !user.IsEmailConfirmed)
-            {
-                return
-                    await
-                        SendEmailConfirmationCode(new ConfirmEmailViewModel() { ConfirmEmailPurpose = ConfirmEmailPurpose.ConfirmEmailPurpose_CreateExternalAccount,  Email = user.Email, UserId = user.Id.ToString() });
-            }
+            
             // Try an auto association.  If this login provider provides and email, than try a match
             if (user == null && !string.IsNullOrEmpty(loginInfo.Email))
             {
@@ -693,22 +690,47 @@ namespace CustomClientCredentialHost.Controllers
                 if (user != null)
                 {
                     // got a match. lets auto associate
-                     await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
+                    await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
                 }
+            }
+
+            if (user != null && !user.IsEmailConfirmed)
+            {
+                if (confirmEmailViewModel != null &&
+                    string.Compare(user.Email, confirmEmailViewModel.Email, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    user.IsEmailConfirmed = true;
+                    await UserManager.UpdateAsync(user);
+                }
+                else
+                {
+                    return
+                        await
+                            SendEmailConfirmationCode(new ConfirmEmailViewModel() { ConfirmEmailPurpose = ConfirmEmailPurpose.ConfirmEmailPurpose_CreateExternalAccount, Email = user.Email, UserId = user.Id.ToString() });
+                }
+            }
+
+            // PreVerified Email Address Create/Association
+            if (user == null && confirmEmailViewModel != null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = confirmEmailViewModel.Email,
+                    Email = confirmEmailViewModel.Email,
+                    IsEmailConfirmed = true
+                };
+                var resultCreate = await UserManager.CreateAsync(user);
+                if (resultCreate.Succeeded)
+                {
+                    resultCreate = await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
+                }
+                Session[WellKnown.ConfirmEmailViewModelClaim] = null;
             }
 
             // Sign in the user with this external login provider if the user already has a login
             var result = await SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
 
-            if (result == SignInStatus.Success)
-            {
-                if (!user.IsEmailConfirmed)
-                {
-                    return
-                        await
-                            SendEmailConfirmationCode(new ConfirmEmailViewModel() {ConfirmEmailPurpose =  ConfirmEmailPurpose.ConfirmEmailPurpose_ConfirmationOnly,  Email = user.Email, UserId = user.Id.ToString()});
-                }
-            }
+            
             switch (result)
             {
                 case SignInStatus.Success:
