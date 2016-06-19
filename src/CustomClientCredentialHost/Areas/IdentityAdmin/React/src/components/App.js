@@ -1,3 +1,9 @@
+import 'purecss/build/pure.css';
+import 'highlight.js/styles/github.css';
+import 'react-ghfork/gh-fork-ribbon.ie.css';
+import 'react-ghfork/gh-fork-ribbon.css';
+import 'react-pagify/style.css';
+
 import React, { Component } from 'react'
 import CommentInput from './CommentInput'
 import CommentList from './CommentList'
@@ -12,7 +18,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-      
+
             columns: [
                 {
                     property: 'name',
@@ -42,14 +48,14 @@ class App extends Component {
             ],
         };
     }
-    
-  
-   
+
+
+
 
     componentDidMount() {
         this.loadTableDataFromServer();
     }
-  
+
  handleCommentSubmit(comment) {
     var comments = this.state.data;
     // Optimistically set an id on the new comment. It will be replaced by an
@@ -75,7 +81,7 @@ class App extends Component {
 
 loadTableDataFromServer() {
     $.ajax({
-        url: '/api/identityadmin',
+        url: '/api/identityadmin/TableData',
       dataType: 'json',
       cache: false,
       success: function(data) {
@@ -91,7 +97,7 @@ render() {
     var data = this.props.data || [];
 
       return (
-      
+
       <div>
        hi I am the app
        <section>
@@ -101,10 +107,13 @@ render() {
         <SkyLight hideOnOverlayClicked ref="simpleDialog" title="Hi, I'm a simple modal">
           Hello, I dont have any callback.
         </SkyLight>
-            <Table className='pure-table pure-table-striped'
+        <Table className='pure-table pure-table-striped'
           columns={columns}
           data={data}
-          rowKey='id' />
+          rowKey='id'
+        >
+
+        </Table>
        <CommentInput dispatch={this.props.dispatch}/>
        <CommentList comments={this.props.comments}/>
       </div>

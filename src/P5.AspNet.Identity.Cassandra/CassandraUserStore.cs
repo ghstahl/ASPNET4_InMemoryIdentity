@@ -20,6 +20,7 @@ namespace P5.AspNet.Identity.Cassandra
     //
     //   TKey:
     public interface IUserStoreAdmin<TUser, in TKey> : IDisposable where TUser : class, Microsoft.AspNet.Identity.IUser<TKey>
+
     {
         // Summary:
         //     page the user database
@@ -27,24 +28,20 @@ namespace P5.AspNet.Identity.Cassandra
         // Parameters:
         //   user:
         Task<Store.Core.Models.IPage<TUser>> PageUsersAsync(int pageSize, byte[] pagingState);
-        // Summary:
-        //     page the user database
-        //
-        // Parameters:
-        //   user:
-        Task<IEnumerable<TUser>> PageUsersAsync(int offset, int limit); 
+        Task<IList<Claim>> GetClaimsAsync(Guid id);
+        Task<Store.Core.Models.IPage<ClaimHandle>> PageClaimsAsync(TKey userId,int pageSize, byte[] pagingState);
     }
 
-    public class CassandraUserStore : 
-        IUserStore<CassandraUser, Guid>, 
-        IUserLoginStore<CassandraUser, Guid>, 
+    public class CassandraUserStore :
+        IUserStore<CassandraUser, Guid>,
+        IUserLoginStore<CassandraUser, Guid>,
         IUserClaimStore<CassandraUser, Guid>,
-        IUserPasswordStore<CassandraUser, Guid>, 
+        IUserPasswordStore<CassandraUser, Guid>,
         IUserSecurityStampStore<CassandraUser, Guid>,
-        IUserTwoFactorStore<CassandraUser, Guid>, 
+        IUserTwoFactorStore<CassandraUser, Guid>,
         IUserLockoutStore<CassandraUser, Guid>,
-        IUserPhoneNumberStore<CassandraUser, Guid>, 
-        IUserEmailStore<CassandraUser, Guid>, 
+        IUserPhoneNumberStore<CassandraUser, Guid>,
+        IUserEmailStore<CassandraUser, Guid>,
         IUserRoleStore<CassandraUser, Guid>,
         IUserStoreAdmin<CassandraUser, Guid>
     {
@@ -53,7 +50,7 @@ namespace P5.AspNet.Identity.Cassandra
         private bool _createSchema = false;
         private readonly Guid _tenantId;
         private ResilientSession _resilientSession;
-        
+
         // A cached copy of some completed tasks
         private static readonly Task<bool> TrueTask = Task.FromResult(true);
         private static readonly Task<bool> FalseTask = Task.FromResult(false);
@@ -530,11 +527,12 @@ namespace P5.AspNet.Identity.Cassandra
                 return CassandraUser.FromRow(rows.SingleOrDefault());
             }
 
-            public async Task<IList<Claim>> GetClaimsAsync(CassandraUser user)
+
+            public async Task<IList<Claim>> GetClaimsAsync(Guid id)
             {
-                if (user == null)
-                    throw new ArgumentNullException("user");
-                var id = user.GenerateIdFromUserData();
+                if (id == Guid.Empty)
+                    throw new ArgumentNullException("id");
+
                 PreparedStatement prepared = await _getClaims;
                 BoundStatement bound = prepared.Bind(id);
 
@@ -542,7 +540,24 @@ namespace P5.AspNet.Identity.Cassandra
                 return
                     rows.Select(row => new Claim(row.GetValue<string>("type"), row.GetValue<string>("value"))).ToList();
             }
+            public async Task<IList<Claim>> GetClaimsAsync(CassandraUser user)
+            {
+                if (user == null)
+                    throw new ArgumentNullException("user");
 
+                var id = user.GenerateIdFromUserData();
+                return await GetClaimsAsync(id);
+            }
+            public async Task AddClaimAsync(Guid id, Claim claim)
+            {
+                if (id == Guid.Empty)
+                    throw new ArgumentNullException("id");
+                if (claim == null)
+                    throw new ArgumentNullException("claim");
+                PreparedStatement prepared = await _addClaim;
+                BoundStatement bound = prepared.Bind(id, claim.Type, claim.Value);
+                await _session.ExecuteAsync(bound).ConfigureAwait(false);
+            }
             public async Task AddClaimAsync(CassandraUser user, Claim claim)
             {
                 if (user == null)
@@ -550,11 +565,21 @@ namespace P5.AspNet.Identity.Cassandra
                 if (claim == null)
                     throw new ArgumentNullException("claim");
                 var id = user.GenerateIdFromUserData();
-                PreparedStatement prepared = await _addClaim;
-                BoundStatement bound = prepared.Bind(id, claim.Type, claim.Value);
-                await _session.ExecuteAsync(bound).ConfigureAwait(false);
+                await AddClaimAsync(id, claim);
             }
 
+            public async Task RemoveClaimAsync(Guid id, Claim claim)
+            {
+                if (id == Guid.Empty)
+                    throw new ArgumentNullException("id");
+                if (claim == null)
+                    throw new ArgumentNullException("claim");
+
+                PreparedStatement prepared = await _removeClaim;
+                BoundStatement bound = prepared.Bind(id, claim.Type, claim.Value);
+
+                await _session.ExecuteAsync(bound).ConfigureAwait(false);
+            }
             public async Task RemoveClaimAsync(CassandraUser user, Claim claim)
             {
                 if (user == null)
@@ -562,11 +587,7 @@ namespace P5.AspNet.Identity.Cassandra
                 if (claim == null)
                     throw new ArgumentNullException("claim");
                 var id = user.GenerateIdFromUserData();
-
-                PreparedStatement prepared = await _removeClaim;
-                BoundStatement bound = prepared.Bind(id, claim.Type, claim.Value);
-
-                await _session.ExecuteAsync(bound).ConfigureAwait(false);
+                await RemoveClaimAsync(id, claim);
             }
 
             public async Task SetPasswordHashAsync(CassandraUser user, string passwordHash)
@@ -666,25 +687,10 @@ namespace P5.AspNet.Identity.Cassandra
             }
 
             private const string SelectUsersQuery = @"SELECT * FROM users";
-            private const string SelectUsersQueryWithOffset = @"SELECT * FROM users OFFSET {0} LIMIT {1};";
-            public async Task<IEnumerable<CassandraUser>> PageUsersAsync(int offset, int limit,
-                CancellationToken cancellationToken = default(CancellationToken))
-            {
-                try
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var session = _session;
-                    IMapper mapper = new Mapper(session);       
-                    var cqlQuery = string.Format(SelectUsersQueryWithOffset, offset, limit);
-                    var result = await mapper.FetchAsync<CassandraUser>(cqlQuery);
-                    return result;
-                }
-                catch (Exception e)
-                {
-                    // only here to catch during a debug unit test.
-                    throw;
-                }
-            }
+            private const string SelectClaimsQuery = @"SELECT * FROM claims Where userid = {0}";
+
+
+
 
             public async Task<Store.Core.Models.IPage<CassandraUser>> PageUsersAsync(int pageSize, byte[] pagingState,
                     CancellationToken cancellationToken = default(CancellationToken))
@@ -721,6 +727,36 @@ namespace P5.AspNet.Identity.Cassandra
                 }
             }
 
+            public async Task<Store.Core.Models.IPage<ClaimHandle>> PageClaimsAsync(Guid userId,int pageSize, byte[] pagingState,
+                CancellationToken cancellationToken = default(CancellationToken))
+            {
+
+                MyMappings.Init();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var session = _session;
+                IMapper mapper = new Mapper(session);
+                IPage<ClaimHandle> page;
+                string cqlQuery = string.Format("Where userid={0}", userId.ToString());
+                if (pagingState == null)
+                {
+                    page = await mapper.FetchPageAsync<ClaimHandle>(
+                        Cql.New(cqlQuery).WithOptions(opt =>
+                            opt.SetPageSize(pageSize)));
+                }
+                else
+                {
+                    page = await mapper.FetchPageAsync<ClaimHandle>(
+                        Cql.New(cqlQuery).WithOptions(opt =>
+                            opt.SetPageSize(pageSize).SetPagingState(pagingState)));
+                }
+
+                // var result = CreatePageProxy(page);
+                var result = new PageProxy<ClaimHandle>(page);
+
+                return result;
+
+            }
         }
 
 
@@ -781,7 +817,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task UpdateAsync(CassandraUser user)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -796,7 +832,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task DeleteAsync(CassandraUser user)
         {
-           
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -813,7 +849,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindByIdAsync(Guid userId)
         {
-            
+
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
@@ -831,7 +867,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindByNameAsync(string userName)
         {
-            
+
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
@@ -849,7 +885,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task AddLoginAsync(CassandraUser user, UserLoginInfo login)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -866,7 +902,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task RemoveLoginAsync(CassandraUser user, UserLoginInfo login)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -883,7 +919,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<IList<UserLoginInfo>> GetLoginsAsync(CassandraUser user)
         {
-            
+
             IList<UserLoginInfo> result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<UserLoginInfo>>(
                 async () =>
                 {
@@ -901,7 +937,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindAsync(UserLoginInfo login)
         {
-            
+
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
@@ -919,8 +955,8 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<IList<Claim>> GetClaimsAsync(CassandraUser user)
         {
-            
-            IList<Claim> result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<Claim>>(
+
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<Claim>>(
                 async () =>
                 {
                     await EstablishSessionAsync();
@@ -929,7 +965,31 @@ namespace P5.AspNet.Identity.Cassandra
                 async (ex) => HandleCassandraException<IList<Claim>>(ex));
             return result;
         }
+        public async Task<IList<Claim>> GetClaimsAsync(Guid id)
+        {
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<Claim>>(
+                async () =>
+                {
+                    await EstablishSessionAsync();
+                    return await _resilientSession.GetClaimsAsync(id);
+                },
+                async (ex) => HandleCassandraException<IList<Claim>>(ex));
+            return result;
+        }
 
+        public async Task<Store.Core.Models.IPage<ClaimHandle>> PageClaimsAsync(Guid userId, int pageSize, byte[] pagingState)
+        {
+            var result =
+              await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<Store.Core.Models.IPage<ClaimHandle>>(
+                  async () =>
+                  {
+                      await EstablishSessionAsync();
+                      return await _resilientSession.PageClaimsAsync(userId,pageSize, pagingState);
+
+                  },
+                  async (ex) => HandleCassandraException<Store.Core.Models.IPage<ClaimHandle>>(ex));
+            return result;
+        }
 
 
         /// <summary>
@@ -937,7 +997,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task AddClaimAsync(CassandraUser user, Claim claim)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -952,7 +1012,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task RemoveClaimAsync(CassandraUser user, Claim claim)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -969,7 +1029,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task SetPasswordHashAsync(CassandraUser user, string passwordHash)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -986,7 +1046,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<string> GetPasswordHashAsync(CassandraUser user)
         {
-            
+
             string result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<string>(
                 async () =>
                 {
@@ -1003,7 +1063,7 @@ namespace P5.AspNet.Identity.Cassandra
         /// </summary>
         public async Task<CassandraUser> FindByEmailAsync(string email)
         {
-            
+
             CassandraUser result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<CassandraUser>(
                 async () =>
                 {
@@ -1032,7 +1092,7 @@ namespace P5.AspNet.Identity.Cassandra
 
         public async Task AddToRoleAsync(CassandraUser user, string roleName)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -1046,7 +1106,7 @@ namespace P5.AspNet.Identity.Cassandra
 
         public async Task RemoveFromRoleAsync(CassandraUser user, string roleName)
         {
-            
+
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
@@ -1060,7 +1120,7 @@ namespace P5.AspNet.Identity.Cassandra
 
         public async Task<IList<string>> GetRolesAsync(CassandraUser user)
         {
-            
+
             IList<string> result = null;
             result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IList<string>>(
                 async () =>
@@ -1076,7 +1136,7 @@ namespace P5.AspNet.Identity.Cassandra
 
         public async Task<bool> IsInRoleAsync(CassandraUser user, string roleName)
         {
-            
+
             bool result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<bool>(
                 async () =>
                 {
@@ -1299,7 +1359,7 @@ namespace P5.AspNet.Identity.Cassandra
 
         public async Task<Store.Core.Models.IPage<CassandraUser>> PageUsersAsync(int pageSize, byte[] pagingState)
         {
-            Store.Core.Models.IPage<CassandraUser> result =
+            var result =
                 await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<Store.Core.Models.IPage<CassandraUser>>(
                     async () =>
                     {
@@ -1311,17 +1371,7 @@ namespace P5.AspNet.Identity.Cassandra
             return result;
         }
 
-        public async Task<IEnumerable<CassandraUser>> PageUsersAsync(int offset, int limit)
-        {
-            var result =
-                  await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IEnumerable<CassandraUser>>(
-                      async () =>
-                      {
-                          await EstablishSessionAsync();
-                          return await _resilientSession.PageUsersAsync(offset, limit);
-                      },
-                      async (ex) => HandleCassandraException<IEnumerable<CassandraUser>>(ex));
-            return result;
-        }
+
+ 
     }
 }

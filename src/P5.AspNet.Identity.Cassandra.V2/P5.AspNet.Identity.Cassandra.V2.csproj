@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B9732F6C-5DC4-41DE-89C0-380EF0462A94}</ProjectGuid>
+    <ProjectGuid>{E3B0E79A-9EFE-4860-A3B2-84425965B53C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>P5.AspNet.Identity.Cassandra</RootNamespace>
-    <AssemblyName>P5.AspNet.Identity.Cassandra</AssemblyName>
+    <AssemblyName>P5.AspNet.Identity.Cassandra.V2</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,6 +32,10 @@
   <ItemGroup>
     <Reference Include="Cassandra, Version=3.0.0.0, Culture=neutral, PublicKeyToken=10b231fbfc8c4b4d, processorArchitecture=MSIL">
       <HintPath>..\packages\CassandraCSharpDriver.3.0.6\lib\net40\Cassandra.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="LZ4, Version=1.0.10.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd, processorArchitecture=MSIL">
@@ -80,23 +83,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncLazy.cs" />
-    <Compile Include="CassandraAspNetIdentityOptions.cs" />
-    <Compile Include="CassandraRole.cs" />
-    <Compile Include="CassandraUser.cs" />
-    <Compile Include="CassandraUserStore.cs" />
-    <Compile Include="CassandraRoleStore.cs" />
-    <Compile Include="AppBuilderExtensions.cs" />
-    <Compile Include="ClaimHandle.cs" />
-    <Compile Include="GuidGenerator.cs" />
-    <Compile Include="HelperExtensions.cs" />
-    <Compile Include="MyMappings.cs" />
+    <Compile Include="DAO\AspNetIdentityDao.cs" />
+    <Compile Include="DAO\Claim\AspNetIdentityDao.cs" />
+    <Compile Include="DAO\Claim\ClaimHandle.cs" />
+    <Compile Include="DAO\Claim\ClaimHandleComparer.cs" />
+    <Compile Include="DAO\MyMappings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SchemaCreationHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
-      <Project>{51566eae-2937-41d2-a6c8-d055a74a6209}</Project>
+      <Project>{51566EAE-2937-41D2-A6C8-D055A74A6209}</Project>
       <Name>P5.CassandraStore</Name>
     </ProjectReference>
     <ProjectReference Include="..\P5.Store.Core\P5.Store.Core.csproj">
@@ -105,10 +101,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="defaultschema.cql" />
     <None Include="app.config" />
+    <EmbeddedResource Include="defaultschema.cql" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Schema\manual.cql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Store\Claim\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

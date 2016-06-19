@@ -43,15 +43,7 @@ namespace CustomClientCredentialHost.Areas.IdentityAdmin.Controllers
         {
            
         }
-        // GET: api/IdentityAdminApi
-        [HttpGet]
-        [Route("PageUsersOffset")]
-        public async Task<IEnumerable<CassandraUser>> PageUsers(int offset, int limit)
-        {
-            var adminStore = UserManager.AdminStore;
-            var result = await adminStore.PageUsersAsync(offset, limit);
-            return result;
-        }
+        
         // GET: api/IdentityAdminApi
         [HttpGet]
         [Route("PageUsers")]

@@ -3,7 +3,7 @@ var webpack = require('webpack');
 var path = require('path');
 
 module.exports = {
-   
+
  context: path.resolve(__dirname, "src"),
   devtool: debug ? "inline-sourcemap" : null,
    entry: [
@@ -14,6 +14,7 @@ module.exports = {
     path: __dirname + "/src/",
     filename: "../../../../wwwroot/assets/IdentityAdmin/bundle.js"
   },
+
   module: {
     loaders: [
       {
@@ -25,15 +26,17 @@ module.exports = {
           plugins: ['react-html-attrs', 'transform-class-properties', 'transform-decorators-legacy'],
         }
       },
-      { 
+      {
         test: /\.less$/,
         loader: "style!css!less"
-          
-      
+      },
+      {
+          test: /\.css$/,
+          loader: "style!css!less"
       },
     ]
   },
-  
+
   plugins: debug ? [] : [
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.OccurenceOrderPlugin(),
