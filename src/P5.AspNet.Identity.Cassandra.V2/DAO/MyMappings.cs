@@ -6,6 +6,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
     {
 
         public const string WellKnownClaims = "claims";
+        public const string WellKnownUserRoles = "user_roles";
 
         private static bool _init { get; set; }
 
@@ -27,6 +28,8 @@ namespace P5.AspNet.Identity.Cassandra.DAO
 
             For<ClaimHandle>()
                 .TableName(WellKnownClaims);
+            For<RoleHandle>()
+                .TableName(WellKnownUserRoles);
 
 
         }

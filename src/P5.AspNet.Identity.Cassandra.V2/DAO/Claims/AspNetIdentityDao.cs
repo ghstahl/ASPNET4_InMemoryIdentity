@@ -34,10 +34,14 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         //-----------------------------------------------
 
         #region PREPARED STATEMENTS for Claim
+
+
+
         #endregion
 
         public void PrepareClaimsStatements()
         {
+
         }
 
         public async Task<IEnumerable<ClaimHandle>> FindClaimHandleByUserIdAsync(Guid userId,

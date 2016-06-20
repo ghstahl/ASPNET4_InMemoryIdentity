@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="ClaimTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoleTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\P5.AspNet.Identity.Cassandra.V2\P5.AspNet.Identity.Cassandra.V2.csproj">

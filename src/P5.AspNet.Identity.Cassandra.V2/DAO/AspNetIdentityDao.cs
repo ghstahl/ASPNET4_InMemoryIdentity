@@ -52,6 +52,11 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                     //-----------------------------------------------
                     PrepareClaimsStatements();
 
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for Roles
+                    //-----------------------------------------------
+                    PrepareRolesStatements();
+
                     MyMappings.Init();
                 }
             }

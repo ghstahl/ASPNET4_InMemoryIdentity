@@ -84,10 +84,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAO\AspNetIdentityDao.cs" />
-    <Compile Include="DAO\Claim\AspNetIdentityDao.cs" />
-    <Compile Include="DAO\Claim\ClaimHandle.cs" />
-    <Compile Include="DAO\Claim\ClaimHandleComparer.cs" />
+    <Compile Include="DAO\Claims\AspNetIdentityDao.cs" />
+    <Compile Include="DAO\Claims\ClaimHandle.cs" />
+    <Compile Include="DAO\Claims\ClaimHandleComparer.cs" />
+    <Compile Include="DAO\Roles\RoleHandle.cs" />
     <Compile Include="DAO\MyMappings.cs" />
+    <Compile Include="DAO\Roles\AspNetIdentityDao.cs" />
+    <Compile Include="DAO\Roles\RoleHandleComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
