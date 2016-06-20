@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace P5.AspNet.Identity.Cassandra.DAO
 {
-    public class RoleHandleComparer : IEqualityComparer<RoleHandle>
+    public class UserRoleHandleComparer : IEqualityComparer<UserRoleHandle>
     {
-        public static RoleHandleComparer Comparer
+        public static UserRoleHandleComparer Comparer
         {
-            get { return new RoleHandleComparer(); }
+            get { return new UserRoleHandleComparer(); }
         }
 
-        public bool Equals(RoleHandle x, RoleHandle y)
+        public bool Equals(UserRoleHandle x, UserRoleHandle y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -21,7 +21,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                    x.UserId == y.UserId;
         }
 
-        public int GetHashCode(RoleHandle obj)
+        public int GetHashCode(UserRoleHandle obj)
         {
             if (ReferenceEquals(obj, null))
                 return 0;

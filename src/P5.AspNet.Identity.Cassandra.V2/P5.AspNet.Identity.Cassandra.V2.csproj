@@ -87,10 +87,16 @@
     <Compile Include="DAO\Claims\AspNetIdentityDao.cs" />
     <Compile Include="DAO\Claims\ClaimHandle.cs" />
     <Compile Include="DAO\Claims\ClaimHandleComparer.cs" />
-    <Compile Include="DAO\Roles\RoleHandle.cs" />
+    <Compile Include="DAO\ProviderLogins\AspNetIdentityDao.cs" />
+    <Compile Include="DAO\ProviderLogins\ProviderLoginHandle.cs" />
+    <Compile Include="DAO\ProviderLogins\ProviderLoginHandleComparer.cs" />
+    <Compile Include="DAO\Roles\CassandraRole.cs" />
+    <Compile Include="DAO\Roles\CassandraRoleExtensions.cs" />
+    <Compile Include="DAO\UserRoles\AspNetIdentityDao.cs" />
+    <Compile Include="DAO\UserRoles\UserRoleHandle.cs" />
     <Compile Include="DAO\MyMappings.cs" />
     <Compile Include="DAO\Roles\AspNetIdentityDao.cs" />
-    <Compile Include="DAO\Roles\RoleHandleComparer.cs" />
+    <Compile Include="DAO\UserRoles\UserRoleHandleComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

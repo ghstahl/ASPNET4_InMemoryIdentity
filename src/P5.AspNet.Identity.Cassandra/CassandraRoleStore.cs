@@ -127,7 +127,7 @@ namespace P5.AspNet.Identity.Cassandra
                 batch.Add(prepared[0].Bind(role.Id, role.Name, role.DisplayName, role.IsSystemRole, role.IsGlobal,
                     role.TenantId, createdDate, null));
 
-                //INSERT INTO roles_by_rolename... 
+                //INSERT INTO roles_by_rolename...
                 batch.Add(prepared[1].Bind(role.Name, role.TenantId, role.Id, role.DisplayName, role.IsSystemRole,
                     role.IsGlobal, createdDate, null));
                 await _session.ExecuteAsync(batch).ConfigureAwait(false);
@@ -296,7 +296,7 @@ namespace P5.AspNet.Identity.Cassandra
                 }
                 );
             return result;
-            
+
         }
         public async Task<CassandraRole> FindByNameAsync(string roleName)
         {

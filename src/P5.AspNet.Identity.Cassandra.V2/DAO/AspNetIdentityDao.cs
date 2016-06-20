@@ -33,9 +33,16 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             }
             set { _CassandraConfig = value; }
         }
-
+        public Guid TenantId { get; set; }
         private ISession _cassandraSession = null;
-        public AspNetIdentityDao() { }
+        public AspNetIdentityDao()
+        {
+            TenantId = Guid.Empty;
+        }
+        public AspNetIdentityDao(Guid tenantId)
+        {
+            TenantId = tenantId;
+        }
         public async Task EstablishConnectionAsync()
         {
             try
@@ -56,6 +63,14 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                     // PREPARED STATEMENTS for Roles
                     //-----------------------------------------------
                     PrepareRolesStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for UserRoles
+                    //-----------------------------------------------
+                    PrepareUserRolesStatements();
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for ProviderLogins
+                    //-----------------------------------------------
+                    PrepareProviderLoginsStatements();
 
                     MyMappings.Init();
                 }

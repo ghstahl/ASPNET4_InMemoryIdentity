@@ -24,164 +24,175 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         //-----------------------------------------------
 
         #region PREPARED STATEMENTS for Role
-        private AsyncLazy<PreparedStatement[]> _addToRoleAsync;
-        private AsyncLazy<PreparedStatement[]> _removeFromRoleAsync;
-        private AsyncLazy<PreparedStatement[]> _deleteRolesFromUserIdAsync;
-        private AsyncLazy<PreparedStatement> _getRolesAsync;
-        private AsyncLazy<PreparedStatement> _isInRoleAsync;
+
+        private AsyncLazy<PreparedStatement[]> _createRole;
+        private AsyncLazy<PreparedStatement> _createRoleByName;
+        private AsyncLazy<PreparedStatement[]> _updateRole;
+        private AsyncLazy<PreparedStatement[]> _deleteRole;
+        private AsyncLazy<PreparedStatement> _deleteRoleByName;
+        private AsyncLazy<PreparedStatement> _findById;
+        private AsyncLazy<PreparedStatement> _findByName;
+        private AsyncLazy<PreparedStatement> _find;
+
         #endregion
 
-        public void PrepareRolesStatements()
+        public void PrepareUserRolesStatements()
         {
-            _addToRoleAsync = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
+
+            _createRole = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
                 {
                     CassandraSession.PrepareAsync(
-                        string.Format("INSERT INTO user_roles (userid, rolename, assigned) VALUES (?, ?, ?)")),
-                    CassandraSession.PrepareAsync(
-                        string.Format("INSERT INTO user_roles_by_role (rolename, userid, assigned) VALUES (?, ?, ?)"))
+                        "INSERT INTO roles (roleid, name, displayname, is_systemrole, is_global, tenantid, created, modified) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"),
+                    _createRoleByName.Value
                 }));
 
-            _removeFromRoleAsync = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
+            _createRoleByName = new AsyncLazy<PreparedStatement>(() => CassandraSession.PrepareAsync(
+                "INSERT INTO roles_by_name (roleid, name, displayname, is_systemrole, is_global, tenantid, created, modified) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
+            // All the statements needed by the UpdateAsync method
+            _updateRole = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
                 {
-                    CassandraSession.PrepareAsync(string.Format("DELETE FROM user_roles " +
-                                                                "WHERE userId = ? and rolename = ?")),
-                    CassandraSession.PrepareAsync(string.Format("DELETE FROM user_roles_by_role " +
-                                      "WHERE userId = ? and rolename = ?"))
-                }));
-            _deleteRolesFromUserIdAsync = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
-                {
-                    CassandraSession.PrepareAsync(string.Format("DELETE FROM user_roles WHERE userId = ?"  )),
                     CassandraSession.PrepareAsync(
-                        string.Format("DELETE FROM user_roles_by_role WHERE userId = ? AND rolename = ?"))
+                        "UPDATE roles SET name = ?, displayname = ?, is_systemrole = ?, modified = ? " +
+                        "WHERE roleid = ?"),
+                    CassandraSession.PrepareAsync("UPDATE roles_by_name SET displayname = ?, is_systemrole = ?, modified = ? " +
+                                          "WHERE tenantid = ? AND name = ?"),
+                    _deleteRoleByName.Value,
+                    _createRoleByName.Value,
                 }));
+
+            _deleteRole = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
+                {
+                    CassandraSession.PrepareAsync(
+                        "DELETE FROM roles WHERE roleid = ?"),
+                    _deleteRoleByName.Value
+                }));
+
+            _deleteRoleByName = new AsyncLazy<PreparedStatement>(() => CassandraSession.PrepareAsync(
+                "DELETE FROM roles_by_name WHERE name = ? AND tenantid = ?"));
         }
-
-        public async Task AddToRoleAsync(Guid userId, string roleName,
+        public async Task CreateRoleAsync(CassandraRole role,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (userId == Guid.Empty)
-                throw new ArgumentNullException("userId");
-            if (roleName == null)
-                throw new ArgumentNullException("roleName");
+            if (role == null)
+                throw new ArgumentNullException("role");
+
             var createdDate = DateTimeOffset.UtcNow;
+            role.Created = createdDate;
+            role.TenantId = role.IsGlobal ? Guid.Empty : TenantId;
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            PreparedStatement[] prepared = await _addToRoleAsync;
+            PreparedStatement[] preparedStatements = await _createRole;
+
             var batch = new BatchStatement();
 
-            // INSERT INTO user_roles ...
-            batch.Add(prepared[0].Bind(userId, roleName, createdDate));
-
-
-            // INSERT INTO user_roles_by_role ...
-            batch.Add(prepared[1].Bind(roleName, userId, createdDate));
-
-            await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
-        }
-
-        public async Task DeleteUserFromRolesAsync(Guid userId,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            //TODO: User the pager here to loop through in a more orderly fashion.
-            // you can't send too many batch statements
-            // Currently this method is crazy inneficient.
-            if (userId == Guid.Empty)
-                throw new ArgumentNullException("userId");
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var roleNames = await FindRoleNamesByUserIdAsync(userId, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            PreparedStatement[] prepared = await _deleteRolesFromUserIdAsync;
-            var batch = new BatchStatement();
-            foreach (var roleName in roleNames)
+            foreach (var preparedStatement in preparedStatements)
             {
-                // TODO: Don't do this, especially for large data sets.
-                await RemoveFromRoleAsync(userId, roleName);
-                // DELETE FROM user_roles_by_role ...
-                //batch.Add(prepared[1].Bind(userId,roleName));
+                batch.Add(preparedStatement.Bind(role.Id, role.Name, role.DisplayName, role.IsSystemRole, role.IsGlobal,
+                    role.TenantId, createdDate, null));
             }
-            // DELETE FROM user_roles ...
-            batch.Add(prepared[0].Bind(userId));
-
 
             await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
         }
 
-        public async Task RemoveFromRoleAsync(Guid userId, string roleName,
+        public async Task<IEnumerable<CassandraRole>> FindRolesByTenantIdAsync(
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (userId == Guid.Empty)
-                throw new ArgumentNullException("userId");
-            if (roleName == null)
-                throw new ArgumentNullException("roleName");
-
-            cancellationToken.ThrowIfCancellationRequested();
-            PreparedStatement[] prepared = await _removeFromRoleAsync;
-            var batch = new BatchStatement();
-
-            // DELETE FROM user_roles ...
-            batch.Add(prepared[0].Bind(userId, roleName));
-
-            // DELETE FROM user_roles_by_role ...
-            batch.Add(prepared[1].Bind(userId, roleName));
-
-            await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
-        }
-        public async Task<IEnumerable<string>> FindRoleNamesByUserIdAsync(Guid userId,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
             cancellationToken.ThrowIfCancellationRequested();
             var records =
                 await
-                    mapper.FetchAsync<string>("SELECT rolename FROM user_roles WHERE userid = ?", userId);
+                    mapper.FetchAsync<CassandraRole>("SELECT * FROM roles_by_name WHERE tenantid = ?", TenantId);
             return records;
         }
-        public async Task<IEnumerable<string>> FindRoleAsync(Guid userId, string rolename,
-            CancellationToken cancellationToken = default(CancellationToken))
+
+        public async Task<IEnumerable<CassandraRole>> FindRoleByTenantIdAsync(Guid tenantId, string name,
+           CancellationToken cancellationToken = default(CancellationToken))
         {
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
             cancellationToken.ThrowIfCancellationRequested();
-             var records =
-                await
-                    mapper.FetchAsync<string>("SELECT rolename FROM user_roles WHERE userId = ? and rolename = ?", userId,rolename);
-             return records;
+            var cqlQuery = string.Format("SELECT * FROM roles_by_name WHERE name = ? AND tenantid IN (?, {0})",
+                Guid.Empty);
+            var records = await mapper.FetchAsync<CassandraRole>(cqlQuery,name, tenantId);
+            return records;
         }
-        public async Task<bool> IsUserInRoleAsync(Guid userId, string rolename,
+
+        public async Task<IEnumerable<CassandraRole>> FindRoleByIdAsync(Guid roleId,
            CancellationToken cancellationToken = default(CancellationToken))
         {
-            var result = await FindRoleAsync(userId, rolename, cancellationToken);
-            return result.Any();
+            var session = CassandraSession;
+            IMapper mapper = new Mapper(session);
+            cancellationToken.ThrowIfCancellationRequested();
+            var records =
+                await
+                    mapper.FetchAsync<CassandraRole>("SELECT * FROM roles WHERE roleid = ?", roleId);
+            return records;
         }
-        public async Task<Store.Core.Models.IPage<RoleHandle>> PageRolesAsync(
-            Guid userId, int pageSize,byte[] pagingState,CancellationToken cancellationToken = default(CancellationToken))
+
+        public async Task DeleteAsync(CassandraRole role)
+        {
+            PreparedStatement[] prepared = await _deleteRole;
+            var batch = new BatchStatement();
+
+            // DELETE FROM roles ...
+            batch.Add(prepared[0].Bind(role.Id));
+
+            // DELETE FROM roles_by_rolename ...
+            batch.Add(prepared[1].Bind(role.Name, role.TenantId));
+            await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
+        }
+
+        public async Task DeleteRolesByTenantIdAsync(
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+
+            var roles = await FindRolesByTenantIdAsync(cancellationToken);
+
+            foreach (var role in roles)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await DeleteAsync(role);
+            }
+        }
+
+
+
+
+
+
+
+
+       
+      
+        public async Task<Store.Core.Models.IPage<UserRoleHandle>> PageRolesAsync(
+            Guid userId, int pageSize,byte[] pagingState,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
-            IPage<RoleHandle> page;
+            IPage<UserRoleHandle> page;
             string cqlQuery = string.Format("Where userid={0}", userId.ToString());
             if (pagingState == null)
             {
-                page = await mapper.FetchPageAsync<RoleHandle>(
+                page = await mapper.FetchPageAsync<UserRoleHandle>(
                     Cql.New(cqlQuery).WithOptions(opt =>
                         opt.SetPageSize(pageSize)));
             }
             else
             {
-                page = await mapper.FetchPageAsync<RoleHandle>(
+                page = await mapper.FetchPageAsync<UserRoleHandle>(
                     Cql.New(cqlQuery).WithOptions(opt =>
                         opt.SetPageSize(pageSize).SetPagingState(pagingState)));
             }
 
             // var result = CreatePageProxy(page);
-            var result = new PageProxy<RoleHandle>(page);
+            var result = new PageProxy<UserRoleHandle>(page);
 
             return result;
 

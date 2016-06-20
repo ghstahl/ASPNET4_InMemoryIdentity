@@ -14,7 +14,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Add_Claims_Pager_Delete_All_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -47,7 +47,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Add_Claim_Delete_All_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -72,7 +72,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Find_Claim_Does_Not_Exist_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -83,7 +83,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Add_Claim_Delete_One_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -110,7 +110,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Add_Claim_Delete_Type_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();

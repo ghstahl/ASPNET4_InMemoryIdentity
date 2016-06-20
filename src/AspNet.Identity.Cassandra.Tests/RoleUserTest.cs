@@ -12,9 +12,96 @@ namespace AspNet.Identity.Cassandra.Tests
     public class RoleTest
     {
         [TestMethod]
+        public async Task Test_Add_Gobal_Role_Delete_All_Async()
+        {
+            var globalDao = Global.GlobalTenantDao;
+            await globalDao.EstablishConnectionAsync();
+
+
+            await globalDao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            var result = await globalDao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+
+
+            var dao = Global.TenantDao;
+            await dao.EstablishConnectionAsync();
+
+            Guid userId = Guid.NewGuid();
+            int nCount = 10;
+            for (int i = 0; i < nCount; ++i)
+            {
+                string roleName = Guid.NewGuid().ToString();
+                var role = new CassandraRole()
+                {
+                    Name = roleName
+                };
+
+                await dao.CreateRoleAsync(role);
+            }
+
+            result = await globalDao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(nCount, result.Count());
+
+
+            await globalDao.DeleteRolesByTenantIdAsync();
+            result = await globalDao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+        }
+
+        [TestMethod]
+        public async Task Test_Add_Tenant_Role_Delete_All_Async()
+        {
+            var globalDao = Global.GlobalTenantDao;
+            await globalDao.EstablishConnectionAsync();
+
+
+            await globalDao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            var result = await globalDao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+
+
+            var dao = Global.TenantDao;
+            await dao.EstablishConnectionAsync();
+
+            Guid userId = Guid.NewGuid();
+            int nCount = 10;
+            for (int i = 0; i < nCount; ++i)
+            {
+                string roleName = Guid.NewGuid().ToString();
+                var role = new CassandraRole()
+                {
+                    Name = roleName,IsGlobal = false
+                };
+
+                await dao.CreateRoleAsync(role);
+            }
+            result = await globalDao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(nCount, result.Count());
+
+
+            await dao.DeleteRolesByTenantIdAsync();
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+        }
+    }
+
+    [TestClass]
+    public class RoleUserTest
+    {
+        [TestMethod]
         public async Task Test_Add_Role_Delete_All_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -39,7 +126,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Add_Role_Delete_Role_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -62,7 +149,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Find_Roles_For_UserId_No_Exist_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -75,7 +162,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Find_Roles_For_Good_UserId_No_Role_Exist_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -103,7 +190,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Is_In_Role_No_UserId_No_Exist_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -115,7 +202,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Is_In_Role_Good_UserId_No_Exist_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -143,7 +230,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Is_In_Role_Good_UserId_Does_Exist_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -175,7 +262,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Find_Role_Good_UserId_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -207,7 +294,7 @@ namespace AspNet.Identity.Cassandra.Tests
         [TestMethod]
         public async Task Test_Add_Roles_Pager_Delete_All_Async()
         {
-            var dao = new AspNetIdentityDao();
+            var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
             Guid userId = Guid.NewGuid();
@@ -220,12 +307,12 @@ namespace AspNet.Identity.Cassandra.Tests
             }
             byte[] pageState = null;
             int pageSize = 99;
-            IPage<RoleHandle> result = await dao.PageRolesAsync(userId, pageSize, pageState);
+            IPage<UserRoleHandle> result = await dao.PageUserRolesAsync(userId, pageSize, pageState);
             pageState = result.PagingState;
             int nCounter = result.Count;
             while (pageState != null)
             {
-                result = await dao.PageRolesAsync(userId, pageSize, pageState);
+                result = await dao.PageUserRolesAsync(userId, pageSize, pageState);
                 pageState = result.PagingState;
                 nCounter += result.Count;
             }
