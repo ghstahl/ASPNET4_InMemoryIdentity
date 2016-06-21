@@ -1,12 +1,27 @@
 using System;
+using System.Security.Claims;
 using Microsoft.AspNet.Identity;
 using ProductStore.Core;
 
 namespace P5.AspNet.Identity.Cassandra.DAO
 {
+    /*
+     CREATE TABLE IF NOT EXISTS roles (
+    roleid uuid,
+    name text,
+	displayname text,
+	is_systemrole boolean,
+	is_global boolean,
+    tenantid uuid,
+	created timestamp,
+	modified timestamp,
+    PRIMARY KEY (roleid)
+);
+     */
+
     public class CassandraRole : IRole<Guid>
     {
-        private readonly string _originalName;
+        private string _originalName;
 
         public CassandraRole()
         {
@@ -52,13 +67,26 @@ namespace P5.AspNet.Identity.Cassandra.DAO
 
             } set { _id = value; } }
 
+        private string _name;
+
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
         /// <value>
         /// The name.
         /// </value>
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                _name = value;
+                if (string.IsNullOrEmpty(_originalName))
+                {
+                    _originalName = value;
+                }
+            }
+        }
 
 
         /// <summary>

@@ -91,6 +91,7 @@
     <Compile Include="DAO\ProviderLogins\ProviderLoginHandle.cs" />
     <Compile Include="DAO\ProviderLogins\ProviderLoginHandleComparer.cs" />
     <Compile Include="DAO\Roles\CassandraRole.cs" />
+    <Compile Include="DAO\Roles\CassandraRoleComparer.cs" />
     <Compile Include="DAO\Roles\CassandraRoleExtensions.cs" />
     <Compile Include="DAO\UserRoles\AspNetIdentityDao.cs" />
     <Compile Include="DAO\UserRoles\UserRoleHandle.cs" />

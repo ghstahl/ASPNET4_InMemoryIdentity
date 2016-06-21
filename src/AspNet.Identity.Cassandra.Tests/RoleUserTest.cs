@@ -17,7 +17,6 @@ namespace AspNet.Identity.Cassandra.Tests
             var globalDao = Global.GlobalTenantDao;
             await globalDao.EstablishConnectionAsync();
 
-
             await globalDao.DeleteRolesByTenantIdAsync(); // get rid of all global records
             var result = await globalDao.FindRolesByTenantIdAsync();
             Assert.IsNotNull(result);
@@ -26,6 +25,10 @@ namespace AspNet.Identity.Cassandra.Tests
 
             var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
+            await dao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
 
             Guid userId = Guid.NewGuid();
             int nCount = 10;
@@ -57,7 +60,6 @@ namespace AspNet.Identity.Cassandra.Tests
             var globalDao = Global.GlobalTenantDao;
             await globalDao.EstablishConnectionAsync();
 
-
             await globalDao.DeleteRolesByTenantIdAsync(); // get rid of all global records
             var result = await globalDao.FindRolesByTenantIdAsync();
             Assert.IsNotNull(result);
@@ -66,6 +68,10 @@ namespace AspNet.Identity.Cassandra.Tests
 
             var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
+            await dao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
 
             Guid userId = Guid.NewGuid();
             int nCount = 10;
@@ -93,11 +99,184 @@ namespace AspNet.Identity.Cassandra.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count());
         }
+
+        [TestMethod]
+        public async Task Test_Add_Tenant_Role_Update_Delete_All_Async()
+        {
+            var globalDao = Global.GlobalTenantDao;
+            await globalDao.EstablishConnectionAsync();
+
+            await globalDao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            var result = await globalDao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+
+
+            var dao = Global.TenantDao;
+            await dao.EstablishConnectionAsync();
+            await dao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+
+            Guid userId = Guid.NewGuid();
+            string roleName = Guid.NewGuid().ToString();
+            var role = new CassandraRole()
+            {
+                Name = roleName,
+                IsGlobal = false
+            };
+
+            await dao.CreateRoleAsync(role);
+
+
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count());
+
+            result = await dao.FindRoleByNameAsync(roleName);
+            Assert.IsNotNull(result);
+            var roleResult = result.ToList();
+            Assert.AreEqual(1, roleResult.Count());
+            Assert.AreEqual(roleName, roleResult[0].Name);
+
+            var roleNew = roleResult[0];
+            roleNew.DisplayName = "I Like Cheese";
+
+             
+            await dao.UpdateRoleAsync(roleNew);
+
+            result = await dao.FindRoleByNameAsync(roleNew.Name);
+            Assert.IsNotNull(result);
+            roleResult = result.ToList();
+            Assert.AreEqual(1, roleResult.Count());
+            Assert.IsTrue(CassandraRoleComparer.Comparer.Equals(roleNew, roleResult[0]));
+          
+            await dao.DeleteRolesByTenantIdAsync();
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+        }
+        
+        
+        [TestMethod]
+        public async Task Test_Add_Tenant_Role_Update_Change_Name_Delete_All_Async()
+        {
+            var globalDao = Global.GlobalTenantDao;
+            await globalDao.EstablishConnectionAsync();
+
+            await globalDao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            var result = await globalDao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+
+
+            var dao = Global.TenantDao;
+            await dao.EstablishConnectionAsync();
+            await dao.DeleteRolesByTenantIdAsync(); // get rid of all global records
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+
+            Guid userId = Guid.NewGuid();
+            string roleName = Guid.NewGuid().ToString();
+            var role = new CassandraRole()
+            {
+                Name = roleName,
+                IsGlobal = false
+            };
+
+            await dao.CreateRoleAsync(role);
+
+
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count());
+
+            result = await dao.FindRoleByNameAsync(roleName);
+            Assert.IsNotNull(result);
+            var roleResult = result.ToList();
+            Assert.AreEqual(1, roleResult.Count());
+            Assert.AreEqual(roleName, roleResult[0].Name);
+
+            var roleNew = roleResult[0];
+            roleNew.DisplayName = "I Like Cheese";
+            roleNew.Name = Guid.NewGuid().ToString();
+
+            await dao.UpdateRoleAsync(roleNew);
+
+            result = await dao.FindRoleByNameAsync(roleNew.Name);
+            Assert.IsNotNull(result);
+            roleResult = result.ToList();
+            Assert.AreEqual(1, roleResult.Count());
+            Assert.IsTrue(CassandraRoleComparer.Comparer.Equals(roleNew, roleResult[0]));
+
+            await dao.DeleteRolesByTenantIdAsync();
+            result = await dao.FindRolesByTenantIdAsync();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+        }
     }
 
     [TestClass]
     public class RoleUserTest
     {
+
+        //RenameRoleNameInUsersAsync
+
+        [TestMethod]
+        public async Task Test_Add_Role_Rename_Delete_All_Async()
+        {
+            var dao = Global.TenantDao;
+            await dao.EstablishConnectionAsync();
+            DateTimeOffset assigned = DateTimeOffset.UtcNow;
+            List<UserRoleHandle> insertHandles = new List<UserRoleHandle>();
+
+            int nCount = 10;
+            string roleName = Guid.NewGuid().ToString();
+            for (int i = 0; i < nCount; ++i)
+            {
+                Guid userId = Guid.NewGuid();
+                UserRoleHandle urh = new UserRoleHandle()
+                {
+                    Assigned = assigned,
+                    RoleName = roleName,
+                    UserId = userId
+                };
+                insertHandles.Add(urh);
+                await dao.AddToRoleAsync(urh.UserId, urh.RoleName);
+            }
+            foreach (var urh in insertHandles)
+            {
+                var result = await dao.FindRoleNamesByUserIdAsync(urh.UserId);
+                Assert.IsNotNull(result);
+                var myData = result.ToList();
+                Assert.AreEqual(1, myData.Count());
+                var readRoleName = myData.First();
+                Assert.AreEqual(readRoleName,urh.RoleName);
+            }
+            var newRoleName = "a super role";
+            await dao.RenameRoleNameInUsersAsync(roleName, newRoleName);
+            foreach (var urh in insertHandles)
+            {
+                var result = await dao.FindRoleNamesByUserIdAsync(urh.UserId);
+                Assert.IsNotNull(result);
+                var myData = result.ToList();
+                Assert.AreEqual(1, myData.Count());
+                var readRoleName = myData.Single();
+                Assert.AreEqual(readRoleName, newRoleName);
+            }
+
+            foreach (var urh in insertHandles)
+            {
+                await dao.RemoveFromRoleAsync(urh.UserId, newRoleName);
+                var result = await dao.FindRoleNamesByUserIdAsync(urh.UserId);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(0, result.Count());  
+            }
+
+        }
+
         [TestMethod]
         public async Task Test_Add_Role_Delete_All_Async()
         {
