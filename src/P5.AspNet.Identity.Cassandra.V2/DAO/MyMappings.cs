@@ -4,8 +4,6 @@ namespace P5.AspNet.Identity.Cassandra.DAO
 {
     public class MyMappings : Mappings
     {
-
-
         private static bool _init { get; set; }
 
         public static void Init()

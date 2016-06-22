@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using P5.AspNet.Identity.Cassandra.DAO;
@@ -128,7 +129,18 @@ namespace AspNet.Identity.Cassandra.Tests
                 var user = new CassandraUserHandle()
                 {
                     Email = userName,
-                    UserName = userName
+                    UserName = userName,
+                    AccessFailedCount = 123,
+                    EmailConfirmed = true,
+                    Enabled = true,
+                    LockoutEnabled = true,
+                    PasswordHash = Guid.NewGuid().ToString(),
+                    PhoneNumber = Guid.NewGuid().ToString(),
+                    PhoneNumberConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    Source = Guid.NewGuid().ToString(),
+                    SourceId = Guid.NewGuid().ToString(),
+                    TwoFactorEnabled = true
                 };
                 insertedUsers.Add(user);
                 await dao.UpsertUserAsync(user);

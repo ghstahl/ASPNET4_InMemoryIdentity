@@ -163,6 +163,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                 await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
             }
         }
+
         public async Task<IEnumerable<CassandraRole>> FindRolesByTenantIdAsync(
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -174,7 +175,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                     mapper.FetchAsync<CassandraRole>("SELECT * FROM roles_by_name WHERE tenantid = ?", TenantId);
             return records;
         }
-
+       
         public async Task<IEnumerable<CassandraRole>> FindRoleByNameAsync( string name,
            CancellationToken cancellationToken = default(CancellationToken))
         {

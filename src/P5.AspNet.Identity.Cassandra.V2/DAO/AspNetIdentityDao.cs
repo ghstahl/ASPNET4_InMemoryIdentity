@@ -108,5 +108,11 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             get { return _cassandraSession; }
             private set { _cassandraSession = value; }
         }
+
+        public void Dispose()
+        {
+            if(_cassandraSession != null)
+                _cassandraSession.Dispose();
+        }
     }
 }

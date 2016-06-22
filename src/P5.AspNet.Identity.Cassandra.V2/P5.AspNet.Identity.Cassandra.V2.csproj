@@ -87,6 +87,7 @@
     <Compile Include="DAO\Claims\AspNetIdentityDao.cs" />
     <Compile Include="DAO\Claims\ClaimHandle.cs" />
     <Compile Include="DAO\Claims\ClaimHandleComparer.cs" />
+    <Compile Include="DAO\Global.cs" />
     <Compile Include="DAO\ProviderLogins\AspNetIdentityDao.cs" />
     <Compile Include="DAO\ProviderLogins\ProviderLoginExtensions.cs" />
     <Compile Include="DAO\ProviderLogins\ProviderLoginHandle.cs" />
@@ -105,6 +106,8 @@
     <Compile Include="DAO\Users\CassandraUserExtensions.cs" />
     <Compile Include="DAO\Users\CassandraUserHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Store\Role\CassandraRoleStore.cs" />
+    <Compile Include="ResilientSessionContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
