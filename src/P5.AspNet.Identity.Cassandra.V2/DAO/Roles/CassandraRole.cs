@@ -1,7 +1,7 @@
 using System;
 using System.Security.Claims;
 using Microsoft.AspNet.Identity;
-using ProductStore.Core;
+using P5.Store.Core;
 
 namespace P5.AspNet.Identity.Cassandra.DAO
 {

@@ -1,5 +1,4 @@
 using System;
-using ProductStore.Core;
 
 namespace P5.Store.Core.Models
 {

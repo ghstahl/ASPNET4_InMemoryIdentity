@@ -199,7 +199,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             return records;
         }
 
-        public async Task DeleteAsync(CassandraRole role)
+        public async Task DeleteRoleAsync(CassandraRole role)
         {
             PreparedStatement[] prepared = await _deleteRole;
             var batch = new BatchStatement();
@@ -221,7 +221,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             foreach (var role in roles)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await DeleteAsync(role);
+                await DeleteRoleAsync(role);
             }
         }
 

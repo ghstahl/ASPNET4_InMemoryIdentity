@@ -1,86 +1,86 @@
-﻿CREATE TABLE IF NOT EXISTS users (
-    userid uuid,
-	tenantid uuid,
-    username text,
-    password_hash text,
-    security_stamp text,
-    two_factor_enabled boolean,
-    access_failed_count int,
-    lockout_enabled boolean,
-    lockout_end_date timestamp,
-    phone_number text,
-    phone_number_confirmed boolean,
-    email text,
-    email_confirmed boolean,
+﻿CREATE TABLE IF NOT EXISTS users ( 
+	access_failed_count int,
 	created timestamp,
-	modified timestamp,
+	email text,
+	email_confirmed boolean,
 	enabled boolean,
+	lockout_enabled boolean,
+	lockout_end_date timestamp,
+	modified timestamp,
+	password_hash text,
+	phone_number text,
+	phone_number_confirmed boolean,
+	security_stamp text,
 	source text,
 	source_id text,
-    PRIMARY KEY (userid)
+	tenantid uuid,
+	two_factor_enabled boolean,
+	userid uuid,
+	username text,
+	PRIMARY KEY (userid)
 );
 
 // Users, keyed by username
 CREATE TABLE IF NOT EXISTS users_by_username (
-	tenantid uuid,
-    username text,
-    userid uuid,
-    password_hash text,
-    security_stamp text,
-    two_factor_enabled boolean,
-    access_failed_count int,
-    lockout_enabled boolean,
-    lockout_end_date timestamp,
-    phone_number text,
-    phone_number_confirmed boolean,
-    email text,
-    email_confirmed boolean,
+	access_failed_count int,
 	created timestamp,
-	modified timestamp,
+	email text,
+	email_confirmed boolean,
 	enabled boolean,
+	lockout_enabled boolean,
+	lockout_end_date timestamp,
+	modified timestamp,
+	password_hash text,
+	phone_number text,
+	phone_number_confirmed boolean,
+	security_stamp text,
 	source text,
 	source_id text,
+	tenantid uuid,
+	two_factor_enabled boolean,
+	userid uuid,
+	username text,
     PRIMARY KEY (tenantid, username)
 );
 
 // Users, keyed by email address
 CREATE TABLE IF NOT EXISTS users_by_email (
-    email text,
-    userid uuid,
-	tenantid uuid,
-    username text,
-    password_hash text,
-    security_stamp text,
-    two_factor_enabled boolean,
     access_failed_count int,
-    lockout_enabled boolean,
-    lockout_end_date timestamp,
-    phone_number text,
-    phone_number_confirmed boolean,
-    email_confirmed boolean,
 	created timestamp,
-	modified timestamp,
+	email text,
+	email_confirmed boolean,
 	enabled boolean,
+	lockout_enabled boolean,
+	lockout_end_date timestamp,
+	modified timestamp,
+	password_hash text,
+	phone_number text,
+	phone_number_confirmed boolean,
+	security_stamp text,
 	source text,
 	source_id text,
+	tenantid uuid,
+	two_factor_enabled boolean,
+	userid uuid,
+	username text,
     PRIMARY KEY ((tenantid, email))
 );
 
 // Logins, keyed by user id
 CREATE TABLE IF NOT EXISTS logins (
-    userid uuid,
-    login_provider text,
+    tenantid uuid,
+	userid uuid,
+	login_provider text,
     provider_key text,
-	tenantid uuid,
     PRIMARY KEY(userid, login_provider, provider_key)
 );
 
 // Logins, keyed by provider and provider key
 CREATE TABLE IF NOT EXISTS logins_by_provider (
-    login_provider text,
+    tenantid uuid,
+	userid uuid,
+	login_provider text,
     provider_key text,
-	tenantid uuid,
-    userid uuid,
     PRIMARY KEY ((login_provider, provider_key), tenantid)
 );
 

@@ -7,6 +7,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         public Guid UserId { get; set; }
         public Guid TenantId { get; set; }
         public string LoginProvider { get; set; }
-        public DateTimeOffset ProviderKey { get; set; }
+        public string ProviderKey { get; set; }
+ 
     }
 }

@@ -15,6 +15,21 @@ namespace P5.AspNet.Identity.Cassandra.DAO
 
     public partial class AspNetIdentityDao
     {
+        private static Guid _namespace = Guid.Empty;
+
+        static Guid @Namespace
+        {
+            get
+            {
+                if (_namespace == Guid.Empty)
+                {
+                    _namespace = Guid.Parse("2b1cb768-6ff0-4be2-8635-f1f1a9a0610a");
+                }
+                return _namespace;
+
+            }
+        }
+
         static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public static CassandraConfig _CassandraConfig;
@@ -34,6 +49,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             set { _CassandraConfig = value; }
         }
         public Guid TenantId { get; set; }
+        public static Guid GobalTenantId { get { return Guid.Empty; } }
         private ISession _cassandraSession = null;
         public AspNetIdentityDao()
         {
@@ -52,8 +68,6 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                     var dao = new CassandraDao(CassandraConfig);
                     CassandraSession = await dao.GetSessionAsync();
 
-
-
                     //-----------------------------------------------
                     // PREPARED STATEMENTS for Claims
                     //-----------------------------------------------
@@ -63,14 +77,21 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                     // PREPARED STATEMENTS for Roles
                     //-----------------------------------------------
                     PrepareRolesStatements();
+                    
                     //-----------------------------------------------
                     // PREPARED STATEMENTS for UserRoles
                     //-----------------------------------------------
                     PrepareUserRolesStatements();
+                    
                     //-----------------------------------------------
                     // PREPARED STATEMENTS for ProviderLogins
                     //-----------------------------------------------
                     PrepareProviderLoginsStatements();
+
+                    //-----------------------------------------------
+                    // PREPARED STATEMENTS for Users
+                    //-----------------------------------------------
+                    PrepareUserStatements();
 
                     MyMappings.Init();
                 }

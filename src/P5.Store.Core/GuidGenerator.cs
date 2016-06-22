@@ -20,7 +20,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ProductStore.Core
+namespace P5.Store.Core
 {
     public static class GuidGenerator
     {
