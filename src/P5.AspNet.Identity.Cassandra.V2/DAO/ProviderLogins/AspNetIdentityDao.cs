@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS logins_by_provider (
             var records = await mapper.FetchAsync<ProviderLoginHandle>(cqlQuery, userId);
             return records;
         }
-         public async Task<IEnumerable<ProviderLoginHandle>> FindLoginsByProviderAsync(string loginProvider,string providerKey,
+         public async Task<IEnumerable<ProviderLoginHandle>> FindLoginByProviderAsync(string loginProvider,string providerKey,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrEmpty(loginProvider))

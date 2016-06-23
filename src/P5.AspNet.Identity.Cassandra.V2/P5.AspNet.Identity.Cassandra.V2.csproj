@@ -83,6 +83,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppBuilderExtensions.cs" />
+    <Compile Include="CassandraAspNetIdentityOptions.cs" />
     <Compile Include="DAO\AspNetIdentityDao.cs" />
     <Compile Include="DAO\Claims\AspNetIdentityDao.cs" />
     <Compile Include="DAO\Claims\ClaimHandle.cs" />
@@ -105,8 +107,20 @@
     <Compile Include="DAO\Users\CassandraUser.cs" />
     <Compile Include="DAO\Users\CassandraUserExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Store\Role\CassandraRoleStore.cs" />
+    <Compile Include="Store\CassandraRoleStore.cs" />
     <Compile Include="ResilientSessionContainer.cs" />
+    <Compile Include="Store\UserStoreAdmin\CassandraUserStore.cs" />
+    <Compile Include="Store\IUserStoreAdmin.cs" />
+    <Compile Include="Store\UserClaimStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserEmailStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserLockoutStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserLoginStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserPasswordStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserPhoneNumberStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserRoleStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserSecurityStampStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserStore\CassandraUserStore.cs" />
+    <Compile Include="Store\UserTwoFactorStore\CassandraUserStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
@@ -123,9 +137,7 @@
     <EmbeddedResource Include="defaultschema.cql" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Store\Claim\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -34,7 +34,7 @@ namespace AspNet.Identity.Cassandra.Tests
             foreach (var item in inserted)
             {
                 item.TenantId = dao.TenantId;
-                var foundResult = await dao.FindLoginsByProviderAsync(item.LoginProvider, item.ProviderKey);
+                var foundResult = await dao.FindLoginByProviderAsync(item.LoginProvider, item.ProviderKey);
                 Assert.IsNotNull(foundResult);
                 var foundList = foundResult.ToList();
                 Assert.IsTrue(foundList.Any());
@@ -82,7 +82,7 @@ namespace AspNet.Identity.Cassandra.Tests
             foreach (var item in inserted)
             {
                 item.TenantId = dao.TenantId;
-                var foundResult = await dao.FindLoginsByProviderAsync(item.LoginProvider, item.ProviderKey);
+                var foundResult = await dao.FindLoginByProviderAsync(item.LoginProvider, item.ProviderKey);
                 Assert.IsNotNull(foundResult);
                 var foundList = foundResult.ToList();
                 Assert.IsTrue(foundList.Any());
@@ -176,7 +176,7 @@ namespace AspNet.Identity.Cassandra.Tests
             foreach (var item in inserted)
             {
                 item.TenantId = dao.TenantId;
-                var foundResult = await dao.FindLoginsByProviderAsync(item.LoginProvider,item.ProviderKey);
+                var foundResult = await dao.FindLoginByProviderAsync(item.LoginProvider,item.ProviderKey);
                 Assert.IsNotNull(foundResult);
                 var foundList = foundResult.ToList();
                 Assert.IsTrue(foundList.Any());
