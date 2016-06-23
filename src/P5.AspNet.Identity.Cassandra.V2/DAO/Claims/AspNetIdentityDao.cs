@@ -12,20 +12,7 @@ using P5.CassandraStore.Extensions;
 
 namespace P5.AspNet.Identity.Cassandra.DAO
 {
-    public static class ClaimDaoExtensions
-    {
-        public static IEnumerable<Claim> ToClaims(this IEnumerable<ClaimHandle> claimHandles)
-        {
-            var query = from item in claimHandles
-                select item.ToClaim();
-            return query;
-        }
-
-        public static Claim ToClaim(this ClaimHandle claimHandle)
-        {
-            return new Claim(claimHandle.Type, claimHandle.Value);
-        }
-    }
+   
 
     public partial class AspNetIdentityDao
     {

@@ -61,6 +61,7 @@
     <Compile Include="DAO\UserTest.cs" />
     <Compile Include="DAO\RoleTest.cs" />
     <Compile Include="DAO\RoleUserTest.cs" />
+    <Compile Include="Store\UserStoreTest.cs" />
     <Compile Include="Store\RoleStoreTest.cs" />
   </ItemGroup>
   <ItemGroup>

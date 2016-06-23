@@ -89,6 +89,7 @@
     <Compile Include="DAO\Claims\AspNetIdentityDao.cs" />
     <Compile Include="DAO\Claims\ClaimHandle.cs" />
     <Compile Include="DAO\Claims\ClaimHandleComparer.cs" />
+    <Compile Include="DAO\Claims\ClaimHandleExtensions.cs" />
     <Compile Include="DAO\Global.cs" />
     <Compile Include="DAO\ProviderLogins\AspNetIdentityDao.cs" />
     <Compile Include="DAO\ProviderLogins\ProviderLoginExtensions.cs" />
