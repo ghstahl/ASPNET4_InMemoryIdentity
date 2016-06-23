@@ -61,6 +61,7 @@
     <Compile Include="DAO\UserTest.cs" />
     <Compile Include="DAO\RoleTest.cs" />
     <Compile Include="DAO\RoleUserTest.cs" />
+    <Compile Include="Store\RoleStoreTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\P5.AspNet.Identity.Cassandra.V2\P5.AspNet.Identity.Cassandra.V2.csproj">
@@ -76,9 +77,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Store\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
