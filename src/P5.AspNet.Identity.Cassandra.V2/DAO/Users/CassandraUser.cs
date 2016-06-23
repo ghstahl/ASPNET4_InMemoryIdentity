@@ -62,7 +62,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             {
                 if (_id == Guid.Empty)
                 {
-                    _id = GenerateIdFromUserData();
+                    throw new Exception("_id cannot be Guid.Empty");
                 }
                 return _id;
             }

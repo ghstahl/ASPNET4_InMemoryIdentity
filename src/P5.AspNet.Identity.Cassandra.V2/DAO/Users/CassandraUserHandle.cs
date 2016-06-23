@@ -1,36 +1,11 @@
 using System;
+using System.CodeDom;
 using P5.Store.Core;
 
 namespace P5.AspNet.Identity.Cassandra.DAO
 {
     public class CassandraUserHandle
     {
-        public Guid GenerateIdFromUserData()
-        {
-            if (string.IsNullOrEmpty(UserName))
-            {
-                throw new NullReferenceException("UserName cannot be null or empty.  Cannot generate userId.");
-            }
-            return GuidGenerator.CreateGuid(CassandraUser.NamespaceGuid, UserNameSecret);
-        }
-
-        private string _userNameSecret;
-
-        public string UserNameSecret
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_userNameSecret))
-                {
-                    _userNameSecret = Guid.NewGuid().ToString();
-                }
-                return _userNameSecret;
-            }
-            set
-            {
-                _userNameSecret = value;
-            }
-        }
 
         public int AccessFailedCount { get; set; }
         public DateTimeOffset Created { get; set; }
@@ -56,7 +31,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             {
                 if (_userId == Guid.Empty)
                 {
-                    _userId = GenerateIdFromUserData();
+                    throw new Exception("_userid cannot be Guid.Empty");
                 }
                 return _userId;
             }

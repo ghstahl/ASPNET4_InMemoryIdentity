@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
 	two_factor_enabled boolean,
 	userid uuid,
 	username text,
-	usernamesecret text,
+	
 	PRIMARY KEY (userid)
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS users_by_username (
 	two_factor_enabled boolean,
 	userid uuid,
 	username text,
-	usernamesecret text,
+	
     PRIMARY KEY (tenantid, username)
 );
 
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS users_by_email (
 	two_factor_enabled boolean,
 	userid uuid,
 	username text,
-	usernamesecret text,
+	
     PRIMARY KEY ((tenantid, email))
 );
 
