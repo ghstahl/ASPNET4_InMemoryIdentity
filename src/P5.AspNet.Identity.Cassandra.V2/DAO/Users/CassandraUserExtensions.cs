@@ -1,55 +1,37 @@
+using System;
+using Cassandra;
+
 namespace P5.AspNet.Identity.Cassandra.DAO
 {
     public static class CassandraUserExtensions
     {
-        public static CassandraUserHandle ToHandle(this CassandraUser user)
+        /// <summary>
+        /// Creates a CassandraUser from a Row.  If the Row is null, returns null.
+        /// </summary>
+        static CassandraUser ToCassandraUser(this Row row)
         {
-            return new CassandraUserHandle
+            if (row == null) return null;
+
+            var user = new CassandraUser(row.GetValue<Guid>("userid"), row.GetValue<Guid>("tenantid"), row.GetValue<string>("username"), row.GetValue<string>("email"))
             {
-                
-                AccessFailedCount = user.AccessFailedCount,
-                Created = user.Created,
-                Email = user.Email,
-                EmailConfirmed = user.IsEmailConfirmed,
-                Enabled = user.Enabled,
-                LockoutEnabled = user.IsLockoutEnabled,
-                LockoutEndDate = user.LockoutEndDate,
-                Modified = user.Modified,
-                PasswordHash = user.PasswordHash,
-                PhoneNumber = user.PhoneNumber,
-                PhoneNumberConfirmed = user.IsPhoneNumberConfirmed,
-                SecurityStamp = user.SecurityStamp,
-                Source = user.Source,
-                SourceId = user.SourceId,
-                TenantId = user.TenantId,
-                TwoFactorEnabled = user.IsTwoFactorEnabled,
-                UserId = user.Id,
-                UserName = user.UserName
+                PasswordHash = row.GetValue<string>("password_hash"),
+                SecurityStamp = row.GetValue<string>("security_stamp"),
+                TwoFactorEnabled = row.GetValue<bool>("two_factor_enabled"),
+                AccessFailedCount = row.GetValue<int>("access_failed_count"),
+                LockoutEnabled = row.GetValue<bool>("lockout_enabled"),
+                LockoutEndDate = row.GetValue<DateTimeOffset>("lockout_end_date"),
+                PhoneNumber = row.GetValue<string>("phone_number"),
+                PhoneNumberConfirmed = row.GetValue<bool>("phone_number_confirmed"),
+                EmailConfirmed = row.GetValue<bool>("email_confirmed"),
+                Created = row.GetValue<DateTimeOffset>("created"),
+                Modified = row.IsNull("modified") ? new DateTimeOffset?() : row.GetValue<DateTimeOffset>("modified"),
+                Enabled = row.GetValue<bool>("enabled"),
+                Source = row.GetValue<string>("source"),
+                SourceId = row.GetValue<string>("source_id")
             };
+
+            return user;
         }
-        public static CassandraUser ToUser(this CassandraUserHandle user)
-        {
-            return new CassandraUser
-            {
-                AccessFailedCount = user.AccessFailedCount,
-                Created = user.Created,
-                Email = user.Email,
-                IsEmailConfirmed = user.EmailConfirmed,
-                Enabled = user.Enabled,
-                IsLockoutEnabled = user.LockoutEnabled,
-                LockoutEndDate = user.LockoutEndDate,
-                Modified = user.Modified,
-                PasswordHash = user.PasswordHash,
-                PhoneNumber = user.PhoneNumber,
-                IsPhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                SecurityStamp = user.SecurityStamp,
-                Source = user.Source,
-                SourceId = user.SourceId,
-                TenantId = user.TenantId,
-                IsTwoFactorEnabled = user.TwoFactorEnabled,
-                Id = user.UserId,
-                UserName = user.UserName
-            };
-        }
+
     }
 }

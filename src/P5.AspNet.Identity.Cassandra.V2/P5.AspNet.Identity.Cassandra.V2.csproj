@@ -101,10 +101,9 @@
     <Compile Include="DAO\Roles\AspNetIdentityDao.cs" />
     <Compile Include="DAO\UserRoles\UserRoleHandleComparer.cs" />
     <Compile Include="DAO\Users\AspNetIdentityDao.cs" />
-    <Compile Include="DAO\Users\CassandraUserHandleComparer.cs" />
+    <Compile Include="DAO\Users\CassandraUserComparer.cs" />
     <Compile Include="DAO\Users\CassandraUser.cs" />
     <Compile Include="DAO\Users\CassandraUserExtensions.cs" />
-    <Compile Include="DAO\Users\CassandraUserHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Store\Role\CassandraRoleStore.cs" />
     <Compile Include="ResilientSessionContainer.cs" />

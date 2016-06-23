@@ -97,7 +97,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         /// <summary>
         /// Whether or not two factor authentication is enabled for the user.
         /// </summary>
-        public bool IsTwoFactorEnabled { get; set; }
+        public bool TwoFactorEnabled { get; set; }
 
         /// <summary>
         /// The number of times the user has tried and failed to login.
@@ -107,7 +107,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         /// <summary>
         /// Whether or not lockout is enabled for the user.
         /// </summary>
-        public bool IsLockoutEnabled { get; set; }
+        public bool LockoutEnabled { get; set; }
 
         /// <summary>
         /// When the user's lockout period will end.
@@ -122,7 +122,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         /// <summary>
         /// Whether the user's phone number has been confirmed.
         /// </summary>
-        public bool IsPhoneNumberConfirmed { get; set; }
+        public bool PhoneNumberConfirmed { get; set; }
 
         /// <summary>
         /// The user's email address.
@@ -132,7 +132,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         /// <summary>
         /// Whether the user's email address has been confirmed.
         /// </summary>
-        public bool IsEmailConfirmed { get; set; }
+        public bool EmailConfirmed { get; set; }
 
         /// <summary>
         /// The date and time the user was created.
@@ -172,7 +172,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         {
         }
 
-        private CassandraUser(Guid userId, Guid tenantId, string userName, string email)
+        public CassandraUser(Guid userId, Guid tenantId, string userName, string email)
             : this()
         {
             Id = userId;
@@ -205,33 +205,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             return Email != _originalEmail;
         }
 
-        /// <summary>
-        /// Creates a CassandraUser from a Row.  If the Row is null, returns null.
-        /// </summary>
-        internal static CassandraUser FromRow(Row row)
-        {
-            if (row == null) return null;
-
-            var user = new CassandraUser(row.GetValue<Guid>("userid"), row.GetValue<Guid>("tenantid"), row.GetValue<string>("username"), row.GetValue<string>("email"))
-            {
-                PasswordHash = row.GetValue<string>("password_hash"),
-                SecurityStamp = row.GetValue<string>("security_stamp"),
-                IsTwoFactorEnabled = row.GetValue<bool>("two_factor_enabled"),
-                AccessFailedCount = row.GetValue<int>("access_failed_count"),
-                IsLockoutEnabled = row.GetValue<bool>("lockout_enabled"),
-                LockoutEndDate = row.GetValue<DateTimeOffset>("lockout_end_date"),
-                PhoneNumber = row.GetValue<string>("phone_number"),
-                IsPhoneNumberConfirmed = row.GetValue<bool>("phone_number_confirmed"),
-                IsEmailConfirmed = row.GetValue<bool>("email_confirmed"),
-                Created = row.GetValue<DateTimeOffset>("created"),
-                Modified = row.IsNull("modified") ? new DateTimeOffset?() : row.GetValue<DateTimeOffset>("modified"),
-                Enabled = row.GetValue<bool>("enabled"),
-                Source = row.GetValue<string>("source"),
-                SourceId = row.GetValue<string>("source_id")
-            };
-
-            return user;
-        }
+      
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<CassandraUser, Guid> manager)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType

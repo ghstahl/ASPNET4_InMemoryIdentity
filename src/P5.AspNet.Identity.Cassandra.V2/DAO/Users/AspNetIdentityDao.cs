@@ -84,19 +84,6 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         }
 
 
-      
-        public async Task UpsertUserAsync(CassandraUser user,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (user == null)
-                throw new ArgumentNullException("user");
-            if (string.IsNullOrEmpty(user.UserName))
-                throw new ArgumentNullException("user", "user.UserName cannot be null or empty");
-
-            var userHandle = user.ToHandle();
-            await UpsertUserAsync(userHandle, cancellationToken);
-        }
-
 
         public async Task ChangeUserNameAsync(string oldUserName, string newUserName,
            CancellationToken cancellationToken = default(CancellationToken))
@@ -129,7 +116,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                 user.UserName = newUserName;
                 user.Email = newUserName;
                 prepared = await _createUserByUserName;
-                bound = prepared.Bind(user.UserName,  user.UserId, user.PasswordHash, user.SecurityStamp,
+                bound = prepared.Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp,
                     user.TwoFactorEnabled, user.AccessFailedCount,
                     user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                     user.Email,
@@ -137,7 +124,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                 batch.Add(bound);
 
                 prepared = await _createUserByEmail;
-                bound = prepared.Bind(user.UserName,  user.UserId, user.PasswordHash, user.SecurityStamp,
+                bound = prepared.Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp,
                     user.TwoFactorEnabled, user.AccessFailedCount,
                     user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                     user.Email,
@@ -145,7 +132,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                 batch.Add(bound);
 
                 prepared = await _createUserById;
-                bound = prepared.Bind(user.UserName,  user.UserId, user.PasswordHash, user.SecurityStamp,
+                bound = prepared.Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp,
                    user.TwoFactorEnabled, user.AccessFailedCount,
                    user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                    user.Email,
@@ -159,7 +146,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                 throw new Exception(string.Format("user:{0} does not exist",oldUserName));
             }
         }
-        public async Task UpsertUserAsync(CassandraUserHandle user,
+        public async Task UpsertUserAsync(CassandraUser user,
           CancellationToken cancellationToken = default(CancellationToken))
         {
             if (user == null)
@@ -182,9 +169,9 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             else
             {
                 // We have a brand new user,
-                // we want to make the userId and user record immutable.
+                // we want to make the Id and user record immutable.
                 // This allows us to change out the email address, which is the only thing we will allow for what looks like a username.
-                user.UserId = Guid.NewGuid();
+                user.Id = Guid.NewGuid();
                 user.Created = now;
             }
            
@@ -193,7 +180,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             var batch = new BatchStatement();
 
             var prepared = await _createUserByUserName;
-            var bound = prepared.Bind(user.UserName,  user.UserId, user.PasswordHash, user.SecurityStamp,
+            var bound = prepared.Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp,
                 user.TwoFactorEnabled, user.AccessFailedCount,
                 user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                 user.Email,
@@ -201,7 +188,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             batch.Add(bound);
 
             prepared = await _createUserByEmail;
-            bound = prepared.Bind(user.UserName,  user.UserId, user.PasswordHash, user.SecurityStamp,
+            bound = prepared.Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp,
                 user.TwoFactorEnabled, user.AccessFailedCount,
                 user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                 user.Email,
@@ -209,7 +196,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             batch.Add(bound);
 
             prepared = await _createUserById;
-            bound = prepared.Bind(user.UserName,  user.UserId, user.PasswordHash, user.SecurityStamp,
+            bound = prepared.Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp,
                user.TwoFactorEnabled, user.AccessFailedCount,
                user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                user.Email,
@@ -221,15 +208,8 @@ namespace P5.AspNet.Identity.Cassandra.DAO
 
             await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
         }
-        public async Task DeleteUserAsync(CassandraUser user,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (user == null)
-                throw new ArgumentNullException("user");
-            var userHandle = user.ToHandle();
-            await DeleteUserAsync(userHandle, cancellationToken);
-        }
-        public async Task DeleteUserAsync(CassandraUserHandle user, 
+
+        public async Task DeleteUserAsync(CassandraUser user, 
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (user == null)
@@ -247,7 +227,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             var batch = new BatchStatement();
 
             PreparedStatement prepared = await _deleteUserById;
-            BoundStatement bound = prepared.Bind(user.UserId);
+            BoundStatement bound = prepared.Bind(user.Id);
             batch.Add(bound);
 
             prepared = await _deleteUserByEmail;
@@ -259,13 +239,13 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             batch.Add(bound);
 
 
-            await RemoveLoginsFromUserAsync(user.UserId, cancellationToken);
-            await DeleteUserFromRolesAsync(user.UserId, cancellationToken);
-            await DeleteClaimHandleByUserIdAsync(user.UserId, cancellationToken);
+            await RemoveLoginsFromUserAsync(user.Id, cancellationToken);
+            await DeleteUserFromRolesAsync(user.Id, cancellationToken);
+            await DeleteClaimHandleByUserIdAsync(user.Id, cancellationToken);
             await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<CassandraUserHandle>> FindUserByIdAsync(Guid userId,
+        public async Task<IEnumerable<CassandraUser>> FindUserByIdAsync(Guid userId,
            CancellationToken cancellationToken = default(CancellationToken))
         {
             if (userId == Guid.Empty)
@@ -276,11 +256,11 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             cancellationToken.ThrowIfCancellationRequested();
             var cqlQuery = string.Format("SELECT * FROM users WHERE userid = ?",
                 Guid.Empty);
-            var records = await mapper.FetchAsync<CassandraUserHandle>(cqlQuery, userId);
+            var records = await mapper.FetchAsync<CassandraUser>(cqlQuery, userId);
             return records;
         }
 
-        public async Task<IEnumerable<CassandraUserHandle>> FindUserByEmailAsync(string email,
+        public async Task<IEnumerable<CassandraUser>> FindUserByEmailAsync(string email,
            CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrEmpty(email))
@@ -292,10 +272,10 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             cancellationToken.ThrowIfCancellationRequested();
             var records =
                 await
-                    mapper.FetchAsync<CassandraUserHandle>("SELECT * FROM users_by_email WHERE tenantid = ? AND email = ?", TenantId, email);
+                    mapper.FetchAsync<CassandraUser>("SELECT * FROM users_by_email WHERE tenantid = ? AND email = ?", TenantId, email);
             return records;
         }
-        public async Task<IEnumerable<CassandraUserHandle>> FindUserByUserNameAsync(string username,
+        public async Task<IEnumerable<CassandraUser>> FindUserByUserNameAsync(string username,
           CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrEmpty(username))
@@ -306,68 +286,68 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             cancellationToken.ThrowIfCancellationRequested();
             var records =
                 await
-                    mapper.FetchAsync<CassandraUserHandle>("SELECT * FROM users_by_username WHERE tenantid = ? AND username = ?", TenantId, username);
+                    mapper.FetchAsync<CassandraUser>("SELECT * FROM users_by_username WHERE tenantid = ? AND username = ?", TenantId, username);
             return records;
         }
 
-        public async Task<Store.Core.Models.IPage<CassandraUserHandle>> PageUsersAsync(int pageSize,byte[] pagingState,
+        public async Task<Store.Core.Models.IPage<CassandraUser>> PageUsersAsync(int pageSize, byte[] pagingState,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             return await PageUsersByTenantIdAsync(TenantId, pageSize, pagingState, cancellationToken);
         }
 
-        public async Task<Store.Core.Models.IPage<CassandraUserHandle>> PageUsersByTenantIdAsync(Guid tenantId,int pageSize, byte[] pagingState,
+        public async Task<Store.Core.Models.IPage<CassandraUser>> PageUsersByTenantIdAsync(Guid tenantId, int pageSize, byte[] pagingState,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
-            IPage<CassandraUserHandle> page;
+            IPage<CassandraUser> page;
             string cqlQuery = string.Format("SELECT * FROM users_by_username WHERE tenantid ={0}", tenantId);
             if (pagingState == null)
             {
-                page = await mapper.FetchPageAsync<CassandraUserHandle>(
+                page = await mapper.FetchPageAsync<CassandraUser>(
                     Cql.New(cqlQuery).WithOptions(opt =>
                         opt.SetPageSize(pageSize)));
             }
             else
             {
-                page = await mapper.FetchPageAsync<CassandraUserHandle>(
+                page = await mapper.FetchPageAsync<CassandraUser>(
                     Cql.New(cqlQuery).WithOptions(opt =>
                         opt.SetPageSize(pageSize).SetPagingState(pagingState)));
             }
 
             // var result = CreatePageProxy(page);
-            var result = new PageProxy<CassandraUserHandle>(page);
+            var result = new PageProxy<CassandraUser>(page);
 
             return result;
         }
-        public async Task<Store.Core.Models.IPage<CassandraUserHandle>> PageUsersOfAllTenantsAsync(int pageSize, byte[] pagingState,
+        public async Task<Store.Core.Models.IPage<CassandraUser>> PageUsersOfAllTenantsAsync(int pageSize, byte[] pagingState,
            CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
-            IPage<CassandraUserHandle> page;
+            IPage<CassandraUser> page;
             string cqlQuery = string.Format("SELECT * FROM users");
             if (pagingState == null)
             {
-                page = await mapper.FetchPageAsync<CassandraUserHandle>(
+                page = await mapper.FetchPageAsync<CassandraUser>(
                     Cql.New(cqlQuery).WithOptions(opt =>
                         opt.SetPageSize(pageSize)));
             }
             else
             {
-                page = await mapper.FetchPageAsync<CassandraUserHandle>(
+                page = await mapper.FetchPageAsync<CassandraUser>(
                     Cql.New(cqlQuery).WithOptions(opt =>
                         opt.SetPageSize(pageSize).SetPagingState(pagingState)));
             }
 
             // var result = CreatePageProxy(page);
-            var result = new PageProxy<CassandraUserHandle>(page);
+            var result = new PageProxy<CassandraUser>(page);
 
             return result;
         }

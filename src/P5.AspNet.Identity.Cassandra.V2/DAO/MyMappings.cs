@@ -21,10 +21,11 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             // Define mappings in the constructor of your class
             // that inherits from Mappings
 
-            For<CassandraUserHandle>()
+            For<CassandraUser>()
                 .TableName("users")
                 .TableName("users_by_email")
                 .TableName("users_by_username")
+                .Column(u => u.Id, cm => cm.WithName("userid"))
                 .Column(u => u.AccessFailedCount, cm => cm.WithName("access_failed_count"))
                 .Column(u => u.EmailConfirmed, cm => cm.WithName("email_confirmed"))
                 .Column(u => u.LockoutEnabled, cm => cm.WithName("lockout_enabled"))

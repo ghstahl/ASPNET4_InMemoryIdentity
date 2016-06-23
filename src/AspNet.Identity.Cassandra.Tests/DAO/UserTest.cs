@@ -18,7 +18,7 @@ namespace AspNet.Identity.Cassandra.Tests
             await dao.EstablishConnectionAsync();
 
             var guidId = Guid.NewGuid();
-            var insertedUsers = new List<CassandraUserHandle>();
+            var insertedUsers = new List<CassandraUser>();
 
             var role = new CassandraRole()
             {
@@ -37,7 +37,7 @@ namespace AspNet.Identity.Cassandra.Tests
             for (int i = 0; i < nCount; ++i)
             {
                 string userName = Guid.NewGuid().ToString();
-                var user = new CassandraUserHandle()
+                var user = new CassandraUser()
                 {
                     Email = userName,
                     UserName = userName
@@ -50,13 +50,13 @@ namespace AspNet.Identity.Cassandra.Tests
                 {
                     LoginProvider = Guid.NewGuid().ToString(),
                     ProviderKey = Guid.NewGuid().ToString(),
-                    UserId = user.UserId
+                    UserId = user.Id
                 };
                 await dao.UpsertLoginsAsync(providerLoginHandle);
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = user.UserId, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = user.Id, Value = "Value:" + guidId };
                 await dao.CreateClaimAsync(claimHandle);
 
-                await dao.AddToRoleAsync(user.UserId, role.Name);
+                await dao.AddToRoleAsync(user.Id, role.Name);
             }
 
 
@@ -70,7 +70,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
                 var foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
 
                   foundUserResult = await dao.FindUserByUserNameAsync(testUser.UserName);
                 Assert.IsNotNull(foundUserResult);
@@ -78,25 +78,25 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
                  foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                 Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
 
-                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.UserId);
+                 var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(roleResult);
                 var roleResultList = roleResult.ToList();
                 Assert.AreEqual(1, roleResultList.Count());
                 var foundRole = roleResultList[0];
                 Assert.AreEqual(foundRole, role.Name);
 
-                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.UserId);
+                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(claimResult);
                 var claimResultList = claimResult.ToList();
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
 
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.UserId, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
-            List<CassandraUserHandle> newUserList = new List<CassandraUserHandle>();
+            List<CassandraUser> newUserList = new List<CassandraUser>();
             foreach (var testUser in insertedUsers)
             {
                 var newUserName = "Herb_" + testUser.UserName;
@@ -125,7 +125,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsFalse(foundUserList.Any());
 
                 // this userid should still be good
-                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.UserId);
+                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(roleResult);
                 var roleResultList = roleResult.ToList();
                 Assert.AreEqual(1, roleResultList.Count());
@@ -133,13 +133,13 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.AreEqual(foundRole, role.Name);
 
                 // this userid should still be good
-                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.UserId);
+                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(claimResult);
                 var claimResultList = claimResult.ToList();
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
 
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.UserId, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
 
@@ -153,7 +153,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
                 var foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
 
                 foundUserResult = await dao.FindUserByUserNameAsync(testUser.UserName);
                 Assert.IsNotNull(foundUserResult);
@@ -161,22 +161,22 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
                 foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
 
-                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.UserId);
+                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(roleResult);
                 var roleResultList = roleResult.ToList();
                 Assert.AreEqual(1, roleResultList.Count());
                 var foundRole = roleResultList[0];
                 Assert.AreEqual(foundRole, role.Name);
 
-                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.UserId);
+                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(claimResult);
                 var claimResultList = claimResult.ToList();
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
 
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.UserId, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
             foreach (var testUser in newUserList)
@@ -188,12 +188,12 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsFalse(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 0);
 
-                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.UserId);
+                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(roleResult);
                 var roleResultList = roleResult.ToList();
                 Assert.IsFalse(roleResultList.Any());
 
-                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.UserId);
+                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(claimResult);
                 var claimResultList = claimResult.ToList();
                 Assert.IsFalse(claimResultList.Any());
@@ -213,7 +213,7 @@ namespace AspNet.Identity.Cassandra.Tests
             await dao.EstablishConnectionAsync();
 
             var guidId = Guid.NewGuid();
-            var insertedUsers = new List<CassandraUserHandle>();
+            var insertedUsers = new List<CassandraUser>();
             
             var role = new CassandraRole()
             {
@@ -232,7 +232,7 @@ namespace AspNet.Identity.Cassandra.Tests
             for (int i = 0; i < nCount; ++i)
             {
                 string userName = Guid.NewGuid().ToString();
-                var user = new CassandraUserHandle()
+                var user = new CassandraUser()
                 {
                     Email = userName,
                     UserName = userName
@@ -245,13 +245,13 @@ namespace AspNet.Identity.Cassandra.Tests
                 {
                     LoginProvider = Guid.NewGuid().ToString(),
                     ProviderKey = Guid.NewGuid().ToString(),
-                    UserId = user.UserId
+                    UserId = user.Id
                 };
                 await dao.UpsertLoginsAsync(providerLoginHandle);
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = user.UserId, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = user.Id, Value = "Value:" + guidId };
                 await dao.CreateClaimAsync(claimHandle);
 
-                await dao.AddToRoleAsync(user.UserId, role.Name);
+                await dao.AddToRoleAsync(user.Id, role.Name);
             }
 
 
@@ -264,22 +264,22 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
                 var foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
 
-                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.UserId);
+                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(roleResult);
                 var roleResultList = roleResult.ToList();
                 Assert.AreEqual(1, roleResultList.Count());
                 var foundRole = roleResultList[0];
                 Assert.AreEqual(foundRole, role.Name);
 
-                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.UserId);
+                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(claimResult);
                 var claimResultList = claimResult.ToList();
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
-                
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.UserId, Value = "Value:" + guidId };
+
+                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
 
@@ -292,12 +292,12 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsFalse(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 0);
 
-                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.UserId);
+                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(roleResult);
                 var roleResultList = roleResult.ToList();
                 Assert.IsFalse(roleResultList.Any());
 
-                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.UserId);
+                var claimResult = await dao.FindClaimHandleByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(claimResult);
                 var claimResultList = claimResult.ToList();
                 Assert.IsFalse(claimResultList.Any());
@@ -315,13 +315,13 @@ namespace AspNet.Identity.Cassandra.Tests
         {
             var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
-            
-            List<CassandraUserHandle> insertedUsers = new List<CassandraUserHandle>();
+
+            List<CassandraUser> insertedUsers = new List<CassandraUser>();
             int nCount = 1;
             for (int i = 0; i < nCount; ++i)
             {
                 string userName = Guid.NewGuid().ToString();
-                var user = new CassandraUserHandle()
+                var user = new CassandraUser()
                 {
                     Email = userName,
                     UserName = userName,
@@ -350,7 +350,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count,1);
                 var foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
             }
 
             foreach (var testUser in insertedUsers)
@@ -370,12 +370,12 @@ namespace AspNet.Identity.Cassandra.Tests
             var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
-            List<CassandraUserHandle> insertedUsers = new List<CassandraUserHandle>();
+            List<CassandraUser> insertedUsers = new List<CassandraUser>();
             int nCount = 1;
             for (int i = 0; i < nCount; ++i)
             {
                 string userName = Guid.NewGuid().ToString();
-                var user = new CassandraUserHandle()
+                var user = new CassandraUser()
                 {
                     Email = userName,
                     UserName = userName
@@ -393,7 +393,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
                 var foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
             }
 
             foreach (var testUser in insertedUsers)
@@ -413,12 +413,12 @@ namespace AspNet.Identity.Cassandra.Tests
             var dao = Global.TenantDao;
             await dao.EstablishConnectionAsync();
 
-            List<CassandraUserHandle> insertedUsers = new List<CassandraUserHandle>();
+            List<CassandraUser> insertedUsers = new List<CassandraUser>();
             int nCount = 1;
             for (int i = 0; i < nCount; ++i)
             {
                 string userName = Guid.NewGuid().ToString();
-                var user = new CassandraUserHandle()
+                var user = new CassandraUser()
                 {
                     Email = userName,
                     UserName = userName
@@ -430,13 +430,13 @@ namespace AspNet.Identity.Cassandra.Tests
             foreach (var testUser in insertedUsers)
             {
                 testUser.TenantId = dao.TenantId;
-                var foundUserResult = await dao.FindUserByIdAsync(testUser.UserId);
+                var foundUserResult = await dao.FindUserByIdAsync(testUser.Id);
                 Assert.IsNotNull(foundUserResult);
                 var foundUserList = foundUserResult.ToList();
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
                 var foundUser = foundUserList[0];
-                Assert.IsTrue(CassandraUserHandleComparer.ShallowComparer.Equals(foundUser, testUser));
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
             }
 
             foreach (var testUser in insertedUsers)
