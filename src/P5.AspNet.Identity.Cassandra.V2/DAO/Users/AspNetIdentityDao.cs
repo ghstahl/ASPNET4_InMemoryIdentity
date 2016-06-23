@@ -36,6 +36,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
         {
             string columns = "tenantid, " +
                              "username, " +
+                             "usernamesecret, " +
                              "userid, " +
                              "password_hash, " +
                              "security_stamp, " +
@@ -55,13 +56,13 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             // Create some reusable prepared statements so we pay the cost of preparing once, then bind multiple times
             _createUserByUserName = new AsyncLazy<PreparedStatement>(() => CassandraSession.PrepareAsync(
                 "INSERT INTO users_by_username (" + columns + ") " +
-                string.Format("VALUES ({0}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", TenantId)));
+                string.Format("VALUES ({0}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", TenantId)));
             _createUserByEmail = new AsyncLazy<PreparedStatement>(() => CassandraSession.PrepareAsync(
                 "INSERT INTO users_by_email (" + columns + ") " +
-                string.Format("VALUES ({0}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", TenantId)));
+                string.Format("VALUES ({0}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", TenantId)));
             _createUserById = new AsyncLazy<PreparedStatement>(() => CassandraSession.PrepareAsync(
                 "INSERT INTO users (" + columns + ") " +
-                string.Format("VALUES ({0}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", TenantId)));
+                string.Format("VALUES ({0}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", TenantId)));
             _deleteUserByUserName =
                     new AsyncLazy<PreparedStatement>(
                         () =>
@@ -97,8 +98,70 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             await UpsertUserAsync(userHandle, cancellationToken);
         }
 
-        public async Task UpsertUserAsync(CassandraUserHandle user,
+
+        public async Task ChangeUserNameAsync(string oldUserName, string newUserName,
            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (oldUserName == null)
+                throw new ArgumentNullException("oldUserName");
+            if (newUserName == null)
+                throw new ArgumentNullException("newUserName");
+
+            var foundUserResult = await FindUserByUserNameAsync(oldUserName, cancellationToken);
+            var foundUserList = foundUserResult.ToList();
+            if (foundUserList.Any())
+            {
+                var user = foundUserList[0];
+                var foundNewResult = await FindUserByUserNameAsync(newUserName, cancellationToken);
+                if (foundNewResult.Any())
+                {
+                    throw new Exception(String.Format("User: {0} exists, so you can't rename to this.  Pick another name",newUserName));
+                }
+                var batch = new BatchStatement();
+
+                PreparedStatement prepared = await _deleteUserByEmail;
+                BoundStatement bound = prepared.Bind(oldUserName);
+                batch.Add(bound);
+
+                prepared = await _deleteUserByUserName;
+                bound = prepared.Bind(oldUserName);
+                batch.Add(bound);
+
+                user.UserName = newUserName;
+                user.Email = newUserName;
+                prepared = await _createUserByUserName;
+                bound = prepared.Bind(user.UserName, user.UserNameSecret, user.UserId, user.PasswordHash, user.SecurityStamp,
+                    user.TwoFactorEnabled, user.AccessFailedCount,
+                    user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
+                    user.Email,
+                    user.EmailConfirmed, user.Created, user.Modified, user.Enabled, user.Source, user.SourceId);
+                batch.Add(bound);
+
+                prepared = await _createUserByEmail;
+                bound = prepared.Bind(user.UserName, user.UserNameSecret, user.UserId, user.PasswordHash, user.SecurityStamp,
+                    user.TwoFactorEnabled, user.AccessFailedCount,
+                    user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
+                    user.Email,
+                    user.EmailConfirmed, user.Created, user.Modified, user.Enabled, user.Source, user.SourceId);
+                batch.Add(bound);
+
+                prepared = await _createUserById;
+                bound = prepared.Bind(user.UserName, user.UserNameSecret, user.UserId, user.PasswordHash, user.SecurityStamp,
+                   user.TwoFactorEnabled, user.AccessFailedCount,
+                   user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
+                   user.Email,
+                   user.EmailConfirmed, user.Created, user.Modified, user.Enabled, user.Source, user.SourceId);
+                batch.Add(bound);
+                cancellationToken.ThrowIfCancellationRequested();
+                await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
+            }
+            else
+            {
+                throw new Exception(string.Format("user:{0} does not exist",oldUserName));
+            }
+        }
+        public async Task UpsertUserAsync(CassandraUserHandle user,
+          CancellationToken cancellationToken = default(CancellationToken))
         {
             if (user == null)
                 throw new ArgumentNullException("user");
@@ -106,13 +169,33 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                 throw new ArgumentNullException("user", "user.UserName cannot be null or empty");
 
             var now = DateTimeOffset.UtcNow;
-            user.Created = now;
+
+            var foundUserResult = await FindUserByEmailAsync(user.Email, cancellationToken);
+            var foundUserList = foundUserResult.ToList();
+            if (foundUserList.Any())
+            {
+                // we have an update, and not a create.
+                // we don't let you update the username/email.  That is done by ChangeUserNameAsync
+                var foundUser = foundUserList[0];
+                user.Email = foundUser.Email;
+                user.UserName = foundUser.UserName;
+                user.UserNameSecret = foundUser.UserName; // set it right, because this is hidden from the end client.
+            }
+            else
+            {
+                // We have a brand new user,
+                // we want to make the userId and user record immutable.
+                // This allows us to change out the email address, which is the only thing we will allow for what looks like a username.
+                user.UserNameSecret = Guid.NewGuid().ToString();
+                user.Created = now;
+            }
+           
             user.Modified = now;
 
             var batch = new BatchStatement();
 
             var prepared = await _createUserByUserName;
-            var bound = prepared.Bind(user.UserName, user.UserId, user.PasswordHash, user.SecurityStamp,
+            var bound = prepared.Bind(user.UserName, user.UserNameSecret, user.UserId, user.PasswordHash, user.SecurityStamp,
                 user.TwoFactorEnabled, user.AccessFailedCount,
                 user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                 user.Email,
@@ -120,7 +203,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             batch.Add(bound);
 
             prepared = await _createUserByEmail;
-             bound = prepared.Bind(user.UserName, user.UserId, user.PasswordHash, user.SecurityStamp,
+            bound = prepared.Bind(user.UserName, user.UserNameSecret, user.UserId, user.PasswordHash, user.SecurityStamp,
                 user.TwoFactorEnabled, user.AccessFailedCount,
                 user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                 user.Email,
@@ -128,7 +211,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             batch.Add(bound);
 
             prepared = await _createUserById;
-            bound = prepared.Bind(user.UserName, user.UserId, user.PasswordHash, user.SecurityStamp,
+            bound = prepared.Bind(user.UserName, user.UserNameSecret, user.UserId, user.PasswordHash, user.SecurityStamp,
                user.TwoFactorEnabled, user.AccessFailedCount,
                user.LockoutEnabled, user.LockoutEndDate, user.PhoneNumber, user.PhoneNumberConfirmed,
                user.Email,
@@ -140,7 +223,6 @@ namespace P5.AspNet.Identity.Cassandra.DAO
 
             await CassandraSession.ExecuteAsync(batch).ConfigureAwait(false);
         }
-
         public async Task DeleteUserAsync(CassandraUser user,
             CancellationToken cancellationToken = default(CancellationToken))
         {

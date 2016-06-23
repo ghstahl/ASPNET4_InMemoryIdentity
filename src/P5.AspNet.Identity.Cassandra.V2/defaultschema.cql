@@ -1,4 +1,9 @@
-﻿CREATE TABLE IF NOT EXISTS users ( 
+﻿// Users, keyed by user id
+CREATE KEYSPACE IF NOT EXISTS aspnetidentity
+WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+use aspnetidentity;
+
+CREATE TABLE IF NOT EXISTS users ( 
 	access_failed_count int,
 	created timestamp,
 	email text,
@@ -17,6 +22,7 @@
 	two_factor_enabled boolean,
 	userid uuid,
 	username text,
+	usernamesecret text,
 	PRIMARY KEY (userid)
 );
 
@@ -40,6 +46,7 @@ CREATE TABLE IF NOT EXISTS users_by_username (
 	two_factor_enabled boolean,
 	userid uuid,
 	username text,
+	usernamesecret text,
     PRIMARY KEY (tenantid, username)
 );
 
@@ -63,6 +70,7 @@ CREATE TABLE IF NOT EXISTS users_by_email (
 	two_factor_enabled boolean,
 	userid uuid,
 	username text,
+	usernamesecret text,
     PRIMARY KEY ((tenantid, email))
 );
 
