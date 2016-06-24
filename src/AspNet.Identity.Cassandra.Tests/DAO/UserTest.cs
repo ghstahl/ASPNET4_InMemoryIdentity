@@ -54,7 +54,12 @@ namespace AspNet.Identity.Cassandra.Tests
                     UserId = user.Id
                 };
                 await dao.UpsertLoginsAsync(providerLoginHandle);
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = user.Id, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle()
+                {
+                    Type = "Type:" + guidId,
+                    UserId = user.Id,
+                    Value = "Value:" + guidId
+                };
                 await dao.CreateClaimAsync(claimHandle);
 
                 await dao.AddToRoleAsync(user.Id, role.Name);
@@ -73,15 +78,15 @@ namespace AspNet.Identity.Cassandra.Tests
                 var foundUser = foundUserList[0];
                 Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
 
-                  foundUserResult = await dao.FindUserByUserNameAsync(testUser.UserName);
+                foundUserResult = await dao.FindUserByUserNameAsync(testUser.UserName);
                 Assert.IsNotNull(foundUserResult);
-                 foundUserList = foundUserResult.ToList();
+                foundUserList = foundUserResult.ToList();
                 Assert.IsTrue(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 1);
-                 foundUser = foundUserList[0];
-                 Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
+                foundUser = foundUserList[0];
+                Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
 
-                 var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
+                var roleResult = await dao.FindRoleNamesByUserIdAsync(testUser.Id);
                 Assert.IsNotNull(roleResult);
                 var roleResultList = roleResult.ToList();
                 Assert.AreEqual(1, roleResultList.Count());
@@ -94,7 +99,12 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
 
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle()
+                {
+                    Type = "Type:" + guidId,
+                    UserId = testUser.Id,
+                    Value = "Value:" + guidId
+                };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
             List<CassandraUser> newUserList = new List<CassandraUser>();
@@ -140,7 +150,12 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
 
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle()
+                {
+                    Type = "Type:" + guidId,
+                    UserId = testUser.Id,
+                    Value = "Value:" + guidId
+                };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
 
@@ -177,7 +192,12 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
 
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle()
+                {
+                    Type = "Type:" + guidId,
+                    UserId = testUser.Id,
+                    Value = "Value:" + guidId
+                };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
             foreach (var testUser in newUserList)
@@ -207,6 +227,7 @@ namespace AspNet.Identity.Cassandra.Tests
             Assert.IsFalse(foundRoleNameResult.Any());
 
         }
+
         [TestMethod]
         public async Task Test_Add_Full_User_Find_by_email_Delete_User_Async()
         {
@@ -215,7 +236,7 @@ namespace AspNet.Identity.Cassandra.Tests
 
             var guidId = Guid.NewGuid();
             var insertedUsers = new List<CassandraUser>();
-            
+
             var role = new CassandraRole()
             {
                 Name = Guid.NewGuid().ToString(),
@@ -240,8 +261,8 @@ namespace AspNet.Identity.Cassandra.Tests
                 };
                 insertedUsers.Add(user);
                 await dao.UpsertUserAsync(user);
-                
-               
+
+
                 var providerLoginHandle = new ProviderLoginHandle()
                 {
                     LoginProvider = Guid.NewGuid().ToString(),
@@ -249,7 +270,12 @@ namespace AspNet.Identity.Cassandra.Tests
                     UserId = user.Id
                 };
                 await dao.UpsertLoginsAsync(providerLoginHandle);
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = user.Id, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle()
+                {
+                    Type = "Type:" + guidId,
+                    UserId = user.Id,
+                    Value = "Value:" + guidId
+                };
                 await dao.CreateClaimAsync(claimHandle);
 
                 await dao.AddToRoleAsync(user.Id, role.Name);
@@ -280,7 +306,12 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.AreEqual(1, claimResultList.Count());
                 var foundClaim = claimResultList[0];
 
-                var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = testUser.Id, Value = "Value:" + guidId };
+                var claimHandle = new ClaimHandle()
+                {
+                    Type = "Type:" + guidId,
+                    UserId = testUser.Id,
+                    Value = "Value:" + guidId
+                };
                 Assert.IsTrue(ClaimHandleComparer.Comparer.Equals(foundClaim, claimHandle));
             }
 
@@ -309,8 +340,9 @@ namespace AspNet.Identity.Cassandra.Tests
             Assert.IsNotNull(roleNameResult);
             foundRoleNameResult = roleNameResult.ToList();
             Assert.IsFalse(foundRoleNameResult.Any());
-           
+
         }
+
         [TestMethod]
         public async Task Test_Add_User_Find_by_email_Delete_User_Async()
         {
@@ -349,7 +381,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.IsNotNull(foundUserResult);
                 var foundUserList = foundUserResult.ToList();
                 Assert.IsTrue(foundUserList.Any());
-                Assert.AreEqual(foundUserList.Count,1);
+                Assert.AreEqual(foundUserList.Count, 1);
                 var foundUser = foundUserList[0];
                 Assert.IsTrue(CassandraUserComparer.ShallowComparer.Equals(foundUser, testUser));
             }
@@ -362,7 +394,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 var foundUserList = foundUserResult.ToList();
                 Assert.IsFalse(foundUserList.Any());
                 Assert.AreEqual(foundUserList.Count, 0);
-            }          
+            }
         }
 
         [TestMethod]
@@ -450,6 +482,6 @@ namespace AspNet.Identity.Cassandra.Tests
                 Assert.AreEqual(foundUserList.Count, 0);
             }
         }
- 
+
     }
 }
