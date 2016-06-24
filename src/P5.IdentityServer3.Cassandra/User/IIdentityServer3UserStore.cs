@@ -21,14 +21,14 @@ namespace P5.IdentityServer3.Cassandra
         Task<IdentityServerUser> FindIdentityServerUserByUserIdAsync(string userId);
         Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUserAsync(string userId);
 
-        Task<IEnumerable<string>> FindIdentityServerUsersAllowedScopesByUserIdAsync(string userId);
-        Task<IEnumerable<string>> FindIdentityServerUsersClientIdsByUserIdAsync(string userId);
+        Task<IEnumerable<string>> FindScopesByUserAsync(string userId);
+        Task<IEnumerable<string>> FindClientIdsByUserAsync(string userId);
 
-        Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersAllowedScopesByUserIdAsync(string userId, IEnumerable<string> scopes);
-        Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds);
+        Task<IdentityServerStoreAppliedInfo> AddScopesToIdentityServerUserAsync(string userId, IEnumerable<string> scopes);
+        Task<IdentityServerStoreAppliedInfo> AddClientIdToIdentityServerUserAsync(string userId, IEnumerable<string> clientIds);
 
-        Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersAllowedScopesByUserIdAsync(string userId, IEnumerable<string> scopes);
-        Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds);
+        Task<IdentityServerStoreAppliedInfo> DeleteScopesByUserIdAsync(string userId, IEnumerable<string> scopes);
+        Task<IdentityServerStoreAppliedInfo> DeleteClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds);
 
     }
 

@@ -39,34 +39,34 @@ namespace P5.IdentityServer3.Cassandra
             return await IdentityServer3UserStore.DeleteIdentityServerUserAsync(userId);
         }
 
-        public async Task<IEnumerable<string>> FindIdentityServerUsersAllowedScopesByUserIdAsync(string userId)
+        public async Task<IEnumerable<string>> FindScopesByUserAsync(string userId)
         {
-            return await IdentityServer3UserStore.FindIdentityServerUsersAllowedScopesByUserIdAsync(userId);
+            return await IdentityServer3UserStore.FindScopesByUserAsync(userId);
         }
 
-        public async Task<IEnumerable<string>> FindIdentityServerUsersClientIdsByUserIdAsync(string userId)
+        public async Task<IEnumerable<string>> FindClientIdsByUserAsync(string userId)
         {
-            return await IdentityServer3UserStore.FindIdentityServerUsersClientIdsByUserIdAsync(userId);
+            return await IdentityServer3UserStore.FindClientIdsByUserAsync(userId);
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersAllowedScopesByUserIdAsync(string userId, IEnumerable<string> scopes)
+        public async Task<IdentityServerStoreAppliedInfo> AddScopesToIdentityServerUserAsync(string userId, IEnumerable<string> scopes)
         {
-            return await IdentityServer3UserStore.AddIdentityServerUsersAllowedScopesByUserIdAsync(userId, scopes);
+            return await IdentityServer3UserStore.AddScopesToIdentityServerUserAsync(userId, scopes);
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds)
+        public async Task<IdentityServerStoreAppliedInfo> AddClientIdToIdentityServerUserAsync(string userId, IEnumerable<string> clientIds)
         {
-            return await IdentityServer3UserStore.AddIdentityServerUsersClientIdsByUserIdAsync(userId, clientIds);
+            return await IdentityServer3UserStore.AddClientIdToIdentityServerUserAsync(userId, clientIds);
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersAllowedScopesByUserIdAsync(string userId, IEnumerable<string> scopes)
+        public async Task<IdentityServerStoreAppliedInfo> DeleteScopesByUserIdAsync(string userId, IEnumerable<string> scopes)
         {
-            return await IdentityServer3UserStore.DeleteIdentityServerUsersAllowedScopesByUserIdAsync(userId, scopes);
+            return await IdentityServer3UserStore.DeleteScopesByUserIdAsync(userId, scopes);
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds)
+        public async Task<IdentityServerStoreAppliedInfo> DeleteClientIdsByUserIdAsync(string userId, IEnumerable<string> clientIds)
         {
-            return await IdentityServer3UserStore.DeleteIdentityServerUsersClientIdsByUserIdAsync(userId, clientIds);
+            return await IdentityServer3UserStore.DeleteClientIdsByUserIdAsync(userId, clientIds);
         }
     }
 }

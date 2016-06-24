@@ -67,7 +67,7 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-        public async Task<IEnumerable<string>> FindIdentityServerUsersAllowedScopesByUserIdAsync(string userId)
+        public async Task<IEnumerable<string>> FindScopesByUserAsync(string userId)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
@@ -81,7 +81,7 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-        public async Task<IEnumerable<string>> FindIdentityServerUsersClientIdsByUserIdAsync(string userId)
+        public async Task<IEnumerable<string>> FindClientIdsByUserAsync(string userId)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
@@ -95,7 +95,8 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersAllowedScopesByUserIdAsync(
+       
+        public async Task<IdentityServerStoreAppliedInfo> AddScopesToIdentityServerUserAsync(
             string userId, IEnumerable<string> scopes)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
@@ -121,7 +122,7 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> AddIdentityServerUsersClientIdsByUserIdAsync(string userId,
+        public async Task<IdentityServerStoreAppliedInfo> AddClientIdToIdentityServerUserAsync(string userId,
             IEnumerable<string> clientIds)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
@@ -146,7 +147,7 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersAllowedScopesByUserIdAsync(
+        public async Task<IdentityServerStoreAppliedInfo> DeleteScopesByUserIdAsync(
             string userId, IEnumerable<string> scopes)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
@@ -172,7 +173,7 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> DeleteIdentityServerUsersClientIdsByUserIdAsync(string userId,
+        public async Task<IdentityServerStoreAppliedInfo> DeleteClientIdsByUserIdAsync(string userId,
             IEnumerable<string> clientIds)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
