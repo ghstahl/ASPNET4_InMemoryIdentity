@@ -29,7 +29,8 @@ namespace AspNet.Identity.Cassandra.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count());
 
-            var store = new CassandraRoleStore();
+            var roleStore = Global.TanantCassandraRoleStore;
+            var userStore = Global.TanantCassandraUserStore;
 
             List<CassandraRole> inserted = new List<CassandraRole>();
             Guid userId = Guid.NewGuid();
@@ -43,26 +44,26 @@ namespace AspNet.Identity.Cassandra.Tests
                     IsGlobal = false
                 };
                 inserted.Add(role);
-                await store.CreateAsync(role);
+                await roleStore.CreateAsync(role);
             }
 
-            result = store.Roles;
+            result = roleStore.Roles;
             Assert.IsNotNull(result);
             Assert.AreEqual(nCount, result.Count());
 
             foreach (var item in inserted)
             {
-                var resultRole = await store.FindByNameAsync(item.Name);
+                var resultRole = await roleStore.FindByNameAsync(item.Name);
                 Assert.IsTrue(CassandraRoleComparer.Comparer.Equals(item,resultRole));
             }
             foreach (var item in inserted)
             {
-                var resultRole = await store.FindByIdAsync(item.Id);
+                var resultRole = await roleStore.FindByIdAsync(item.Id);
                 Assert.IsTrue(CassandraRoleComparer.Comparer.Equals(item, resultRole));
             }
             foreach (var item in inserted)
             {
-                await store.DeleteAsync(item);
+                await roleStore.DeleteAsync(item);
             }
             
             result = await dao.FindRolesByTenantIdAsync();
@@ -87,7 +88,8 @@ namespace AspNet.Identity.Cassandra.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count());
 
-            var store = new CassandraRoleStore();
+            var roleStore = Global.TanantCassandraRoleStore;
+            var userStore = Global.TanantCassandraUserStore;
 
             List<CassandraRole> inserted = new List<CassandraRole>();
             Guid userId = Guid.NewGuid();
@@ -101,23 +103,23 @@ namespace AspNet.Identity.Cassandra.Tests
                     IsGlobal = false
                 };
                 inserted.Add(role);
-                await store.CreateAsync(role);
+                await roleStore.CreateAsync(role);
             }
 
-            result = store.Roles;
+            result = roleStore.Roles;
             Assert.IsNotNull(result);
             Assert.AreEqual(nCount, result.Count());
 
             
             foreach (var item in inserted)
             {
-                var resultRole = await store.FindByIdAsync(item.Id);
+                var resultRole = await roleStore.FindByIdAsync(item.Id);
                 Assert.IsTrue(CassandraRoleComparer.Comparer.Equals(item, resultRole));
             }
 
             foreach (var item in inserted)
             {
-                await store.DeleteAsync(item);
+                await roleStore.DeleteAsync(item);
             }
 
             result = await dao.FindRolesByTenantIdAsync();
@@ -151,15 +153,17 @@ namespace AspNet.Identity.Cassandra.Tests
                 Name = roleName,
                 IsGlobal = false
             };
-            var store = new CassandraRoleStore();
-            await store.CreateAsync(role);
+            var roleStore = Global.TanantCassandraRoleStore;
+            var userStore = Global.TanantCassandraUserStore;
+
+            await roleStore.CreateAsync(role);
 
 
-            result = store.Roles;
+            result = roleStore.Roles;
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count());
 
-            var resultRole = await store.FindByNameAsync(roleName);
+            var resultRole = await roleStore.FindByNameAsync(roleName);
             Assert.IsTrue(CassandraRoleComparer.Comparer.Equals(role, resultRole));
 
 
@@ -168,9 +172,9 @@ namespace AspNet.Identity.Cassandra.Tests
             roleNew.DisplayName = "I Like Cheese";
 
 
-            await store.UpdateAsync(roleNew);
+            await roleStore.UpdateAsync(roleNew);
 
-            resultRole = await store.FindByNameAsync(roleName);
+            resultRole = await roleStore.FindByNameAsync(roleName);
             Assert.IsTrue(CassandraRoleComparer.Comparer.Equals(roleNew, resultRole));
           
             await dao.DeleteRolesByTenantIdAsync();
