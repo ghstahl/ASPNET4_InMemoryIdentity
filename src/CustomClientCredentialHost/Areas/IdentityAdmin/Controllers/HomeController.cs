@@ -25,7 +25,7 @@ namespace CustomClientCredentialHost.Areas.IdentityAdmin.Controllers
                 {
                     UserName = MasterBlasterEmail,
                     Email = MasterBlasterEmail,
-                    IsEmailConfirmed = true
+                    EmailConfirmed = true
                 };
                 await UserManager.CreateAsync(user);
             }

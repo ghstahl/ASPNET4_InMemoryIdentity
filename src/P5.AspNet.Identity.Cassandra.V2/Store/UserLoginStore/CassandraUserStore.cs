@@ -77,9 +77,12 @@ namespace P5.AspNet.Identity.Cassandra
                      return await ResilientSessionContainer.ResilientSession.FindLoginByProviderAsync(login.LoginProvider,login.ProviderKey);
                  },
                  async (ex) => ResilientSessionContainer.HandleCassandraException<IEnumerable<ProviderLoginHandle>>(ex));
-            var plh = resultList.ToList()[0];
 
-            var result = await FindByIdAsync(plh.UserId);
+            var plhList = resultList.ToList();
+            if (!plhList.Any())
+                return null;
+
+            var result = await FindByIdAsync(plhList.First().UserId);
             return result;
         }
 

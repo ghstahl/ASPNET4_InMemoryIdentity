@@ -307,7 +307,7 @@ namespace CustomClientCredentialHost.Controllers
                     return View("Error");
                 }
 
-                user = new ApplicationUser {UserName = model.Email, Email = model.Email, IsEmailConfirmed = true};
+                user = new ApplicationUser {UserName = model.Email, Email = model.Email, EmailConfirmed = true};
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -512,9 +512,9 @@ namespace CustomClientCredentialHost.Controllers
             var user = await UserManager.FindByEmailAsync(confirmEmailViewModel.Email);
             if (user != null)
             {
-                if (!user.IsEmailConfirmed)
+                if (!user.EmailConfirmed)
                 {
-                    user.IsEmailConfirmed = true;
+                    user.EmailConfirmed = true;
                     await UserManager.UpdateAsync(user);
                 }
                 return View("ConfirmEmail");
@@ -522,7 +522,7 @@ namespace CustomClientCredentialHost.Controllers
             if (userLoginInfo != null)
             {
                 // User does not exist, and we have an email confirmation, so lets create
-                user = new ApplicationUser { UserName = confirmEmailViewModel.Email, Email = confirmEmailViewModel.Email, IsEmailConfirmed = true };
+                user = new ApplicationUser { UserName = confirmEmailViewModel.Email, Email = confirmEmailViewModel.Email, EmailConfirmed = true };
                 var createResult = await UserManager.CreateAsync(user);
                 if (createResult.Succeeded)
                 {
@@ -694,12 +694,12 @@ namespace CustomClientCredentialHost.Controllers
                 }
             }
 
-            if (user != null && !user.IsEmailConfirmed)
+            if (user != null && !user.EmailConfirmed)
             {
                 if (confirmEmailViewModel != null &&
                     string.Compare(user.Email, confirmEmailViewModel.Email, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    user.IsEmailConfirmed = true;
+                    user.EmailConfirmed = true;
                     await UserManager.UpdateAsync(user);
                 }
                 else
@@ -717,7 +717,7 @@ namespace CustomClientCredentialHost.Controllers
                 {
                     UserName = confirmEmailViewModel.Email,
                     Email = confirmEmailViewModel.Email,
-                    IsEmailConfirmed = true
+                    EmailConfirmed = true
                 };
                 var resultCreate = await UserManager.CreateAsync(user);
                 if (resultCreate.Succeeded)

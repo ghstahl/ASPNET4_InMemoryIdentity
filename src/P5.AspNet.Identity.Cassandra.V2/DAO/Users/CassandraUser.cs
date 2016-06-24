@@ -5,7 +5,7 @@ using Cassandra;
 using Microsoft.AspNet.Identity;
 using P5.Store.Core;
 
-namespace P5.AspNet.Identity.Cassandra.DAO
+namespace P5.AspNet.Identity.Cassandra
 {
     /*
      access_failed_count int,

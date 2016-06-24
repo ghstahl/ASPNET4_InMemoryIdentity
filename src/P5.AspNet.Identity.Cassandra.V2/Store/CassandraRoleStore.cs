@@ -6,17 +6,32 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using P5.AspNet.Identity.Cassandra.DAO;
 using P5.CassandraStore.DAO;
+using P5.CassandraStore.Settings;
 
 namespace P5.AspNet.Identity.Cassandra
 {
     public class CassandraRoleStore : IQueryableRoleStore<CassandraRole, Guid>
     {
+        public CassandraRoleStore()
+        {
+            
+        }
+
+  
+        private Guid TenantId { get;  set; }
+        private CassandraConfig CassandraConfig { get; set; }
+        public CassandraRoleStore(CassandraConfig config, Guid tenantId)
+        {
+            TenantId = tenantId;
+            CassandraConfig = config;
+        }
+
         private readonly bool _disposeOfSession;
         private ResilientSessionContainer _resilientSessionContainer;
 
         ResilientSessionContainer ResilientSessionContainer
         {
-            get { return _resilientSessionContainer ?? (_resilientSessionContainer = new ResilientSessionContainer()); }
+            get { return _resilientSessionContainer ?? (_resilientSessionContainer = new ResilientSessionContainer(CassandraConfig,TenantId)); }
         }
 
         protected void Dispose(bool disposing)

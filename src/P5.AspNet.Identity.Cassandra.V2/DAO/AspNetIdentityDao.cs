@@ -32,9 +32,9 @@ namespace P5.AspNet.Identity.Cassandra.DAO
 
         static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public static CassandraConfig _CassandraConfig;
+        public CassandraConfig _CassandraConfig;
 
-        public static CassandraConfig CassandraConfig
+        public CassandraConfig CassandraConfig
         {
             get
             {
@@ -46,19 +46,20 @@ namespace P5.AspNet.Identity.Cassandra.DAO
                     KeySpace = "aspnetidentity"
                 });
             }
-            set { _CassandraConfig = value; }
+            set
+            {
+                _CassandraConfig = value;
+            }
         }
         public Guid TenantId { get; set; }
         public static Guid GobalTenantId { get { return Guid.Empty; } }
         private ISession _cassandraSession = null;
-        public AspNetIdentityDao()
-        {
-            TenantId = Guid.Empty;
-        }
-        public AspNetIdentityDao(Guid tenantId)
+        public AspNetIdentityDao(CassandraConfig config, Guid tenantId)
         {
             TenantId = tenantId;
+            CassandraConfig = config;
         }
+
         public async Task EstablishConnectionAsync()
         {
             try

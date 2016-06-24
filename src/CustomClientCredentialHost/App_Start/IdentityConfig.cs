@@ -15,6 +15,7 @@ using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using CustomClientCredentialHost.Models;
 using P5.AspNet.Identity.Cassandra;
+using P5.AspNet.Identity.Cassandra.DAO;
 using P5.CassandraStore.DAO;
 
 namespace CustomClientCredentialHost
@@ -191,8 +192,9 @@ namespace CustomClientCredentialHost
     public class ApplicationUserManager : UserManager<CassandraUser, Guid>
     {
         public ApplicationUserManager()
-            : base(new CassandraUserStore(new CassandraDao(CassandraAspNetIdentityOptions.CassandraConfig), CassandraAspNetApplicationConstants.TenantGuid))
+            : base(new CassandraUserStore(CassandraAspNetIdentityOptions.CassandraConfig, CassandraAspNetApplicationConstants.TenantGuid))
         {
+            
         }
 
         public IUserStoreAdmin<CassandraUser, Guid> AdminStore

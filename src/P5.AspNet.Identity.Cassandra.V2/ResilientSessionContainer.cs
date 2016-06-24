@@ -3,17 +3,20 @@ using System.Threading.Tasks;
 using Cassandra;
 using P5.AspNet.Identity.Cassandra.DAO;
 using P5.CassandraStore.DAO;
+using P5.CassandraStore.Settings;
 
 namespace P5.AspNet.Identity.Cassandra
 {
     public class ResilientSessionContainer
     {
-        private static Guid _tenantId = Guid.Parse("43dc5fa3-e7b2-4ee1-bb30-943636367967");
-
-        static Guid TenantId
+        private CassandraConfig CassandraConfig { get; set; }
+        public ResilientSessionContainer(CassandraConfig config, Guid tentantId)
         {
-            get { return _tenantId; }
+            TenantId = tentantId;
+            CassandraConfig = config;
         }
+        private Guid TenantId { get; set; }
+       
         public void Dispose()
         {
             if (ResilientSession != null)
@@ -21,12 +24,12 @@ namespace P5.AspNet.Identity.Cassandra
                 ResilientSession.Dispose();
             }
         }
-        public static AspNetIdentityDao TenantDao
+        public AspNetIdentityDao TenantDao
         {
             get
             {
                 return
-                    new AspNetIdentityDao(TenantId);
+                    new AspNetIdentityDao(CassandraConfig, TenantId);
 
             }
         }

@@ -16,7 +16,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             get
             {
                 return
-                    new AspNetIdentityDao(TenantId);
+                    new AspNetIdentityDao(null,TenantId);
 
             }
         }
@@ -25,7 +25,7 @@ namespace P5.AspNet.Identity.Cassandra.DAO
             get
             {
                 return
-                    new AspNetIdentityDao(Guid.Empty);
+                    new AspNetIdentityDao(null,Guid.Empty);
 
             }
         }
