@@ -69,6 +69,10 @@
       <Project>{e3b0e79a-9efe-4860-a3b2-84425965b53c}</Project>
       <Name>P5.AspNet.Identity.Cassandra.V2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\P5.CassandraStore\P5.CassandraStore.csproj">
+      <Project>{51566EAE-2937-41D2-A6C8-D055A74A6209}</Project>
+      <Name>P5.CassandraStore</Name>
+    </ProjectReference>
     <ProjectReference Include="..\P5.Store.Core\P5.Store.Core.csproj">
       <Project>{909166B9-D719-47A9-9C61-92FD5ED35BA4}</Project>
       <Name>P5.Store.Core</Name>

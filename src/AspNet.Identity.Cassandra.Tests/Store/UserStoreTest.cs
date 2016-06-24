@@ -45,7 +45,7 @@ namespace AspNet.Identity.Cassandra.Tests
             await userStore.DeleteAsync(foundUser);
             foundUser = await userStore.FindByEmailAsync(userName);
             Assert.IsNull(foundUser);
-            
+
 
 
         }
@@ -291,7 +291,7 @@ namespace AspNet.Identity.Cassandra.Tests
             await userStore.DeleteAsync(foundUser);
             foundUser = await userStore.FindByEmailAsync(userName);
             Assert.IsNull(foundUser);
-            
+
         }
         [TestMethod]
         public async Task Test_add_user_modify_twofactor_enabled_delete()
@@ -348,11 +348,11 @@ namespace AspNet.Identity.Cassandra.Tests
             };
 
 
-            var roleStore = new CassandraRoleStore();
-            var userStore = new CassandraUserStore();
+            var roleStore = Global.TanantCassandraRoleStore;
+            var userStore = Global.TanantCassandraUserStore;
 
             await roleStore.CreateAsync(role);
- 
+
             int nCount = 1;
             for (int i = 0; i < nCount; ++i)
             {
@@ -374,7 +374,7 @@ namespace AspNet.Identity.Cassandra.Tests
                 await
                     userStore.AddLoginAsync(user,
                         new UserLoginInfo(providerLoginHandle.LoginProvider, providerLoginHandle.ProviderKey));
-               
+
 
                 var claimHandle = new ClaimHandle() { Type = "Type:" + guidId, UserId = user.Id, Value = "Value:" + guidId };
                 await userStore.AddClaimAsync(user, new Claim(claimHandle.Type,claimHandle.Value));
@@ -437,7 +437,7 @@ namespace AspNet.Identity.Cassandra.Tests
             await roleStore.DeleteAsync(role);
             var findDeletedRole = await roleStore.FindByNameAsync(role.Name);
             Assert.IsNull(findDeletedRole);
-           
+
         }
     }
 }
