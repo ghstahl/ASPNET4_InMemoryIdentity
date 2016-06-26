@@ -3,22 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
 using P5.AspNet.Identity.Cassandra.DAO;
 using P5.CassandraStore.DAO;
 using P5.CassandraStore.Settings;
 
 namespace P5.AspNet.Identity.Cassandra
 {
-    public partial class CassandraUserStore :
-        IUserStore<CassandraUser, Guid>
+    public partial class CassandraUserStore : IFullUserStore
+
     {
         public CassandraUserStore()
         {
-            
+
         }
 
-  
+
         private Guid TenantId { get;  set; }
         private CassandraConfig CassandraConfig { get; set; }
         public CassandraUserStore(CassandraConfig config,Guid tenantId)

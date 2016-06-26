@@ -110,8 +110,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Store\CassandraRoleStore.cs" />
     <Compile Include="ResilientSessionContainer.cs" />
-    <Compile Include="Store\UserStoreAdmin\CassandraUserStore.cs" />
-    <Compile Include="Store\IUserStoreAdmin.cs" />
+    <Compile Include="Store\UserAdminStore\CassandraUserStore.cs" />
+    <Compile Include="Store\IUserAdminStore.cs" />
     <Compile Include="Store\UserClaimStore\CassandraUserStore.cs" />
     <Compile Include="Store\UserEmailStore\CassandraUserStore.cs" />
     <Compile Include="Store\UserLockoutStore\CassandraUserStore.cs" />
@@ -121,6 +121,7 @@
     <Compile Include="Store\UserRoleStore\CassandraUserStore.cs" />
     <Compile Include="Store\UserSecurityStampStore\CassandraUserStore.cs" />
     <Compile Include="Store\UserStore\CassandraUserStore.cs" />
+    <Compile Include="Store\IFullUserStore.cs" />
     <Compile Include="Store\UserTwoFactorStore\CassandraUserStore.cs" />
   </ItemGroup>
   <ItemGroup>

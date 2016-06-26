@@ -12,7 +12,7 @@ namespace P5.AspNet.Identity.Cassandra
     /// </summary>
     /// <typeparam name="TUser"></typeparam>
     /// <typeparam name="TKey"></typeparam>
-    public interface IUserStoreAdmin<TUser, in TKey> : IDisposable where TUser : class, Microsoft.AspNet.Identity.IUser<TKey>
+    public interface IUserAdminStore<TUser, in TKey> : IDisposable where TUser : class, Microsoft.AspNet.Identity.IUser<TKey>
     {
         // Summary:
         //     page the user database

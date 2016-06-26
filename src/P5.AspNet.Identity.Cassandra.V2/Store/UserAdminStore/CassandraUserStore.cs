@@ -11,7 +11,7 @@ using P5.Store.Core.Models;
 namespace P5.AspNet.Identity.Cassandra
 {
     public partial class CassandraUserStore :
-        IUserStoreAdmin<CassandraUser, Guid>
+        IUserAdminStore<CassandraUser, Guid>
     {
 
         public async Task<IPage<CassandraUser>> PageUsersAsync(int pageSize, byte[] pagingState)

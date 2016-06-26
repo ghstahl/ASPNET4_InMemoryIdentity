@@ -1,0 +1,25 @@
+﻿
+@model IEnumerable<P5.AspNet.Identity.Cassandra.CassandraUser>
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>eMail</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var claim in Model)
+        {
+            <tr>
+                <td>@claim.Id</td>
+                <td>@claim.Email</td>
+            </tr>
+        }
+    </tbody>
+</table>

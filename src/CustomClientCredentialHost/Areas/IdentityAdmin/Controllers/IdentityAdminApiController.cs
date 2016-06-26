@@ -50,8 +50,8 @@ namespace CustomClientCredentialHost.Areas.IdentityAdmin.Controllers
         public async Task<PageProxyHandle<CassandraUser>> PageUsers(int count, string pageState)
         {
             var ps = string.IsNullOrEmpty(pageState) ? null : Convert.FromBase64String(pageState);
-            var adminStore = UserManager.AdminStore;
-            var result = await adminStore.PageUsersAsync(count, ps);
+            var fullUserStore = UserManager.FullUserStore;
+            var result = await fullUserStore.PageUsersAsync(count, ps);
             var finalResult = result.ToPageProxyHandle();
             return finalResult;
         }
@@ -61,8 +61,8 @@ namespace CustomClientCredentialHost.Areas.IdentityAdmin.Controllers
         [Route("TableData")]
         public async Task<IEnumerable<TableRecord>> GetTableData()
         {
-            var adminStore = UserManager.AdminStore;
-            var result = await adminStore.PageUsersAsync(2, null);
+            var fullUserStore = UserManager.FullUserStore;
+            var result = await fullUserStore.PageUsersAsync(2, null);
             var finalResult = result.ToPageProxyHandle();
             var data = new List<TableRecord>
             {

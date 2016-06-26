@@ -194,12 +194,11 @@ namespace CustomClientCredentialHost
         public ApplicationUserManager()
             : base(new CassandraUserStore(CassandraAspNetIdentityOptions.CassandraConfig, CassandraAspNetApplicationConstants.TenantGuid))
         {
-            
-        }
 
-        public IUserStoreAdmin<CassandraUser, Guid> AdminStore
+        }
+        public IFullUserStore FullUserStore
         {
-            get { return this.Store as IUserStoreAdmin<CassandraUser, Guid>; }
+            get { return this.Store as IFullUserStore; }
         }
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
@@ -259,7 +258,7 @@ namespace CustomClientCredentialHost
         {
         }
 
-        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context) 
+        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
             var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context.Get<ApplicationDbContext>()));
             // Configure validation logic for usernames
@@ -300,7 +299,7 @@ namespace CustomClientCredentialHost
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = 
+                manager.UserTokenProvider =
                     new DataProtectorTokenProvider<ApplicationUser>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
             return manager;
