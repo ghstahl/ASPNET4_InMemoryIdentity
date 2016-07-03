@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Web.Hosting;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using Autofac;
 using Autofac.Integration.WebApi;
 using CustomClientCredentialHost.Config;
@@ -20,6 +21,7 @@ using P5.IdentityServer3.Cassandra;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServerCore.IdSrv;
+using P5.WebApi2.Hub;
 
 [assembly: OwinStartupAttribute(typeof(CustomClientCredentialHost.Startup))]
 
@@ -29,6 +31,8 @@ namespace CustomClientCredentialHost
     {
         public void Configuration(IAppBuilder app)
         {
+           
+
             var builder = new ContainerBuilder();
 
             ConfigureAuth(app);
@@ -37,6 +41,8 @@ namespace CustomClientCredentialHost
 
             var userService = new Registration<IUserService>(new UserServiceBase());
             IdentityServerServiceFactory identityServerServiceFactory;
+
+          
 
 #if CASSANDRA_STORE
 
@@ -139,12 +145,15 @@ namespace CustomClientCredentialHost
             // Register your Web API controllers.
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
             builder.RegisterType<ApplicationUserManager>();
-          
+
             // Run other optional steps, like registering filters,
             // per-controller-type services, etc., then set the dependency resolver
             // to be Autofac.
             var container = builder.Build();
             config.DependencyResolver = new AutofacWebApiDependencyResolver(container);
+
+            config.Services.Replace(typeof(IAssembliesResolver), new WebApi2HubAssembliesResolver());
+            WebApiConfig.Register(config); // NEW way
 
             // OWIN WEB API SETUP:
 

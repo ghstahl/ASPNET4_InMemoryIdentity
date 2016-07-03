@@ -28,7 +28,7 @@ namespace CustomClientCredentialHost.Areas.Admin.api
             get { return _userManager ?? HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>(); }
             private set { _userManager = value; }
         }
-   
+
         // GET api/<controller>
         [Route("users/page/{pageSize:int}")]
         [HttpGet]
@@ -56,7 +56,7 @@ namespace CustomClientCredentialHost.Areas.Admin.api
             return user;
         }
 
-        // GET api/<controller>  
+        // GET api/<controller>
         [Route("user/id")]
         [HttpGet]
         public async Task<CassandraUser> GetUserByIdAsync(string id)
@@ -75,6 +75,6 @@ namespace CustomClientCredentialHost.Areas.Admin.api
             await fullUserStore.UpdateAsync(user);
         }
 
-      
+
     }
 }

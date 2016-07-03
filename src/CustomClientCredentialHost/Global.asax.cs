@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using System.Web.SessionState;
+using P5.WebApi2.Hub;
 
 namespace CustomClientCredentialHost
 {
@@ -14,11 +15,15 @@ namespace CustomClientCredentialHost
     {
         protected void Application_Start()
         {
+
+
             AreaRegistration.RegisterAllAreas();
-            GlobalConfiguration.Configure(WebApiConfig.Register); // NEW way
+//            GlobalConfiguration.Configure(WebApiConfig.Register); // NEW way
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            WebApi2Hub.Use(new WebApi2HubOptions() { PluginRootPath = @"C:\MyMefPlugins" });
             
            
         }
