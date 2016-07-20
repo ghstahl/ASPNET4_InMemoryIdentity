@@ -8,6 +8,13 @@ using System.Web.Http.Dispatcher;
 
 /*
  * http://www.strathweb.com/2013/08/customizing-controller-discovery-in-asp-net-web-api/
+ *
+ *
+ * NOTE: DO NOT register this in Global.asax.
+ * Instead it goes in Startup.cs near the bottom
+ *
+ *  config.Services.Replace(typeof(IAssembliesResolver), new WebApi2HubAssembliesResolver());
+            WebApiConfig.Register(config); // NEW way
  * */
 namespace P5.WebApi2.Hub
 {
