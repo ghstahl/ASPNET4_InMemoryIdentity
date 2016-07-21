@@ -32,7 +32,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         private AsyncLazy<PreparedStatement> _FindScopeById { get; set; }
         private AsyncLazy<PreparedStatement> _FindScopeByName { get; set; }
-
+        private const string SelectScopeQuery = @"SELECT * FROM scopes_by_id";
         #endregion
 
         public  void PrepareScopeStatements()
@@ -473,6 +473,41 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
             await UpsertScopeAsync(stored);
 
+        }
+
+        public async Task<Store.Core.Models.IPage<Scope>> PageScopesAsync(int pageSize, byte[] pagingState,
+         CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                IPage<Scope> page;
+                if (pagingState == null)
+                {
+                    page = await mapper.FetchPageAsync<Scope>(
+                        Cql.New(SelectScopeQuery).WithOptions(opt =>
+                            opt.SetPageSize(pageSize)));
+                }
+                else
+                {
+                    page = await mapper.FetchPageAsync<Scope>(
+                        Cql.New(SelectScopeQuery).WithOptions(opt =>
+                            opt.SetPageSize(pageSize).SetPagingState(pagingState)));
+                }
+
+                // var result = CreatePageProxy(page);
+                var result = new PageProxy<Scope>(page);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                // only here to catch during a debug unit test.
+                throw;
+            }
         }
     }
 }

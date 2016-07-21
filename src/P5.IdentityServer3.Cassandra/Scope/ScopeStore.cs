@@ -8,6 +8,7 @@ using System.Linq;
 using IdentityServer3.Core.Models;
 using P5.CassandraStore.DAO;
 using P5.IdentityServer3.Common;
+using P5.Store.Core.Models;
 
 namespace P5.IdentityServer3.Cassandra
 {
@@ -123,6 +124,19 @@ namespace P5.IdentityServer3.Cassandra
                 },
                 async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
 
+        }
+
+        public async Task<IPage<Scope>> PageScopesAsync(int pageSize, byte[] pagingState)
+        {
+            IPage<Scope> result =
+                 await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync<IPage<Scope>>(
+                     async () =>
+                     {
+                         await ResilientSessionContainer.EstablishSessionAsync();
+                         return await ResilientSessionContainer.ResilientSession.PageScopesAsync(pageSize, pagingState);
+                     },
+                     async (ex) => ResilientSessionContainer.HandleCassandraException<IPage<Scope>>(ex));
+            return result;
         }
     }
 }

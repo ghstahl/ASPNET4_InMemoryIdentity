@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
+using P5.Store.Core.Models;
 
 namespace P5.IdentityServer3.Cassandra
 {
@@ -56,6 +57,11 @@ namespace P5.IdentityServer3.Cassandra
         public async Task UpdateScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims)
         {
             await ScopeStore.UpdateScopeClaimsAsync(name, claims);
+        }
+
+        public async Task<IPage<Scope>> PageScopesAsync(int pageSize, byte[] pagingState)
+        {
+            return await ScopeStore.PageScopesAsync(pageSize, pagingState);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace P5.IdentityServer3.Cassandra.Test
     [DeploymentItem("source", "source")]
     public class ScopeStoreTest : TestBase
     {
-       
+
 
         [TestInitialize]
         public async void Setup()
@@ -353,15 +353,18 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsTrue(finalList.Count == 0);
         }
 
+
         [TestMethod]
         public async Task Test_CreateAsync()
         {
+            await CreateAsync(1);
+        }
+
+
+        public async Task<Scope> CreateAsync(int i)
+        {
             var dao = new IdentityServer3CassandraDao();
             await dao.EstablishConnectionAsync();
-
-
-
-            int i = 0;
 
             var name = Guid.NewGuid().ToString();
             global::IdentityServer3.Core.Models.Scope record = new global::IdentityServer3.Core.Models.Scope()
@@ -427,8 +430,36 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             var differences = record.Claims.Except(scope.Claims, ScopeClaimComparer.MinimalScopeClaimComparer);
             Assert.IsTrue(!differences.Any());
+            return scope;
 
         }
+        [TestMethod]
+        public async Task Test_Create_Page_ByScopeIdAsync()
+        {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
 
+            await dao.TruncateTablesAsync();
+            List<Scope> addedScopes= new List<Scope>();
+            int nNumber = 100;
+            var adminStore = new IdentityServer3AdminStore();
+            for (int i = 0; i < nNumber; ++i)
+            {
+                addedScopes.Add(await CreateAsync(nNumber));
+            }
+
+            var pageSize = 9;
+            byte[] pagingState = null;
+            int runningCount = 0;
+            do
+            {
+                var items = await adminStore.PageScopesAsync(pageSize, pagingState);
+                pagingState = items.PagingState;
+                runningCount += items.Count();
+            } while (pagingState != null);
+            Assert.AreEqual(100, runningCount);
+
+
+        }
     }
 }
