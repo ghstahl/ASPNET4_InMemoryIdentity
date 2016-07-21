@@ -16,7 +16,6 @@ using Owin;
 using P5.AspNet.Identity.Cassandra;
 using P5.CassandraStore;
 using P5.CassandraStore.Settings;
-using P5.IdentityServer3.BiggyJson;
 using P5.IdentityServer3.Cassandra;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;

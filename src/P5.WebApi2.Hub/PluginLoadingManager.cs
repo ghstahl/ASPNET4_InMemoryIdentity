@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Linq;
@@ -26,8 +27,9 @@ namespace P5.WebApi2.Hub
         private AggregateCatalog CreatePluginCatalog(WebApi2HubOptions pluginLoaderConfiguration)
         {
             var pluginsCatalog = new AggregateCatalog();
+            var dirs = GetPluginDirectories(pluginLoaderConfiguration.PluginRootPath);
 
-            foreach (var pluginDirectory in GetPluginDirectories(pluginLoaderConfiguration.PluginRootPath))
+            foreach (var pluginDirectory in dirs)
             {
                 pluginsCatalog.Catalogs.Add(new DirectoryCatalog(pluginDirectory));
             }
@@ -42,8 +44,16 @@ namespace P5.WebApi2.Hub
         /// <returns></returns>
         private string[] GetPluginDirectories(string baseDirectory)
         {
-            var directories = Directory.EnumerateDirectories(baseDirectory, "*", SearchOption.TopDirectoryOnly);
-            return directories.ToArray();
+            string[] dirs = {};
+            try
+            {
+                var directories = Directory.EnumerateDirectories(baseDirectory, "*", SearchOption.TopDirectoryOnly);
+                return directories.ToArray();
+            }
+            catch (Exception)
+            {
+            }
+            return dirs;
         }
 
         #endregion

@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using P5.AspNet.Identity.Cassandra;
 
 namespace CustomClientCredentialHost.Areas.Admin.api
 {
-    public class PageRecord
-    {
-        public string PagingState { get; set; }
-        public string CurrentPagingState { get; set; }
-        public int PageSize { get; set; }
-        public IEnumerable<CassandraUser> Users { get; set; }
-    }
     [RoutePrefix("api/v1/IdentityAdmin")]
     public class AspNetIdentityApiController : ApiController
     {
