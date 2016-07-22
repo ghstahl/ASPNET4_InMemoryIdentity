@@ -1,0 +1,29 @@
+﻿@model CustomClientCredentialHost.Areas.Admin.api.IDSScopePageRecord
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>DisplayName</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var scope in Model.Scopes)
+        {
+            <tr>
+                <td>@scope.Name</td>
+                <td>@scope.DisplayName</td>
+                <td>@scope.Type</td>
+                <td>@scope.Description</td>
+            </tr>
+        }
+    </tbody>
+</table>

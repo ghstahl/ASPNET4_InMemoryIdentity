@@ -27,6 +27,8 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
             return View(enumerable);
         }
 
+
+
         // GET: Admin/Home/Details/5
         public ActionResult Details(int id)
         {
