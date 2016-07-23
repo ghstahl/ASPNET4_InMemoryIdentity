@@ -61,7 +61,39 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.AreEqual(result.Count(), insertResult.Count);
 
         }
+        [TestMethod]
+        public async Task Test_Create_Find_Delete_Scope_Async()
+        {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
 
+            var insertResult = await CassandraTestHelper.InsertTestData_Scopes(1);
+            var queryNames = from item in insertResult
+                             select item.Record.Name;
+            var nameList = queryNames.ToList();
+            var result = await dao.FindScopesByNamesAsync(nameList);
+            Assert.AreEqual(result.Count(), insertResult.Count);
+
+            var scope = await dao.FindScopeByNameAsync(nameList[0]);
+            Assert.IsNotNull(scope);
+            Assert.AreEqual(scope.Name, nameList[0]);
+            FlattenedScopeRecord fsr = new FlattenedScopeRecord(new FlattenedScopeHandle(scope));
+
+            scope = await dao.FindScopeByIdAsync(fsr.Id);
+            Assert.IsNotNull(scope);
+            Assert.AreEqual(scope.Name, nameList[0]);
+
+            await dao.DeleteScopeAsync(scope);
+
+            scope = await dao.FindScopeByNameAsync(scope.Name);
+            Assert.IsNull(scope);
+
+            scope = await dao.FindScopeByIdAsync(fsr.Id);
+            Assert.IsNull(scope);
+
+
+
+        }
         [TestMethod]
         public async Task Test_Create_Add_Delete_ScopesSecretsAsync()
         {

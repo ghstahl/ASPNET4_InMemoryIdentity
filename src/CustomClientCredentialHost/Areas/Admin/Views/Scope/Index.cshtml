@@ -1,11 +1,15 @@
 ﻿@model CustomClientCredentialHost.Areas.Admin.api.IDSScopePageRecord
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Scopes";
 }
-
-<h2>Index</h2>
-
+<br/>
+<span>
+<a href="@Url.Action("New", "Scope")" class="btn btn-warning">
+    New Scope
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+</a>
+</span>
 <table class="table">
     <thead>
         <tr>
@@ -13,7 +17,8 @@
             <th>DisplayName</th>
             <th>Type</th>
             <th>Description</th>
-        </tr>
+            <th>Action</th>
+         </tr>
     </thead>
     <tbody>
         @foreach (var scope in Model.Scopes)
@@ -23,6 +28,19 @@
                 <td>@scope.DisplayName</td>
                 <td>@scope.Type</td>
                 <td>@scope.Description</td>
+                <td>
+                    <span>
+                        <a href="@Url.Action("Delete", "Scope", new { name = scope.Name })" class="btn btn-warning">
+                            Delete
+                            <span class="glyphicon   glyphicon-remove" aria-hidden="true"></span>
+                        </a>
+                        <a href="@Url.Action("Edit", "Scope")" class="btn btn-warning">
+                            Edit
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                    </span>
+
+                </td>
             </tr>
         }
     </tbody>

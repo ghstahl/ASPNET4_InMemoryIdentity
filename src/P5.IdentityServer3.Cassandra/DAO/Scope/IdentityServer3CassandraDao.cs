@@ -27,17 +27,42 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private AsyncLazy<PreparedStatement> _CreateScopeById { get; set; }
         private AsyncLazy<PreparedStatement> _CreateScopeByName { get; set; }
 
+        private AsyncLazy<PreparedStatement> _DeleteScopeById { get; set; }
+        private AsyncLazy<PreparedStatement> _DeleteScopeByName { get; set; }
+
+#if _SCOPE_CLAIMS_TABLE
         private AsyncLazy<PreparedStatement> _CreateScopeClaimByNameAndScopeId { get; set; }
         private AsyncLazy<PreparedStatement> _CreateScopeClaimByNameAndScopeName { get; set; }
-
+#endif
         private AsyncLazy<PreparedStatement> _FindScopeById { get; set; }
         private AsyncLazy<PreparedStatement> _FindScopeByName { get; set; }
+
         private const string SelectScopeQuery = @"SELECT * FROM scopes_by_id";
         #endregion
 
         public  void PrepareScopeStatements()
         {
             #region PREPARED STATEMENTS for Scope
+
+            _DeleteScopeById =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"Delete FROM scopes_by_id " +
+                            @"WHERE id = ?");
+                        return result;
+                    });
+            _DeleteScopeByName =
+                new AsyncLazy<PreparedStatement>(
+                    () =>
+                    {
+                        var result = _cassandraSession.PrepareAsync(
+                            @"Delete FROM scopes_by_name " +
+                            @"WHERE name = ?");
+                        return result;
+                    });
+ #if _SCOPE_CLAIMS_TABLE
 
             _CreateScopeClaimByNameAndScopeId =
                 new AsyncLazy<PreparedStatement>(
@@ -59,7 +84,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                             @"VALUES(?,?,?)");
                         return result;
                     });
-
+#endif
             /*
             INSERT
             INTO scopes (Id,AllowUnrestrictedIntrospection,ClaimsRule,Description,DisplayName,
@@ -114,6 +139,25 @@ namespace P5.IdentityServer3.Cassandra.DAO
                         new FlattenedScopeRecord(new FlattenedScopeHandle(scope)), cancellationToken);
         }
 
+
+
+        public async Task DeleteScopeAsync(Scope scope,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var session = CassandraSession;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (scope == null)
+                throw new ArgumentNullException("scope");
+
+            // breaking batch apart.
+            var batch = new BatchStatement();
+            var boundStatements = await BuildBoundStatements_ForDelete(scope);
+            batch.AddRange(boundStatements);
+            cancellationToken.ThrowIfCancellationRequested();
+            await session.ExecuteAsync(batch).ConfigureAwait(false);
+        }
+
         public async Task<bool> UpsertScopeAsync(FlattenedScopeRecord scopeRecord,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -127,14 +171,16 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
                 // breaking batch apart.
                 var batch = new BatchStatement();
-                var boundStatements = await BuildBoundStatements_ForScopeClaimCreate(scopeRecord);
+                var boundStatements = await BuildBoundStatements_ForCreate(scopeRecord);
+                batch.AddRange(boundStatements);
+                cancellationToken.ThrowIfCancellationRequested();
+#if _SCOPE_CLAIMS_TABLE
+                boundStatements = await BuildBoundStatements_ForScopeClaimCreate(scopeRecord);
                 batch.AddRange(boundStatements);
                 await session.ExecuteAsync(batch).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
+#endif
 
-                batch = new BatchStatement();
-                boundStatements = await BuildBoundStatements_ForCreate(scopeRecord);
-                batch.AddRange(boundStatements);
 
                 await session.ExecuteAsync(batch).ConfigureAwait(false);
                 return true;
@@ -165,7 +211,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public async Task<global::IdentityServer3.Core.Models.Scope> FindScopeByName(string name,
+        public async Task<global::IdentityServer3.Core.Models.Scope> FindScopeByNameAsync(string name,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -250,6 +296,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
+#if _SCOPE_CLAIMS_TABLE
         public async Task<List<BoundStatement>> BuildBoundStatements_ForScopeClaimCreate(
             FlattenedScopeRecord scopeRecord)
         {
@@ -263,15 +310,31 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
             var scopeInternal = await scopeRecord.Record.GetScopeAsync();
 
+
             var claimsQuery = from scopeClaim in scopeInternal.Claims
                 select new ScopeClaimRecord(scopeRecord.Id, scopeRecord.Record.Name, scopeClaim);
 
-            var scopeClaimBoundStatements = await BuildBoundStatements_ForCreate(claimsQuery);
+            var scopeClaimBoundStatements = await BuildBoundStatements_ForScopeClaimRecord_Create(claimsQuery);
             result.AddRange(scopeClaimBoundStatements);
-
             return result;
         }
+#endif
 
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForDelete(
+            Scope scope)
+        {
+            var result = new List<BoundStatement>();
+            FlattenedScopeHandle fsh = new FlattenedScopeHandle(scope);
+            FlattenedScopeRecord fsr = new FlattenedScopeRecord(fsh);
+            PreparedStatement prepared = await _DeleteScopeById;
+            BoundStatement bound = prepared.Bind(fsr.Id);
+            result.Add(bound);
+
+            prepared = await _DeleteScopeByName;
+            bound = prepared.Bind(scope.Name);
+            result.Add(bound);
+            return result;
+        }
         public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
             FlattenedScopeRecord scopeRecord)
         {
@@ -337,8 +400,9 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
             return result;
         }
+#if _SCOPE_CLAIMS_TABLE
 
-        public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
+        public async Task<List<BoundStatement>> BuildBoundStatements_ForScopeClaimRecord_Create(
             IEnumerable<ScopeClaimRecord> scopeClaimRecords)
         {
             var result = new List<BoundStatement>();
@@ -370,7 +434,6 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return result;
         }
 
-
         public async Task<bool> UpsertManyScopeClaimAsync(IEnumerable<ScopeClaimRecord> scopeClaimsRecords,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -387,16 +450,18 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
 
             var batch = new BatchStatement();
-            var boundStatements = await BuildBoundStatements_ForCreate(scopes);
+            var boundStatements = await BuildBoundStatements_ForScopeClaimRecord_Create(scopes);
             batch.AddRange(boundStatements);
 
             await session.ExecuteAsync(batch).ConfigureAwait(false);
             return true;
         }
+#endif
+
         public async Task AddScopeClaimsToScopeByNameAsync(string name, IEnumerable<ScopeClaim> claims,
           CancellationToken cancellationToken = default(CancellationToken))
         {
-            var stored = await FindScopeByName(name, cancellationToken);
+            var stored = await FindScopeByNameAsync(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
             List<ScopeClaim> ulist = stored.Claims.Union(claims, ScopeClaimComparer.MinimalScopeClaimComparer).ToList();
@@ -406,7 +471,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task DeleteScopeClaimsFromScopeByNameAsync(string name, IEnumerable<ScopeClaim> claims,
           CancellationToken cancellationToken = default(CancellationToken))
         {
-            var stored = await FindScopeByName(name, cancellationToken);
+            var stored = await FindScopeByNameAsync(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             var comparer = ScopeClaimComparer.MinimalScopeClaimComparer;
             var query = from item in stored.Claims
@@ -419,7 +484,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task UpdateScopeClaimsInScopeByNameAsync(string name, IEnumerable<ScopeClaim> claims,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var stored = await FindScopeByName(name, cancellationToken);
+            var stored = await FindScopeByNameAsync(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             var comparer = ScopeClaimComparer.MinimalScopeClaimComparer;
             var claimsList = claims.ToList();
@@ -438,7 +503,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task AddScopeSecretsByNameAsync(string name, IEnumerable<Secret> secrets,
            CancellationToken cancellationToken = default(CancellationToken))
         {
-            var stored = await FindScopeByName(name, cancellationToken);
+            var stored = await FindScopeByNameAsync(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
             List<Secret> ulist = stored.ScopeSecrets.Union(secrets, SecretComparer.OrdinalIgnoreCase).ToList();
@@ -450,7 +515,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task DeleteScopeSecretsFromScopeByNameAsync(string name, IEnumerable<Secret> secrets,
            CancellationToken cancellationToken = default(CancellationToken))
         {
-            var stored = await FindScopeByName(name, cancellationToken);
+            var stored = await FindScopeByNameAsync(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             var comparer = SecretComparer.OrdinalIgnoreCase;
             var query = from item in stored.ScopeSecrets
@@ -464,7 +529,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task UpdateScopeByNameAsync(string name, IEnumerable<PropertyValue> properties,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var stored = await FindScopeByName(name, cancellationToken);
+            var stored = await FindScopeByNameAsync(name, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
             foreach (var value in properties)
@@ -509,5 +574,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 throw;
             }
         }
+
+
     }
 }

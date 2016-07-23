@@ -11,7 +11,9 @@ namespace P5.IdentityServer3.Cassandra
     public interface IIdentityServer3AdminScopeStore : IScopeStore
     {
         Task UpdateScopeByNameAsync(string name, IEnumerable<PropertyValue> properties);
+        Task<Scope> FindScopeByNameAsync(string name);
         Task CreateScopeAsync(global::IdentityServer3.Core.Models.Scope scope);
+        Task DeleteScopeAsync(global::IdentityServer3.Core.Models.Scope scope);
         Task AddScopeSecretsAsync(string name, IEnumerable<Secret> secrets);
         Task DeleteScopeSecretsAsync(string name, IEnumerable<Secret> secrets);
         Task AddScopeClaimsAsync(string name, IEnumerable<ScopeClaim> claims);

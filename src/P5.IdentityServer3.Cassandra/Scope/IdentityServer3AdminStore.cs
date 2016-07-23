@@ -29,12 +29,22 @@ namespace P5.IdentityServer3.Cassandra
             await ScopeStore.UpdateScopeByNameAsync(name, properties);
         }
 
+        public async Task<Scope> FindScopeByNameAsync(string name)
+        {
+            return await ScopeStore.FindScopeByNameAsync(name);
+        }
+
         public async Task CreateScopeAsync(Scope scope)
         {
             await ScopeStore.CreateScopeAsync(scope);
         }
 
-       
+        public async Task DeleteScopeAsync(Scope scope)
+        {
+            await ScopeStore.DeleteScopeAsync(scope);
+        }
+
+
         public async Task AddScopeSecretsAsync(string name, IEnumerable<Secret> secrets)
         {
             await ScopeStore.AddScopeSecretsAsync(name, secrets);
