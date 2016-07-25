@@ -47,9 +47,15 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
                 Scope scope = new Scope { Name = model.Name,Type = model.SelectedScopeType,Enabled = true};
 
                 var adminStore = new IdentityServer3AdminStore();
-                await adminStore.CreateScopeAsync(scope);
-
-                return RedirectToAction("Index");
+                var scopeCheck = await adminStore.FindScopeByNameAsync(scope.Name);
+                if (scopeCheck == null)
+                {
+                    await adminStore.CreateScopeAsync(scope);
+                    // Good doesn't exist
+                    return RedirectToAction("Index");
+                }
+                ModelState.AddModelError(string.Empty, string.Format("The scope, {0}, already exists.",scope.Name));
+                return View(model);
             }
             catch
             {
