@@ -34,8 +34,11 @@ namespace P5.IdentityServer3.Cassandra.DAO
             // that inherits from Mappings
 
             For<Scope>()
-                .TableName("scopes_by_id")
-                .Column(u => u.Type, cm => cm.WithName("scopetype").WithDbType<ScopeType>());
+               .TableName("scopes_by_name")
+               .Column(u => u.Type, cm => cm.WithName("scopetype").WithDbType<ScopeType>());
+            For<ScopeMappedRecord>()
+               .TableName("scopes_by_name")
+               .Column(u => u.Type, cm => cm.WithName("scopetype").WithDbType<ScopeType>());
 
             For<IdentityServerUserRecordCassandra>()
                 .TableName(WellKnownUserProfileById);

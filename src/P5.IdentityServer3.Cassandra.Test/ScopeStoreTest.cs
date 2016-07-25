@@ -21,7 +21,7 @@ namespace P5.IdentityServer3.Cassandra.Test
         [TestInitialize]
         public async void Setup()
         {
-
+/*
             base.Setup();
             var dao = new IdentityServer3CassandraDao();
             await dao.EstablishConnectionAsync();
@@ -29,6 +29,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             await dao.CreateTablesAsync();
             await dao.TruncateTablesAsync();
+ * */
         }
 
 
@@ -60,6 +61,64 @@ namespace P5.IdentityServer3.Cassandra.Test
             var result = await dao.FindScopesByNamesAsync(nameList);
             Assert.AreEqual(result.Count(), insertResult.Count);
 
+        }
+
+        [TestMethod]
+        public async Task Test_Find_Scope_by_Name_Async()
+        {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+            var actualScope1 = new Scope()
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = ScopeType.Identity
+            };
+            await dao.UpsertScopeAsync(new FlattenedScopeRecord(new FlattenedScopeHandle(actualScope1)));
+             var actualScope2 = new Scope()
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = ScopeType.Resource
+            };
+            await dao.UpsertScopeAsync(new FlattenedScopeRecord(new FlattenedScopeHandle(actualScope2)));
+
+            var scope = await dao.FindScopeByNameAsync(actualScope1.Name);
+            Assert.AreEqual(scope.Type, actualScope1.Type);
+            Assert.AreEqual(scope.Name, actualScope1.Name);
+
+            scope = await dao.FindScopeByNameAsync(actualScope2.Name);
+            Assert.AreEqual(scope.Type, actualScope2.Type);
+            Assert.AreEqual(scope.Name, actualScope2.Name);
+        }
+        [TestMethod]
+        public async Task Test_Find_Scope_by_ID_Async()
+        {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+            var actualScope1 = new Scope()
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = ScopeType.Identity
+            };
+            var rec1 = new FlattenedScopeRecord(new FlattenedScopeHandle(actualScope1));
+            await dao.UpsertScopeAsync(rec1);
+
+            var actualScope2 = new Scope()
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = ScopeType.Resource
+            };
+            var rec2 = new FlattenedScopeRecord(new FlattenedScopeHandle(actualScope2));
+            await dao.UpsertScopeAsync(rec2);
+
+            var scope = await dao.FindScopeByIdAsync(rec1.Id);
+            Assert.AreEqual(scope.Type, actualScope1.Type);
+            Assert.AreEqual(scope.Name, actualScope1.Name);
+
+            scope = await dao.FindScopeByIdAsync(rec2.Id);
+            Assert.AreEqual(scope.Type, actualScope2.Type);
+            Assert.AreEqual(scope.Name, actualScope2.Name);
         }
         [TestMethod]
         public async Task Test_Create_Find_Delete_Scope_Async()

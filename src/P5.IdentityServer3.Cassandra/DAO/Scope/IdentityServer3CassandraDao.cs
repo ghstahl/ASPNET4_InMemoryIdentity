@@ -37,7 +37,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         private AsyncLazy<PreparedStatement> _FindScopeById { get; set; }
         private AsyncLazy<PreparedStatement> _FindScopeByName { get; set; }
 
-        private const string SelectScopeQuery = @"SELECT * FROM scopes_by_id";
+        private const string SelectScopeQuery = @"SELECT * FROM scopes_by_name";
         #endregion
 
         public  void PrepareScopeStatements()
@@ -198,6 +198,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
+                MyMappings.Init();
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -216,6 +217,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
+                MyMappings.Init();
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -236,6 +238,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
+                MyMappings.Init();
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var queryInValues = from item in scopeNames
@@ -273,6 +276,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
+                MyMappings.Init();
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var query = string.Format("SELECT * FROM scopes_by_id WHERE ShowInDiscoveryDocument = {0}",
@@ -545,6 +549,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
+                MyMappings.Init();
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var session = CassandraSession;
