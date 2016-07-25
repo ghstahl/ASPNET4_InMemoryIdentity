@@ -1,4 +1,4 @@
-﻿@model IdentityServer3.Core.Models.Scope
+﻿@model CustomClientCredentialHost.Areas.Admin.Models.ScopeViewModel
 
 @{
     ViewBag.Title = "Delete Scope";
@@ -14,18 +14,20 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>DisplayName</th>
                 <th>Type</th>
                 <th>Description</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>@Model.Name</td>
-                <td>@Model.DisplayName</td>
-                <td>@Model.Type</td>
-                <td>@Model.Description</td>
-            </tr>
+        <tr>
+
+            <td >
+                @Html.TextBoxFor(m => m.Name,
+                new { style = "width: 300px;border: none;background-color: #fff;background: transparent;", @readonly = "readonly" })
+            </td>
+            <td >@Model.ScopeType</td>
+            <td >@Model.Description</td>
+        </tr>
         </tbody>
     </table>
     <div class="form-group">

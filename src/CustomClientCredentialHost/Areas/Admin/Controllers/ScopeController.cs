@@ -10,6 +10,7 @@ using P5.IdentityServer3.Cassandra;
 
 namespace CustomClientCredentialHost.Areas.Admin.Controllers
 {
+
     public class ScopeController : Controller
     {
         // GET: Admin/Scope
@@ -27,7 +28,7 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
                 PagingState = HttpUtility.UrlEncode(page.PagingState),
                 Scopes = page
             };
-        
+
 
             return View(record);
         }
@@ -35,8 +36,54 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
         public async Task<ActionResult> New()
         {
             var scope = new ScopeNewModel();
-            
+
             return View(scope);
+        }
+        [HttpPost]
+        public async Task<ActionResult> New(ScopeNewModel model)
+        {
+            try
+            {
+                Scope scope = new Scope { Name = model.Name,Type = model.SelectedScopeType,Enabled = true};
+
+                var adminStore = new IdentityServer3AdminStore();
+                await adminStore.CreateScopeAsync(scope);
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+        public async Task<ActionResult> Edit(string name)
+        {
+            var adminStore = new IdentityServer3AdminStore();
+            var scope = await adminStore.FindScopeByNameAsync(name);
+            if (scope == null)
+            {
+                return RedirectToAction("Index");
+
+            }
+            ScopeNewModel snm = scope.ToScopeNewModel();
+            return View(snm);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Edit(ScopeNewModel model)
+        {
+            try
+            {
+                Scope scope = new Scope { Name = model.Name, Type = model.SelectedScopeType, Enabled = true };
+
+                var adminStore = new IdentityServer3AdminStore();
+                await adminStore.CreateScopeAsync(scope);
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
         }
         // GET: Admin/Home/Delete
         public async Task<ActionResult> Delete(string name)
@@ -48,18 +95,25 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
                 return RedirectToAction("Index");
 
             }
-            return View(scope);
+            ScopeViewModel model = new ScopeViewModel
+            {
+                Name = scope.Name,
+                Description = scope.Description,
+                ScopeType = scope.Type
+            };
+            return View(model);
         }
 
         // POST: Admin/Home/Create
         [HttpPost]
-        public async Task<ActionResult> Delete(Scope scope)
+        public async Task<ActionResult> Delete(ScopeViewModel model)
         {
             try
             {
+                Scope scope = new Scope {Name = model.Name};
+
                 var adminStore = new IdentityServer3AdminStore();
-              //  await adminStore.DeleteScopesFromClientAsync()
-                // TODO: Add insert logic here
+                await adminStore.DeleteScopeAsync(scope);
 
                 return RedirectToAction("Index");
             }
