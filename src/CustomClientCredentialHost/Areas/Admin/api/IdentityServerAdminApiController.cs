@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using CustomClientCredentialHost.Areas.Admin.Models;
 using P5.IdentityServer3.Cassandra;
 
 namespace CustomClientCredentialHost.Areas.Admin.api

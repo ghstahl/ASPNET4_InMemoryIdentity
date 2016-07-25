@@ -1,5 +1,5 @@
 ﻿
-@model IEnumerable<P5.AspNet.Identity.Cassandra.CassandraUser>
+@model CustomClientCredentialHost.Areas.Admin.Models.AspNetIdentityPageRecord
 @{
     ViewBag.Title = "Index";
 }
@@ -11,14 +11,23 @@
         <tr>
             <th>Id</th>
             <th>eMail</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var claim in Model)
+        @foreach (var user in Model.Users)
         {
             <tr>
-                <td>@claim.Id</td>
-                <td>@claim.Email</td>
+                <td>@user.Id</td>
+                <td>@user.Email</td>
+                <td>
+                    <span>
+                        <a href="@Url.Action("Manage", "Home", new { id = user.Id,email = user.Email })" class="btn btn-warning">
+                            Manage
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                    </span>
+                </td>
             </tr>
         }
     </tbody>

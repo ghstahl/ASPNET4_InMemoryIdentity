@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using CustomClientCredentialHost.Areas.Admin.Models;
 using Microsoft.AspNet.Identity.Owin;
 
 namespace CustomClientCredentialHost.Areas.Admin.Controllers
@@ -22,17 +23,33 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
         public async Task<ActionResult> Index()
         {
             var fullUserStore = UserManager.FullUserStore;
-            var page = await fullUserStore.PageUsersAsync(9, null);
+
+            int pageSize = 100;
+            var page = await fullUserStore.PageUsersAsync(pageSize, null);
             var enumerable = page.AsEnumerable();
-            return View(enumerable);
+          
+            var record = new AspNetIdentityPageRecord()
+            {
+                CurrentPagingState = HttpUtility.UrlEncode(page.CurrentPagingState),
+                PageSize = pageSize,
+                PagingState = HttpUtility.UrlEncode(page.PagingState),
+                Users = page
+            };
+            return View(record);
         }
 
 
 
-        // GET: Admin/Home/Details/5
-        public ActionResult Details(int id)
+        // GET: Admin/Home/Manage/5
+        public ActionResult Manage(string id, string email)
         {
-            return View();
+            ViewBag.Email = email;
+            IdentityServerUserModel isum = new IdentityServerUserModel()
+            {
+                UserId = id,
+                AllowedScopes = new List<string>()
+            };
+            return View(isum);
         }
 
         // GET: Admin/Home/Create

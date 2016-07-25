@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using IdentityServer3.Core.Models;
 
-namespace CustomClientCredentialHost.Areas.Admin.api
+namespace CustomClientCredentialHost.Areas.Admin.Models
 {
     public class IDSScopePageRecord
     {
