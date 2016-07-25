@@ -99,7 +99,16 @@ namespace P5.IdentityServer3.Cassandra.Test
             var actualScope1 = new Scope()
             {
                 Name = Guid.NewGuid().ToString(),
-                Type = ScopeType.Identity
+                Type = ScopeType.Identity,
+                AllowUnrestrictedIntrospection = true,
+                ClaimsRule = Guid.NewGuid().ToString(),
+                Description = Guid.NewGuid().ToString(),
+                DisplayName = Guid.NewGuid().ToString(),
+                Emphasize = true,
+                Enabled = true,
+                IncludeAllClaimsForUser = true,
+                Required = true,
+                ShowInDiscoveryDocument = true
             };
             var rec1 = new FlattenedScopeRecord(new FlattenedScopeHandle(actualScope1));
             await dao.UpsertScopeAsync(rec1);
@@ -107,18 +116,25 @@ namespace P5.IdentityServer3.Cassandra.Test
             var actualScope2 = new Scope()
             {
                 Name = Guid.NewGuid().ToString(),
-                Type = ScopeType.Resource
+                Type = ScopeType.Resource,
+                AllowUnrestrictedIntrospection = true,
+                ClaimsRule = Guid.NewGuid().ToString(),
+                Description = Guid.NewGuid().ToString(),
+                DisplayName = Guid.NewGuid().ToString(),
+                Emphasize = true,
+                Enabled = true,
+                IncludeAllClaimsForUser = true,
+                Required = true,
+                ShowInDiscoveryDocument = true
             };
             var rec2 = new FlattenedScopeRecord(new FlattenedScopeHandle(actualScope2));
             await dao.UpsertScopeAsync(rec2);
 
             var scope = await dao.FindScopeByIdAsync(rec1.Id);
-            Assert.AreEqual(scope.Type, actualScope1.Type);
-            Assert.AreEqual(scope.Name, actualScope1.Name);
+            Assert.IsTrue(ScopeComparer.OrdinalIgnoreCase.Equals(scope,actualScope1));
 
             scope = await dao.FindScopeByIdAsync(rec2.Id);
-            Assert.AreEqual(scope.Type, actualScope2.Type);
-            Assert.AreEqual(scope.Name, actualScope2.Name);
+            Assert.IsTrue(ScopeComparer.OrdinalIgnoreCase.Equals(scope, actualScope2));
         }
         [TestMethod]
         public async Task Test_Create_Find_Delete_Scope_Async()

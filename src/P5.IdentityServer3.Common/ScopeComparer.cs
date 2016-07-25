@@ -24,7 +24,20 @@ namespace P5.IdentityServer3.Common
                 return true;
             if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 return false;
-            return string.Compare(x.Name, y.Name, StringComparisonType) == 0;
+            var compared = string.Compare(x.Name, y.Name, StringComparisonType) == 0
+                           && x.AllowUnrestrictedIntrospection == y.AllowUnrestrictedIntrospection
+                           && x.Emphasize == y.Emphasize
+                           && x.Enabled == y.Enabled
+                           && x.Required == y.Required
+                           && x.ShowInDiscoveryDocument == y.ShowInDiscoveryDocument
+                           && x.Type == y.Type
+                           && string.Compare(x.Description, y.Description, StringComparisonType) == 0
+                           && string.Compare(x.DisplayName, y.DisplayName, StringComparisonType) == 0
+                           && string.Compare(x.ClaimsRule, y.ClaimsRule, StringComparisonType) == 0;
+                           
+            return compared;
+           
+
         }
 
         public int GetHashCode(Scope obj)
