@@ -6,6 +6,9 @@ using System.Web;
 using System.Web.Mvc;
 using CustomClientCredentialHost.Areas.Admin.Models;
 using Microsoft.AspNet.Identity.Owin;
+using P5.IdentityServer3.Cassandra;
+using P5.IdentityServer3.Common;
+using IdentityServerUserModel = CustomClientCredentialHost.Areas.Admin.Models.IdentityServerUserModel;
 
 namespace CustomClientCredentialHost.Areas.Admin.Controllers
 {
@@ -27,7 +30,7 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
             int pageSize = 100;
             var page = await fullUserStore.PageUsersAsync(pageSize, null);
             var enumerable = page.AsEnumerable();
-          
+
             var record = new AspNetIdentityPageRecord()
             {
                 CurrentPagingState = HttpUtility.UrlEncode(page.CurrentPagingState),
@@ -41,17 +44,39 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
 
 
         // GET: Admin/Home/Manage/5
-        public ActionResult Manage(string id, string email)
+        public async Task<ActionResult> Manage(string id, string email)
         {
+            var adminStore = new IdentityServer3AdminStore();
             ViewBag.Email = email;
+            var exists = await adminStore.FindDoesUserExistByUserIdAsync(id);
+            if (exists)
+            {
+                var scopes = await adminStore.FindScopesByUserAsync(id);
+            }
             IdentityServerUserModel isum = new IdentityServerUserModel()
             {
                 UserId = id,
+                Exists = exists,
                 AllowedScopes = new List<string>()
             };
+
             return View(isum);
         }
+        [HttpPost]
+        public async Task<ActionResult> Manage(IdentityServerUserModel model)
+        {
+            if (model.Exists == false)
+            {
+                ModelState.AddModelError(string.Empty,  "Please check the Exists.");
+                return View(model);
+            }
+            var adminStore = new IdentityServer3AdminStore();
+            IdentityServerUser user = new IdentityServerUser() {Enabled = true, UserId = model.UserId};
+            await adminStore.CreateIdentityServerUserAsync(user);
 
+
+            return RedirectToAction("Index");
+        }
         // GET: Admin/Home/Create
         public ActionResult Create()
         {

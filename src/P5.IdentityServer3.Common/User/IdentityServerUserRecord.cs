@@ -1,5 +1,6 @@
 ﻿namespace P5.IdentityServer3.Common
 {
+ /*
     public class IdentityServerUserRecord : WrappedRecord<IdentityServerUserHandle>
     {
         public IdentityServerUserRecord() { }
@@ -8,4 +9,5 @@
         {
         }
     }
+  * */
 }

@@ -12,9 +12,14 @@ namespace P5.IdentityServer3.Common
         {
             return GuidGenerator.CreateGuid(IdentityServerUserConstants.Namespace, userHandle.UserId);
         }
-        public static IdentityServerUserHandle ToIdentityServerUserHandle(this IdentityServerUser user)
+        public static IdentityServerUserModel ToIdentityServerUserModel(this IdentityServerUser user)
         {
-            var handle = new IdentityServerUserHandle(user);
+            var handle = new IdentityServerUserModel()
+            {
+                Enabled = user.Enabled,
+                UserId = user.UserId,
+                UserName = user.UserName
+            };
             return handle;
         }
 

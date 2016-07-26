@@ -15,7 +15,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 {
     public partial class IdentityServer3CassandraDao
     {
-     
+
         //-----------------------------------------------
         // PREPARED STATEMENTS for User
         //-----------------------------------------------
@@ -39,11 +39,10 @@ namespace P5.IdentityServer3.Cassandra.DAO
             /*
             *************************************************
                     CREATE TABLE IF NOT EXISTS user_profile_by_id (
-                        id uuid,
+                        UserId text,
                         AllowedScopes text,
                         ClientIds text,
                         Enabled boolean,
-                        UserId text,
                         UserName text,
                         PRIMARY KEY (id)
                     );
@@ -53,15 +52,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 new AsyncLazy<PreparedStatement>(
                     () => _cassandraSession.PrepareAsync("SELECT * " +
                                                          "FROM user_profile_by_id " +
-                                                         "WHERE id = ?"));
+                                                         "WHERE userid = ?"));
             _CreateUserById =
                 new AsyncLazy<PreparedStatement>(
                     () =>
                     {
                         var result = _cassandraSession.PrepareAsync(
                             @"INSERT INTO " +
-                            @"user_profile_by_id (id,Enabled,UserId,UserName) " +
-                            @"VALUES(?,?,?,?)");
+                            @"user_profile_by_id (UserId,Enabled,UserName) " +
+                            @"VALUES(?,?,?)");
                         return result;
                     });
             _DeleteUserId =
@@ -70,11 +69,11 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     {
                         var result = _cassandraSession.PrepareAsync(
                             @"Delete FROM user_profile_by_id " +
-                            @"WHERE id = ?");
+                            @"WHERE userid = ?");
                         return result;
                     });
 
-         
+
 
             _DeleteUserIdFromClientIds =
               new AsyncLazy<PreparedStatement>(
@@ -103,10 +102,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
             PreparedStatement prepared;
             BoundStatement bound;
 
-            var id = userId.UserIdToGuid();
-            
             prepared = await _DeleteUserId;
-            bound = prepared.Bind(id);
+            bound = prepared.Bind(userId);
             result.Add(bound);
 
 
@@ -117,37 +114,37 @@ namespace P5.IdentityServer3.Cassandra.DAO
             prepared = await _DeleteUserIdFromAllowedScopes;
             bound = prepared.Bind(userId);
             result.Add(bound);
-        
+
             return result;
         }
+
         public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
-        IdentityServerUserRecord record)
+            IdentityServerUserModel user)
         {
 
             var result = new List<BoundStatement>();
-            // @"user_profile_by_id (id,Enabled,UserId,UserName) " +
-            var user = record.Record;
+            // @"user_profile_by_id (UserId,Enabled,UserName) " +
+
             PreparedStatement prepared = await _CreateUserById;
             BoundStatement bound = prepared.Bind(
-                record.Id,
-                user.Enabled,
                 user.UserId,
+                user.Enabled,
                 user.UserName
                 );
             result.Add(bound);
             return result;
         }
+
         public async Task<bool> FindDoesUserExistByUserIdAsync(string userId,
          CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
-                Guid id = userId.UserIdToGuid();
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
-                    await mapper.SingleAsync<string>("SELECT userid FROM user_profile_by_id WHERE id = ?", id);
+                    await mapper.SingleAsync<string>("SELECT userid FROM user_profile_by_id WHERE userid = ?", userId);
 
                 return !string.IsNullOrEmpty(record);
             }
@@ -164,22 +161,25 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
-                Guid id = userId.UserIdToGuid();
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
-                    await mapper.SingleAsync<IdentityServerUserHandle>("SELECT * FROM user_profile_by_id WHERE id = ?", id);
-                
+                    await mapper.SingleAsync<IdentityServerUserModel>("SELECT * FROM user_profile_by_id WHERE userid = ?", userId);
+
+                var isu = new IdentityServerUser()
+                {
+                    Enabled = record.Enabled,
+                    UserId = record.UserId,
+                    UserName = record.UserName
+                };
                 var allowedScopes = await FindAllowedScopesByUserIdAsync(userId, cancellationToken);
-                record.AllowedScopes = allowedScopes.ToList();
+                isu.AllowedScopes = allowedScopes.ToList();
 
                 var allowedClients = await FindClientIdsByUserIdAsync(userId, cancellationToken);
-                record.ClientIds = allowedClients.ToList();
+                isu.ClientIds = allowedClients.ToList();
 
-                IIdentityServerUserHandle ch = record;
-                var result = await ch.MakeIdentityServerUserAsync();
-                return result;
+                return isu;
             }
             catch (Exception e)
             {
@@ -188,40 +188,26 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public async Task<IdentityServerUser> FindIdentityServerUserByIdAsync(Guid id,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                var session = CassandraSession;
-                IMapper mapper = new Mapper(session);
-                cancellationToken.ThrowIfCancellationRequested();
-                var record =
-                    await mapper.SingleAsync<IdentityServerUserHandle>("WHERE id = ?", id);
-                IIdentityServerUserHandle ch = record;
-                var result = await ch.MakeIdentityServerUserAsync();
-                return result;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
 
-      
 
-        public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUserRecord user,
+        public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUserModel user,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (user == null)
                 throw new ArgumentNullException("user");
-            IdentityServerUserRecordCassandra insertRecord = new IdentityServerUserRecordCassandra(user);
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
             cancellationToken.ThrowIfCancellationRequested();
 
-            var record = await mapper.InsertIfNotExistsAsync(insertRecord);
-            return new IdentityServerStoreAppliedInfo(record.Applied);
+            try
+            {
+                var record = await mapper.InsertIfNotExistsAsync(user);
+                return new IdentityServerStoreAppliedInfo(record.Applied);
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
             /*
                         var batch = new BatchStatement();
                         var boundStatements = await BuildBoundStatements_ForCreate(user);
@@ -238,8 +224,13 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
             if (user == null)
                 throw new ArgumentNullException("user");
-            return await UpsertIdentityServerUserAsync(
-                new IdentityServerUserRecord(new IdentityServerUserHandle(user)),
+            var model = new IdentityServerUserModel()
+            {
+                Enabled = user.Enabled,
+                UserId = user.UserId,
+                UserName = user.UserName
+            };
+            return await UpsertIdentityServerUserAsync(model,
                 cancellationToken);
         }
 
@@ -260,6 +251,6 @@ namespace P5.IdentityServer3.Cassandra.DAO
             return new IdentityServerStoreAppliedInfo(true);
         }
 
-        
+
     }
 }

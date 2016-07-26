@@ -39,10 +39,13 @@ namespace P5.IdentityServer3.Cassandra.Test
             var userId = Guid.NewGuid().ToString();
             var adminStore = new IdentityServer3AdminStore();
             var user = new IdentityServerUser { Enabled = true, UserId = userId, UserName = "Herb-" + userId };
-
-            await adminStore.CreateIdentityServerUserAsync(user);
-
             var result = await adminStore.FindIdentityServerUserByUserIdAsync(userId);
+            Assert.IsNull(result);
+            await adminStore.CreateIdentityServerUserAsync(user);
+            result = await adminStore.FindIdentityServerUserByUserIdAsync(userId);
+            Assert.IsNotNull(result);
+
+
 
             Assert.AreEqual(user.UserId, result.UserId);
         }
@@ -66,7 +69,7 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var userId = Guid.NewGuid().ToString();
             var adminStore = new IdentityServer3AdminStore();
-          
+
             List<string> scopesToAdd = new List<string> { "scope1", "scope2" };
             var appliedInfo = await adminStore.AddScopesToIdentityServerUserAsync(userId, scopesToAdd);
             Assert.IsFalse(appliedInfo.Applied);
@@ -122,8 +125,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.AreEqual(scopes.Count(), scopesToAdd.Count);
             var finalList = scopes.ToList().Except(scopesToAdd);
             Assert.IsFalse(finalList.Any());
-            
-            
+
+
             List<string> scopesToDelete = new List<string> { "scope1", "scope2" };
             await adminStore.DeleteScopesByUserIdAsync(userId, scopesToDelete);
             scopes = await adminStore.FindScopesByUserAsync(userId);
@@ -229,6 +232,6 @@ namespace P5.IdentityServer3.Cassandra.Test
             result = await adminStore.FindIdentityServerUserByUserIdAsync(userId);
             Assert.IsNull(result);
         }
-      
+
     }
 }

@@ -17,14 +17,15 @@
          {
              style = "width: 300px;border: none;background-color: #fff;background: transparent;",
              @class = "form-control",
-
-
              @readonly = "readonly"
          })
         </div>
-
-
-
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Exists, new { @class = "col-md-1 control-label" })
+        <div class="col-md-1">
+            @Html.CheckBoxFor(m => m.Exists, new{ @class = "form-control" })
+        </div>
     </div>
 
     <div class="form-group">

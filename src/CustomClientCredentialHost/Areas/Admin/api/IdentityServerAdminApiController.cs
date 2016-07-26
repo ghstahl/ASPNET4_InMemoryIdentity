@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using CustomClientCredentialHost.Areas.Admin.Models;
+using IdentityServer3.Core.Models;
 using P5.IdentityServer3.Cassandra;
 
 namespace CustomClientCredentialHost.Areas.Admin.api
@@ -28,6 +29,16 @@ namespace CustomClientCredentialHost.Areas.Admin.api
             };
             return record;
         }
-        
+
+        [Route("scopes/find")]
+        [HttpGet]
+        public async Task<Scope> FindScopeAsync(string name)
+        {
+            var adminStore = new IdentityServer3AdminStore();
+            var scope = await adminStore.FindScopeByNameAsync(name);
+            return scope;
+        }
+
+       
     }
 }

@@ -4,9 +4,8 @@ WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
 use identityserver3;
 
 CREATE TABLE IF NOT EXISTS user_profile_by_id (
-    id uuid,
-    Enabled boolean,
     UserId text,
+    Enabled boolean,
     UserName text,
     PRIMARY KEY (id)
 );
