@@ -13,9 +13,7 @@
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
+                <span class="glyphicon glyphicon-menu-hamburger white" aria-hidden="true"></span>
             </button>
             @Html.ActionLink("Application name", "Index", "Home", new {area = ""}, new {@class = "navbar-brand"})
         </div>
@@ -42,24 +40,7 @@
                 <li>
                    @Html.ActionLink("Scopes", "Index", "Scope", new { area = "Admin" }, null)
                 </li>
-                <li>
-                    <a href="#">Shortcuts</a>
-                </li>
-                <li>
-                    <a href="#">Overview</a>
-                </li>
-                <li>
-                    <a href="#">Events</a>
-                </li>
-                <li>
-                    <a href="#">About</a>
-                </li>
-                <li>
-                    <a href="#">Services</a>
-                </li>
-                <li>
-                    <a href="#">Contact</a>
-                </li>
+                
             </ul>
         </div>
         <!-- /#sidebar-wrapper -->

@@ -22,7 +22,9 @@ select,
 textarea {
     max-width: 380px;
 }
-
+.white {
+    color: white;
+}
 form label {
     display: block;
 }
