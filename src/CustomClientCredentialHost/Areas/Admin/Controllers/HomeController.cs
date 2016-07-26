@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using CustomClientCredentialHost.Areas.Admin.Models;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using P5.IdentityServer3.Cassandra;
 using P5.IdentityServer3.Common;
@@ -46,6 +48,12 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
         // GET: Admin/Home/Manage/5
         public async Task<ActionResult> Manage(string id, string email)
         {
+            var fullUserStore = UserManager.FullUserStore;
+            var claims = await fullUserStore.GetClaimsAsync(Guid.Parse(id));
+            var query = from item in claims
+                where item.Type == "http://schemas.identityserver.org/ws/2008/06/identity/claims/accesstype" && item.Value == "Developer"
+                select item;
+
             var adminStore = new IdentityServer3AdminStore();
             ViewBag.Email = email;
             var exists = await adminStore.FindDoesUserExistByUserIdAsync(id);
@@ -57,7 +65,8 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
             {
                 UserId = id,
                 Exists = exists,
-                AllowedScopes = new List<string>()
+                AllowedScopes = new List<string>(),
+                Developer = query.Any()
             };
 
             return View(isum);
@@ -65,16 +74,20 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Manage(IdentityServerUserModel model)
         {
-            if (model.Exists == false)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty,  "Please check the Exists.");
                 return View(model);
             }
+
+            var fullUserStore = UserManager.FullUserStore;
+            var user = await fullUserStore.FindByIdAsync(Guid.Parse(model.UserId));
+            var claim = new Claim("http://schemas.identityserver.org/ws/2008/06/identity/claims/accesstype", "Developer");
+            await fullUserStore.AddClaimAsync(user, claim);
+
             var adminStore = new IdentityServer3AdminStore();
-            IdentityServerUser user = new IdentityServerUser() {Enabled = true, UserId = model.UserId};
-            await adminStore.CreateIdentityServerUserAsync(user);
-
-
+            IdentityServerUser idsUser = new IdentityServerUser() {Enabled = true, UserId = model.UserId};
+            await adminStore.CreateIdentityServerUserAsync(idsUser);
+            
             return RedirectToAction("Index");
         }
         // GET: Admin/Home/Create

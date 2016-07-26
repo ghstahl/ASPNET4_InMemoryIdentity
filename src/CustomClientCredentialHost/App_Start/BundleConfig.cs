@@ -25,6 +25,7 @@ namespace CustomClientCredentialHost
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
+                      "~/Content/simple-sidebar.css",
                       "~/Content/site.css"));
         }
     }
