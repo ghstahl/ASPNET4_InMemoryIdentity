@@ -1,0 +1,34 @@
+﻿@model System.Collections.Generic.IEnumerable<string>
+
+@{
+    ViewBag.Title = "Norton Developer - Client Credentials";
+}
+<div class="page-header">
+    <h1>Norton Developer - Client Credentials</h1>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Client</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var client in Model)
+        {
+            <tr>
+                <td>@client</td>
+            
+                <td>
+                    <span>
+                        <a href="@Url.Action("Manage", "Home", new { id = client })" class="btn btn-warning">
+                            Manage
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                    </span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

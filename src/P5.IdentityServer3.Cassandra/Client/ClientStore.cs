@@ -34,6 +34,40 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
+        public async Task<string> FindSecretProtectedValue(string secretValue)
+        {
+            var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                  async () =>
+                  {
+                      await ResilientSessionContainer.EstablishSessionAsync();
+                      return await ResilientSessionContainer.ResilientSession.FindSecretProtectedValue(secretValue);
+                  },
+                  async (ex) => ResilientSessionContainer.HandleCassandraException<string>(ex));
+            return result; 
+        }
+
+        public async Task AddSecretProtectedValue(string secretValue, string protectedValue)
+        {
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+               async () =>
+               {
+                   await ResilientSessionContainer.EstablishSessionAsync();
+                   await ResilientSessionContainer.ResilientSession.AddSecretProtectedValue(secretValue, protectedValue);
+               },
+               async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
+        }
+
+        public async Task DeleteSecretProtectedValue(string secretValue)
+        {
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    await ResilientSessionContainer.ResilientSession.DeleteSecretProtectedValue(secretValue);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
+        }
+
         public async Task CreateClientAsync(Client client)
         {
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(

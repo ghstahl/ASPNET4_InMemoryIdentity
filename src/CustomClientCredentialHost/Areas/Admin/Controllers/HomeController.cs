@@ -132,7 +132,7 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
             var fullUserStore = UserManager.FullUserStore;
             var claims = await fullUserStore.GetClaimsAsync(Guid.Parse(id));
             var query = from item in claims
-                where item.Type == "http://schemas.identityserver.org/ws/2008/06/identity/claims/accesstype" && item.Value == "Developer"
+                        where item.Type == ClaimTypes.Role && item.Value == "Developer"
                 select item;
 
             var adminStore = new IdentityServer3AdminStore();
@@ -162,7 +162,7 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
 
             var fullUserStore = UserManager.FullUserStore;
             var user = await fullUserStore.FindByIdAsync(Guid.Parse(model.UserId));
-            var claim = new Claim("http://schemas.identityserver.org/ws/2008/06/identity/claims/accesstype", "Developer");
+            var claim = new Claim(ClaimTypes.Role, "Developer");
             await fullUserStore.AddClaimAsync(user, claim);
 
             var adminStore = new IdentityServer3AdminStore();

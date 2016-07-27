@@ -19,6 +19,21 @@ namespace P5.IdentityServer3.Cassandra
             get { return _ClientStore ?? (_ClientStore = new ClientStore()); }
         }
 
+        public async Task<string> FindSecretProtectedValue(string secretValue)
+        {
+            return await ClientStore.FindSecretProtectedValue(secretValue);
+        }
+
+        public async Task AddSecretProtectedValue(string secretValue, string protectedValue)
+        {
+            await ClientStore.AddSecretProtectedValue(secretValue, protectedValue);
+        }
+
+        public async Task DeleteSecretProtectedValue(string secretValue)
+        {
+            await ClientStore.DeleteSecretProtectedValue(secretValue);
+        }
+
         public async Task CreateClientAsync(global::IdentityServer3.Core.Models.Client client)
         {
             await ClientStore.CreateClientAsync(client);

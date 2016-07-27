@@ -36,11 +36,12 @@ namespace P5.IdentityServer3.Cassandra.DAO
 			"consent_by_clientid",
             "user_profile_by_id",
             "user_clientid",
-            "user_scopename"
+            "user_scopename",
+            "secret_value_hash_protected_password"
 
 		};
 
-
+      
 
 		#endregion
 
@@ -139,7 +140,16 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 		        @"PRIMARY KEY (Id))",
 
 		        //////////////////////////////////////////////////////////////////////
-		        //consent_by_id//////////////////////////////////////////////////////
+		        //secret_value_hash_protected_password ///////////////////////////////
+		        //////////////////////////////////////////////////////////////////////
+
+		        @"CREATE TABLE IF NOT EXISTS secret_value_hash_protected_password (" +
+		        @"Value text," +
+		        @"ProtectedValue text," +
+		        @"PRIMARY KEY (Value))",
+
+		        //////////////////////////////////////////////////////////////////////
+		        //consent_by_id //////////////////////////////////////////////////////
 		        //////////////////////////////////////////////////////////////////////
 		        @"CREATE TABLE IF NOT EXISTS consent_by_id (" +
 		        @"id uuid," +

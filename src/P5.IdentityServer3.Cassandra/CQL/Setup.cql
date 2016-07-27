@@ -3,6 +3,12 @@ WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
 
 use identityserver3;
 
+CREATE TABLE IF NOT EXISTS secret_value_hash_protected_password (
+	Value text,
+	ProtectedValue text,
+	PRIMARY KEY (Value)
+);
+
 CREATE TABLE IF NOT EXISTS user_profile_by_id (
     UserId text,
     Enabled boolean,
@@ -10,18 +16,17 @@ CREATE TABLE IF NOT EXISTS user_profile_by_id (
     PRIMARY KEY (id)
 );
 
-
 CREATE TABLE IF NOT EXISTS user_clientid (
     ClientId text,
    	UserId text,
     PRIMARY KEY (UserId,ClientId)
 );
+
 CREATE TABLE IF NOT EXISTS user_scopename (
     ScopeName text,
     UserId text,
     PRIMARY KEY (UserId,ScopeName)
 );
-
 
 CREATE TABLE IF NOT EXISTS scopeclaims_by_name_and_scopeid (
 	Name text,
@@ -155,6 +160,12 @@ CREATE TABLE IF NOT EXISTS TokenHandle_By_ClientId (
     Type text,
     Version int,
     PRIMARY KEY (ClientId,Key)
+);
+
+CREATE TABLE IF NOT EXISTS Secret_Value_Hash_Protected_Password (
+    Value text,
+    ProtectedValue text
+    PRIMARY KEY (Value)
 );
 
 CREATE TABLE IF NOT EXISTS clients_by_id (

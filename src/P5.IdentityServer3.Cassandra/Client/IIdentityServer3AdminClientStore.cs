@@ -11,6 +11,11 @@ namespace P5.IdentityServer3.Cassandra
 {
     public interface IIdentityServer3AdminClientStore : IClientStore
     {
+
+
+        Task<string> FindSecretProtectedValue(string secretValue);
+        Task AddSecretProtectedValue(string secretValue, string protectedValue);
+        Task DeleteSecretProtectedValue(string secretValue);
         /// <summary>
         /// Upsert a brand new client or overwrite a matching one.
         /// </summary>

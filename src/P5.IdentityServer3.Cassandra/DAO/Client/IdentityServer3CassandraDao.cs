@@ -21,6 +21,11 @@ using StringComparer = System.StringComparer;
 
 namespace P5.IdentityServer3.Cassandra.DAO
 {
+    public class SecretValuePasswordRecord
+    {
+        public string Value { get; set; }
+        public string ProtectedValue { get; set; }
+    }
     public partial class IdentityServer3CassandraDao
     {
         //-----------------------------------------------
@@ -577,6 +582,42 @@ namespace P5.IdentityServer3.Cassandra.DAO
             finalList.AddRange(claims);
             stored.Claims = finalList;
             await UpsertClientAsync(stored, cancellationToken);
+        }
+
+        public async Task<string> FindSecretProtectedValue(string secretValue,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var session = CassandraSession;
+            IMapper mapper = new Mapper(session);
+
+            var result = await mapper.FirstAsync<SecretValuePasswordRecord>(secretValue);
+            return result.ProtectedValue;
+        }
+        public async Task AddSecretProtectedValue(string secretValue,string protectedValue,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var session = CassandraSession;
+            IMapper mapper = new Mapper(session);
+            var svpr = new SecretValuePasswordRecord()
+            {
+                Value = secretValue,
+                ProtectedValue = protectedValue
+            };
+            var result = await mapper.InsertIfNotExistsAsync< SecretValuePasswordRecord > (svpr);
+        }
+
+        public async Task DeleteSecretProtectedValue(string secretValue,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var session = CassandraSession;
+            IMapper mapper = new Mapper(session);
+
+            var record = await
+                mapper.DeleteIfAsync<SecretValuePasswordRecord>(
+                    "WHERE value = ? ", secretValue);
         }
 
         public async Task<Store.Core.Models.IPage<FlattenedClientHandle>> PageClientsAsync(int pageSize, byte[] pagingState,

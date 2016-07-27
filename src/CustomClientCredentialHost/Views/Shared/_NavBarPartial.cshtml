@@ -1,0 +1,27 @@
+﻿<ul class="nav navbar-nav">
+    <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, null)</li>
+    <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, null)</li>
+    <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, null)</li>
+    <li>@Html.ActionLink("Admin", "Index", "Home", new { area = "Admin" }, null)</li>
+
+    @{
+        var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
+
+        if (claimsIdentity != null)
+        {
+            var c = claimsIdentity.FindFirst(p =>
+            {
+                var match = (p.Type == System.Security.Claims.ClaimTypes.Role
+                             && p.Value == "Developer");
+                return match;
+
+            });
+
+            if (c != null)
+            {
+                <li>@Html.ActionLink("Norton Developer", "Index", "Home", new { area = "NortonDeveloper" }, null)</li>
+            }
+        }
+
+    }
+</ul>

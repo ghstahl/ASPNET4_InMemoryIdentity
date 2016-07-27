@@ -5,3 +5,32 @@
 <h3>@ViewBag.Message</h3>
 
 <p>Use this area to provide additional information.</p>
+@{
+    var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
+
+    if (claimsIdentity != null)
+    {
+        foreach (var claim in claimsIdentity.Claims)
+        {
+            <p>
+                @claim.Type.ToString();
+                @claim.Value.ToString();
+            </p>
+        }
+        var c = claimsIdentity.FindFirst(p =>
+        {
+            var match = (p.Type == System.Security.Claims.ClaimTypes.Role
+                         && p.Value == "Developer");
+            return match;
+           
+        });
+
+        if (c != null)
+        {
+            <p>
+                @c.Type.ToString();
+                @c.Value.ToString();
+            </p>
+        }
+    }
+}
