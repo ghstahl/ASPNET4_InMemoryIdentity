@@ -14,6 +14,18 @@ using IdentityServerUserModel = CustomClientCredentialHost.Areas.Admin.Models.Id
 
 namespace CustomClientCredentialHost.Areas.Admin.Controllers
 {
+    public class UserScopeRecord
+    {
+        public string Name { get; set; }
+        public bool Enabled { get; set; }
+    }
+    public class UserScopeModel
+    {
+        public string UserId { get; set; }
+        public string Email { get; set; }
+        public List<UserScopeRecord> UserScopeRecords { get; set; }
+        public List<UserScopeRecord> AllowedScopes { get; set; }
+    }
     public class HomeController : Controller
     {
         private ApplicationUserManager _userManager;
@@ -43,7 +55,57 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
             return View(record);
         }
 
+        [HttpPost]
+        public async Task<ActionResult> Scopes(UserScopeModel model)
+        {
 
+            return View(model);
+        }
+
+        // GET: Admin/Home/Manage/5
+        public async Task<ActionResult> Scopes(string id, string email)
+        {
+            // note this is POC.  We need a dynamic ajax page that does paging
+            var usm = new UserScopeModel
+            {
+                AllowedScopes = new List<UserScopeRecord>(),
+                UserScopeRecords = new List<UserScopeRecord>(),
+                Email = email,
+                UserId = id
+            };
+
+            var fullUserStore = UserManager.FullUserStore;
+            var adminStore = new IdentityServer3AdminStore();
+            var userScopes = await adminStore.FindScopesByUserAsync(id);
+            foreach (var scope in userScopes)
+            {
+                usm.UserScopeRecords.Add(new UserScopeRecord()
+                {
+                    Enabled = true,Name = scope
+
+                });
+            }
+            int pageSize = 100;
+            var page = await adminStore.PageScopesAsync(100, null);
+            var state = HttpUtility.UrlEncode(page.PagingState);
+            var record = new IDSScopePageRecord()
+            {
+                CurrentPagingState = HttpUtility.UrlEncode(page.CurrentPagingState),
+                PageSize = pageSize,
+                PagingState = HttpUtility.UrlEncode(page.PagingState),
+                Scopes = page
+            };
+            foreach (var scope in page)
+            {
+                usm.AllowedScopes.Add(new UserScopeRecord()
+                {
+                    Enabled = false,
+                    Name = scope.Name
+
+                });
+            }
+            return View(usm);
+        }
 
         // GET: Admin/Home/Manage/5
         public async Task<ActionResult> Manage(string id, string email)
@@ -87,7 +149,7 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
             var adminStore = new IdentityServer3AdminStore();
             IdentityServerUser idsUser = new IdentityServerUser() {Enabled = true, UserId = model.UserId};
             await adminStore.CreateIdentityServerUserAsync(idsUser);
-            
+
             return RedirectToAction("Index");
         }
         // GET: Admin/Home/Create

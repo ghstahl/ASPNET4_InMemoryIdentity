@@ -1,0 +1,98 @@
+﻿@model CustomClientCredentialHost.Areas.Admin.Controllers.UserScopeModel
+
+@{
+    ViewBag.Title = "Manage IdentityServer User";
+}
+
+@using (Html.BeginForm("Scopes", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <h4>Manage @ViewBag.Email</h4>
+    <hr />
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(m => m.UserId, new { @class = "col-md-1 control-label" })
+        <div class="col-md-5">
+            @Html.TextBoxFor(m => m.UserId, new
+            {
+                style = "width: 300px;border: none;background-color: #fff;background: transparent;",
+                @class = "form-control",
+                @readonly = "readonly"
+            })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new {@class = "col-md-1 control-label"})
+        <div class="col-md-1">
+            @Html.TextBoxFor(m => m.Email, new
+            {
+                style = "width: 300px;border: none;background-color: #fff;background: transparent;",
+                @class = "form-control",
+                @readonly = "readonly"
+            })
+        </div>
+    </div>
+
+    <h1>User Scopes</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>eMail</th>
+            <th>Scope</th>
+            <th>Enabled</th>
+        </tr>
+        </thead>
+        <tbody>
+        @for (int i = 0; i< Model.UserScopeRecords.Count;++i)
+        {
+            <tr>
+                <td>@Model.Email</td>
+                <td>@Model.UserScopeRecords[i].Name</td>
+                <td>
+                    @Html.CheckBoxFor(m => m.UserScopeRecords[i].Enabled, new { @class = "form-control" })
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <h1>Allowed Scopes</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Scope</th>
+                <th>Enabled</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.AllowedScopes.Count; ++i)
+            {
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(m => m.AllowedScopes[i].Name, new
+            {
+                style = "width: 300px;border: none;background-color: #fff;background: transparent;",
+                @class = "form-control",
+                @readonly = "readonly"
+            })
+
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(m => m.AllowedScopes[i].Enabled, new { @class = "form-control" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-default" value="Submit" />
+            @Html.ActionLink("Cancel", "Index", "Home", new { @class = "btn btn-default" })
+
+        </div>
+    </div>
+
+
+}

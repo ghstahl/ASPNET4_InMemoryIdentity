@@ -44,15 +44,21 @@
             @Html.CheckBoxFor(m => m.Exists, new { @class = "form-control", @disabled = "disabled" })
         </div>
     </div>
-   
-    
-    
+
+
+
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
             <input type="submit" class="btn btn-default" value="Submit"/>
-            @Html.ActionLink("Cancel", "Index", "Home", new { @class = "btn btn-default" })
+            @Html.ActionLink("Cancel", "Index", "Home", new {@class = "btn btn-default"})
+            @if (Model.Developer)
+            {
+                @Html.ActionLink("Scopes", "Scopes", "Home", new { id = Model.UserId, email = @ViewBag.Email }, new { @class = "btn btn-default" })
+            }
         </div>
     </div>
+
+
 }
 
 

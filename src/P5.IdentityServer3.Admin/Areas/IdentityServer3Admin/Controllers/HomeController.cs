@@ -9,5 +9,15 @@ namespace P5.IdentityServer3.Admin.Areas.IdentityServer3Admin.Controllers
         {
             return await Task.FromResult(View(Request));
         }
+
+        public void ScopesAsync(string id, string email)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public ActionResult ScopesCompleted()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
