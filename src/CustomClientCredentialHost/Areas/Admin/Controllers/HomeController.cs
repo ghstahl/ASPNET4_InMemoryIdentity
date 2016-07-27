@@ -58,8 +58,27 @@ namespace CustomClientCredentialHost.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Scopes(UserScopeModel model)
         {
+            var fullUserStore = UserManager.FullUserStore;
+            var adminStore = new IdentityServer3AdminStore();
+            if (model.UserScopeRecords != null)
+            {
+                // remove the ones that need to be removed
+                var queryToBeDeleted = (from item in model.UserScopeRecords
+                    where item.Enabled == false
+                    select item.Name).ToList();
+                await adminStore.DeleteScopesByUserIdAsync(model.UserId, queryToBeDeleted);
+            }
 
-            return View(model);
+            var queryToBeAdded = (from item in model.AllowedScopes
+                where item.Enabled
+                select item.Name).ToList();
+            // add the ones that need to be added.
+            if (queryToBeAdded.Any())
+            {
+                await adminStore.AddScopesToIdentityServerUserAsync(model.UserId, queryToBeAdded);
+            }
+            
+            return RedirectToAction("Index");
         }
 
         // GET: Admin/Home/Manage/5
