@@ -999,5 +999,25 @@ namespace P5.IdentityServer3.Cassandra.Test
 
 
         }
+
+        [TestMethod]
+        public async Task Test_Add_Protected_SecrAsync()
+        {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+            var value = Guid.NewGuid().ToString();
+            var valueProtected = Guid.NewGuid().ToString();
+            await dao.AddSecretProtectedValue(value, valueProtected);
+
+            var fetchedValueProtected = await dao.FindSecretProtectedValue(value);
+            Assert.AreEqual(valueProtected, fetchedValueProtected);
+
+            await dao.DeleteSecretProtectedValue(value);
+            fetchedValueProtected = await dao.FindSecretProtectedValue(value);
+            Assert.IsNull(fetchedValueProtected);
+
+
+        }
     }
 }

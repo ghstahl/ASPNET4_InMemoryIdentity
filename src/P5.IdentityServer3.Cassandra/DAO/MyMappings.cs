@@ -41,7 +41,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                .Column(u => u.Type, cm => cm.WithName("scopetype").WithDbType<ScopeType>());
 
             For<SecretValuePasswordRecord>()
-                .TableName("scopeclaims_by_name_and_scopeid");
+                .TableName("secret_value_hash_protected_password");
 
             For<IdentityServerUserModel>()
                 .TableName(WellKnownUserProfileById);

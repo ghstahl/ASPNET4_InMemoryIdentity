@@ -587,25 +587,43 @@ namespace P5.IdentityServer3.Cassandra.DAO
         public async Task<string> FindSecretProtectedValue(string secretValue,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var session = CassandraSession;
-            IMapper mapper = new Mapper(session);
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
 
-            var result = await mapper.FirstAsync<SecretValuePasswordRecord>(secretValue);
-            return result.ProtectedValue;
+                var result = await mapper.FirstAsync<SecretValuePasswordRecord>("Where value=?",secretValue);
+                return result.ProtectedValue;
+            }
+            catch (Exception e)
+            {
+                if (e.Message == "Sequence contains no elements")
+                    return null;
+                throw;
+            }
         }
+
         public async Task AddSecretProtectedValue(string secretValue,string protectedValue,
            CancellationToken cancellationToken = default(CancellationToken))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var session = CassandraSession;
-            IMapper mapper = new Mapper(session);
-            var svpr = new SecretValuePasswordRecord()
+            try
             {
-                Value = secretValue,
-                ProtectedValue = protectedValue
-            };
-            var result = await mapper.InsertIfNotExistsAsync< SecretValuePasswordRecord > (svpr);
+                cancellationToken.ThrowIfCancellationRequested();
+                var session = CassandraSession;
+                IMapper mapper = new Mapper(session);
+                var svpr = new SecretValuePasswordRecord()
+                {
+                    Value = secretValue,
+                    ProtectedValue = protectedValue
+                };
+               await mapper.InsertAsync(svpr);
+
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         public async Task DeleteSecretProtectedValue(string secretValue,
