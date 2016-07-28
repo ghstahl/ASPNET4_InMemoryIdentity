@@ -10,6 +10,7 @@ using CustomClientCredentialHost.Areas.NortonDeveloper.Models;
 using IdentityServer3.Core.Models;
 using Microsoft.AspNet.Identity;
 using P5.IdentityServer3.Cassandra;
+using P5.IdentityServer3.Cassandra.Crypto;
 using P5.IdentityServer3.Common;
 
 namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
@@ -42,6 +43,33 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
             };
             return View(cvModel);
         }
+
+        [HttpPost]
+        public async Task<ActionResult> Manage(ClientViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            Client client = new Client()
+            {
+                AccessTokenType = model.AccessTokenType,
+                Enabled = model.Enabled,
+                AllowedScopes = model.AllowedScopes,
+                ClientId = model.ClientId,
+                ClientName = model.ClientName,
+                ClientSecrets = model.ClientSecrets,
+                Flow = model.Flow
+            };
+            var adminStore = new IdentityServer3AdminStore();
+            await adminStore.CreateClientAsync(client);
+            var clients = new List<string> { client.ClientId };
+            await adminStore.AddClientIdToIdentityServerUserAsync(User.Identity.GetUserId(), clients);
+
+            return RedirectToAction("Index");
+        }
+
         /*
          * new Client
                 {
@@ -72,18 +100,7 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
         public async Task<ActionResult> New(ClientViewModel model)
         {
             if (!ModelState.IsValid)
-            {/*
-                ClientViewModel cvModel = new ClientViewModel()
-                {
-                    AccessTokenType = model.AccessTokenType,
-                    AllowedScopes = model.AllowedScopes,
-                    ClientId = model.ClientId,
-                    ClientName = model.ClientName,
-                    ClientSecrets = model.ClientSecrets,
-                    Enabled = model.Enabled,
-                    Flow = model.Flow
-                };
-                */
+            {
                 return View(model);
             }
 
@@ -104,5 +121,68 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
 
             return RedirectToAction("Index");
         }
+        public async Task<ActionResult> ShowSecret(string hash)
+        {
+            var model = new ShowSecretViewModel()
+            {
+                Hash = hash,
+                OpenSecret = "hidden for now"
+            };
+            return View(model);
+        }
+        public async Task<ActionResult> ShowOpenSecret(string hash, string passCode, string openSecret)
+        {
+            var model = new ShowSecretViewModel()
+            {
+                Hash = hash,
+                OpenSecret = openSecret,
+                PassCode = passCode
+            };
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<ActionResult> ShowSecret(ShowSecretViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var adminStore = new IdentityServer3AdminStore();
+            var protectedClientSecret = await adminStore.FindSecretProtectedValue(model.Hash);
+            var myCrypto = new TripleDesEncryption(model.PassCode);
+            model.OpenSecret = myCrypto.Decrypt(protectedClientSecret);
+            return RedirectToAction("ShowOpenSecret",
+                new {hash = model.Hash, openSecret = model.OpenSecret, passCode = model.PassCode});
+
+        }
+        public async Task<ActionResult> Secret(string clientId)
+        {
+            var model = new SecretViewModel()
+            {
+                ClientId = clientId,
+                OpenClientSecret = Guid.NewGuid().ToString()
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Secret(SecretViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var adminStore = new IdentityServer3AdminStore();
+            var myCrypto = new TripleDesEncryption(model.PassCode);
+            var protectedClientSecret = myCrypto.Encrypt(model.OpenClientSecret);
+            var hashedClientSecret = model.OpenClientSecret.Sha256();
+            var secret = new Secret(hashedClientSecret);
+            var secrets = new List<Secret> {secret};
+            await adminStore.AddSecretProtectedValue(hashedClientSecret, protectedClientSecret);
+            await adminStore.AddClientSecretsToClientAsync(model.ClientId, secrets);
+            return RedirectToAction("Index");
+        }
     }
+
+
 }
