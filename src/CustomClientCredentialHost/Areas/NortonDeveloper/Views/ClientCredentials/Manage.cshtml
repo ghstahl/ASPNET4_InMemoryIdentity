@@ -5,6 +5,22 @@
 }
 
 <h2>@ViewBag.Title</h2>
+<span>
+    <a href="@Url.Action("Secret", "ClientCredentials", new { clientId = Model.ClientId })" class="btn btn-primary">
+        New Secret
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+    </a>
+    <a href="@Url.Action("Scope", "ClientCredentials", new {clientId = Model.ClientId})" class="btn btn-primary">
+        Add Scope
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+    </a>
+    <a href="@Url.Action("Index", "ClientCredentials")" class="btn btn-primary">
+        Cancel
+        <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+    </a>
+</span>
+
+
 @using (Html.BeginForm("Manage", "ClientCredentials", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
 {
     @Html.AntiForgeryToken()
@@ -42,23 +58,48 @@
             @Html.ValidationMessageFor(m => m.AccessTokenType)
         </div>
     </div>
-    
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Secret Hash</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var secret in Model.ClientSecrets)
+        {
+            <tr>
+                <td>@secret.Value</td>
+
+                <td>
+                    <span>
+                            <a href="@Url.Action("ShowSecret", "ClientCredentials", new {hash = @secret.Value})" class="btn btn-primary">
+                                Show
+                                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                            </a>
+                        </span>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
     <table class="table">
         <thead>
             <tr>
-                <th>Secret Hash</th>
+                <th>Scopes</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var secret in Model.ClientSecrets)
+            @foreach (var scope in Model.AllowedScopes)
             {
                 <tr>
-                    <td>@secret.Value</td>
+                    <td>@scope</td>
 
                     <td>
                         <span>
-                            <a href="@Url.Action("ShowSecret", "ClientCredentials", new { hash = @secret.Value })" class="btn btn-primary">
+                            <a href="@Url.Action("Description", "Scope", new { area = "admin", name = @scope })" class="btn btn-primary">
                                 Show
                                 <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
                             </a>
@@ -69,11 +110,10 @@
         </tbody>
     </table>
     <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" class="btn btn-default" value="Submit"/>
+        <div class="col-md-offset-10 col-md-10">
+            <input type="submit" class="btn btn-primary" value="Submit"/>
         </div>
-        @Html.ActionLink("Cancel", "Index", "ClientCredentials", new { @class = "btn btn-default" })
-        @Html.ActionLink("Secret", "Secret", "ClientCredentials", new { clientId = Model.ClientId }, new { @class = "btn btn-default" })
-        
+       
+       
     </div>
 }
