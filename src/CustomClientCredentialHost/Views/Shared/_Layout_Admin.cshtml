@@ -35,7 +35,7 @@
                 <li>
                    @Html.ActionLink("Scopes", "Index", "Scope", new { area = "Admin" }, null)
                 </li>
-                
+
             </ul>
         </div>
         <!-- /#sidebar-wrapper -->
@@ -45,7 +45,11 @@
                 <div class="row">
                     <div class="col-lg-12">
                         @RenderBody()
-                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+
+                        <a class="btn btn-primary" id="menu-sidenav">
+                            Toggle Menu
+                            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                        </a>
                     </div>
                     <footer>
                         <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
@@ -57,7 +61,7 @@
 
     </div>
     <!-- /#wrapper -->
-   
+
     <hr/>
 
 </div>
@@ -65,12 +69,22 @@
 @Scripts.Render("~/bundles/jquery")
 @Scripts.Render("~/bundles/bootstrap")
 @RenderSection("scripts", required: false)
-    <!-- Menu Toggle Script -->
-    <script>
-    $("#menu-toggle").click(function(e) {
+
+
+<!-- Menu Toggle Script -->
+<script>
+    $('#menu-sidenav').click(function (e) {
+
         e.preventDefault();
         $("#wrapper").toggleClass("toggled");
+
+        if ($('a span').hasClass('glyphicon-chevron-left')) {
+            $('#menu-sidenav').html('Toggle Menu<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>');
+        } else {
+            $('#menu-sidenav').html('Toggle Menu<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>');
+        }
     });
-    </script>
+
+</script>
 </body>
 </html>
