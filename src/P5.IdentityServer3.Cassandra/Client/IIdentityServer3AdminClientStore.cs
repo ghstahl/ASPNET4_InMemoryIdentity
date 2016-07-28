@@ -30,12 +30,7 @@ namespace P5.IdentityServer3.Cassandra
         /// <returns></returns>
         Task DeleteClientAsync(string clientId);
 
-        /// <summary>
-        /// Delete a client record.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task DeleteClientAsync(Guid id);
+
         /// <summary>
         /// Makes sure that data is trued up by pruning scopes that no longer exit
         /// </summary>

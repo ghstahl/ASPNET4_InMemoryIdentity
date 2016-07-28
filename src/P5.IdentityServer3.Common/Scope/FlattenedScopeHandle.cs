@@ -15,28 +15,30 @@ namespace P5.IdentityServer3.Common
         public override string Serialize(List<Secret> scopeSecrets)
         {
             if (scopeSecrets == null)
-                return null;
+                return "[]";
             var simpleDocument = new SimpleDocument<List<Secret>>(scopeSecrets).DocumentJson;
             return simpleDocument;
         }
 
-        public override async Task<List<Secret>> DeserializeSecretsAsync(string scopeSecrets)
+        public override async Task<List<Secret>> DeserializeSecretsAsync(string obj)
         {
-            var simpleDocument = new SimpleDocument<List<Secret>>(scopeSecrets);
+            obj = string.IsNullOrEmpty(obj) ? "[]" : obj;
+            var simpleDocument = new SimpleDocument<List<Secret>>(obj);
             var document = (List<Secret>)simpleDocument.Document;
             return await Task.FromResult(document);
         }
         public override string Serialize(List<ScopeClaim> claims)
         {
             if (claims == null)
-                return null;
+                return "[]";
             var simpleDocument = new SimpleDocument<List<ScopeClaim>>(claims).DocumentJson;
             return simpleDocument;
         }
 
-        public override async Task<List<ScopeClaim>> DeserializeClaimsAsync(string claims)
+        public override async Task<List<ScopeClaim>> DeserializeClaimsAsync(string obj)
         {
-            var simpleDocument = new SimpleDocument<List<ScopeClaim>>(claims);
+            obj = string.IsNullOrEmpty(obj) ? "[]" : obj;
+            var simpleDocument = new SimpleDocument<List<ScopeClaim>>(obj);
             var document = (List<ScopeClaim>)simpleDocument.Document;
             return await Task.FromResult(document);
         }

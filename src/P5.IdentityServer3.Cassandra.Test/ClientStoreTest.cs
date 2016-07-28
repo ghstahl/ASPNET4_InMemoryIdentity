@@ -43,43 +43,32 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
         }
         [TestMethod]
         public async Task Test_Create_Delete_ByIdAsync()
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
-            await adminStore.DeleteClientAsync(insert[0].Id);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteClientAsync(insert[0].ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNull(result);
         }
-        [TestMethod]
-        public async Task Test_Create_Delete_ByClientIdAsync()
-        {
-            var adminStore = new IdentityServer3AdminStore();
-            var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
 
-            await adminStore.DeleteClientAsync(insert[0].Record.ClientId);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
-            Assert.IsNull(result);
-        }
         [TestMethod]
         public async Task Test_Create_Add_AllowedCustomGrantTypesByClientIdAsync()
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
             var originalAllowedCustomGrantTypes = result.AllowedCustomGrantTypes;
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> newAllowedCustomGrantTypes = new List<string>()
             {
@@ -89,10 +78,10 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(originalAllowedCustomGrantTypes);
             finalList.AddRange(newAllowedCustomGrantTypes);
 
-            await adminStore.AddAllowedCustomGrantTypesToClientAsync(insert[0].Record.ClientId, newAllowedCustomGrantTypes);
+            await adminStore.AddAllowedCustomGrantTypesToClientAsync(insert[0].ClientId, newAllowedCustomGrantTypes);
 
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AllowedCustomGrantTypes.Count(), finalList.Count);
 
@@ -105,11 +94,11 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
             var originalAllowedCustomGrantTypes = result.AllowedCustomGrantTypes;
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> newAllowedCustomGrantTypes = new List<string>()
             {
@@ -119,10 +108,10 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(originalAllowedCustomGrantTypes);
             finalList.AddRange(newAllowedCustomGrantTypes);
 
-            await adminStore.AddAllowedCustomGrantTypesToClientAsync(insert[0].Record.ClientId, newAllowedCustomGrantTypes);
+            await adminStore.AddAllowedCustomGrantTypesToClientAsync(insert[0].ClientId, newAllowedCustomGrantTypes);
 
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AllowedCustomGrantTypes.Count(), finalList.Count);
 
@@ -131,9 +120,9 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsFalse(ff.Any());
 
             await
-                adminStore.DeleteAllowedCustomGrantTypesFromClientAsync(insert[0].Record.ClientId,
+                adminStore.DeleteAllowedCustomGrantTypesFromClientAsync(insert[0].ClientId,
                     result.AllowedCustomGrantTypes);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.IsFalse(result.AllowedCustomGrantTypes.Any());
 
@@ -143,21 +132,21 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> allowedCorsOrigins = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddAllowedCorsOriginsToClientAsync(insert[0].Record.ClientId, allowedCorsOrigins);
+            await adminStore.AddAllowedCorsOriginsToClientAsync(insert[0].ClientId, allowedCorsOrigins);
 
             var finalList = new List<string>();
             finalList.AddRange(allowedCorsOrigins);
             finalList.AddRange(result.AllowedCorsOrigins);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.AreEqual(result.AllowedCorsOrigins.Count(), finalList.Count);
 
 
@@ -170,29 +159,29 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> allowedCorsOrigins = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
             var originalList = result.AllowedCorsOrigins;
-            await adminStore.AddAllowedCorsOriginsToClientAsync(insert[0].Record.ClientId, allowedCorsOrigins);
+            await adminStore.AddAllowedCorsOriginsToClientAsync(insert[0].ClientId, allowedCorsOrigins);
 
             var finalList = new List<string>();
             finalList.AddRange(allowedCorsOrigins);
             finalList.AddRange(result.AllowedCorsOrigins);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.AreEqual(result.AllowedCorsOrigins.Count(), finalList.Count);
 
             var ff = result.AllowedCorsOrigins.Except(finalList);
             Assert.IsFalse(ff.Any());
 
 
-            await adminStore.DeleteAllowedCorsOriginsFromClientAsync(insert[0].Record.ClientId, allowedCorsOrigins);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteAllowedCorsOriginsFromClientAsync(insert[0].ClientId, allowedCorsOrigins);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.AreEqual(result.AllowedCorsOrigins.Count(), originalList.Count);
             ff = result.AllowedCorsOrigins.Except(originalList);
             Assert.IsFalse(ff.Any());
@@ -202,10 +191,10 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
             var adminStore = new IdentityServer3AdminStore();
-           // await adminStore.CleanupClientByIdAsync(insert[0].Record.ClientId);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+           // await adminStore.CleanupClientByIdAsync(insert[0].ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             var originalAllowedScopes = result.AllowedScopes;
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<Scope> scopes = new List<Scope>()
             {
@@ -237,11 +226,11 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalExpected.AddRange(addedScopeNames);
             finalExpected.AddRange(result.AllowedScopes);
 
-            await adminStore.AddScopesToClientAsync(insert[0].Record.ClientId, addedScopeNames);
+            await adminStore.AddScopesToClientAsync(insert[0].ClientId, addedScopeNames);
 
 
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AllowedScopes.Count(), finalExpected.Count);
 
@@ -254,10 +243,10 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
             var adminStore = new IdentityServer3AdminStore();
-            // await adminStore.CleanupClientByIdAsync(insert[0].Record.ClientId);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            // await adminStore.CleanupClientByIdAsync(insert[0].ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             var originalAllowedScopes = result.AllowedScopes;
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<Scope> scopes = new List<Scope>()
             {
@@ -289,11 +278,11 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalExpected.AddRange(addedScopeNames);
             finalExpected.AddRange(result.AllowedScopes);
 
-            await adminStore.AddScopesToClientAsync(insert[0].Record.ClientId, addedScopeNames);
+            await adminStore.AddScopesToClientAsync(insert[0].ClientId, addedScopeNames);
 
 
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AllowedScopes.Count(), finalExpected.Count);
 
@@ -302,8 +291,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsFalse(ff.Any());
 
 
-            await adminStore.DeleteScopesFromClientAsync(insert[0].Record.ClientId, result.AllowedScopes);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteScopesFromClientAsync(insert[0].ClientId, result.AllowedScopes);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsFalse(result.AllowedScopes.Any());
 
 
@@ -318,8 +307,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             var adminStore = new IdentityServer3AdminStore();
             global::IdentityServer3.Core.Models.Client dd = new global::IdentityServer3.Core.Models.Client();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
             int expectedInt = 1961;
             string expectedString = Guid.NewGuid().ToString();
             List<string> expectedList = new List<string>()
@@ -519,7 +508,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             await dao.UpdateClientByIdAsync(result.ClientId, propertyList);
 
-            var result2 = await dao.FindClientByIdAsync(insert[0].Id);
+            var result2 = await dao.FindClientByClientIdAsync(insert[0].ClientId);
 
             foreach (var property in propertyList)
             {
@@ -573,24 +562,24 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             var originalIdentityProviderRestrictions = result.IdentityProviderRestrictions;
 
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> newIdentityProviderRestrictions = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddIdentityProviderRestrictionsToClientAsync(insert[0].Record.ClientId, newIdentityProviderRestrictions);
+            await adminStore.AddIdentityProviderRestrictionsToClientAsync(insert[0].ClientId, newIdentityProviderRestrictions);
 
             var finalList = new List<string>();
             finalList.AddRange(newIdentityProviderRestrictions);
             finalList.AddRange(originalIdentityProviderRestrictions);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.IdentityProviderRestrictions.Count(), finalList.Count);
 
@@ -604,24 +593,24 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             var originalIdentityProviderRestrictions = result.IdentityProviderRestrictions;
 
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> newIdentityProviderRestrictions = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddIdentityProviderRestrictionsToClientAsync(insert[0].Record.ClientId, newIdentityProviderRestrictions);
+            await adminStore.AddIdentityProviderRestrictionsToClientAsync(insert[0].ClientId, newIdentityProviderRestrictions);
 
             var finalList = new List<string>();
             finalList.AddRange(newIdentityProviderRestrictions);
             finalList.AddRange(originalIdentityProviderRestrictions);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.IdentityProviderRestrictions.Count(), finalList.Count);
 
@@ -630,8 +619,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsFalse(ff.Any());
 
 
-            await adminStore.DeleteIdentityProviderRestrictionsFromClientAsync(insert[0].Record.ClientId, result.IdentityProviderRestrictions);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteIdentityProviderRestrictionsFromClientAsync(insert[0].ClientId, result.IdentityProviderRestrictions);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.IdentityProviderRestrictions.Any());
@@ -642,24 +631,24 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             var original = result.PostLogoutRedirectUris;
 
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> newData = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddPostLogoutRedirectUrisToClientAsync(insert[0].Record.ClientId, newData);
+            await adminStore.AddPostLogoutRedirectUrisToClientAsync(insert[0].ClientId, newData);
 
             var finalList = new List<string>();
             finalList.AddRange(original);
             finalList.AddRange(newData);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.PostLogoutRedirectUris.Count(), finalList.Count);
 
@@ -673,24 +662,24 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             var original = result.PostLogoutRedirectUris;
 
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> newData = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddPostLogoutRedirectUrisToClientAsync(insert[0].Record.ClientId, newData);
+            await adminStore.AddPostLogoutRedirectUrisToClientAsync(insert[0].ClientId, newData);
 
             var finalList = new List<string>();
             finalList.AddRange(original);
             finalList.AddRange(newData);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.PostLogoutRedirectUris.Count(), finalList.Count);
 
@@ -699,8 +688,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsFalse(ff.Any());
 
 
-            await adminStore.DeletePostLogoutRedirectUrisFromClientAsync(insert[0].Record.ClientId, result.PostLogoutRedirectUris);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeletePostLogoutRedirectUrisFromClientAsync(insert[0].ClientId, result.PostLogoutRedirectUris);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.PostLogoutRedirectUris.Any());
@@ -711,24 +700,24 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             var original = result.RedirectUris;
 
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             List<string> newData = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddRedirectUrisToClientAsync(insert[0].Record.ClientId, newData);
+            await adminStore.AddRedirectUrisToClientAsync(insert[0].ClientId, newData);
 
             var finalList = new List<string>();
             finalList.AddRange(original);
             finalList.AddRange(newData);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.RedirectUris.Count(), finalList.Count);
 
@@ -742,23 +731,23 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             var original = result.RedirectUris;
 
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
             List<string> newData = new List<string>()
             {
                 Guid.NewGuid().ToString()
             };
 
-            await adminStore.AddRedirectUrisToClientAsync(insert[0].Record.ClientId, newData);
+            await adminStore.AddRedirectUrisToClientAsync(insert[0].ClientId, newData);
 
             var finalList = new List<string>();
             finalList.AddRange(original);
             finalList.AddRange(newData);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.RedirectUris.Count(), finalList.Count);
 
@@ -767,8 +756,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             Assert.IsFalse(ff.Any());
 
 
-            await adminStore.DeleteRedirectUrisFromClientAsync(insert[0].Record.ClientId, result.RedirectUris);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteRedirectUrisFromClientAsync(insert[0].ClientId, result.RedirectUris);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.RedirectUris.Any());
@@ -779,9 +768,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             var original = result.ClientSecrets;
 
@@ -801,9 +790,9 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(newSecrets);
 
 
-            await adminStore.AddClientSecretsToClientAsync(insert[0].Record.ClientId, newSecrets);
+            await adminStore.AddClientSecretsToClientAsync(insert[0].ClientId, newSecrets);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.ClientSecrets.Count(), finalList.Count);
 
@@ -817,9 +806,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             var original = result.ClientSecrets;
 
@@ -838,17 +827,17 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(original);
             finalList.AddRange(newSecrets);
 
-            await adminStore.AddClientSecretsToClientAsync(insert[0].Record.ClientId, newSecrets);
+            await adminStore.AddClientSecretsToClientAsync(insert[0].ClientId, newSecrets);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.ClientSecrets.Count(), finalList.Count);
 
             var ff = result.ClientSecrets.Except(finalList, SecretComparer.OrdinalIgnoreCase);
             Assert.IsFalse(ff.Any());
 
-            await adminStore.DeleteClientSecretsFromClientAsync(insert[0].Record.ClientId, result.ClientSecrets);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteClientSecretsFromClientAsync(insert[0].ClientId, result.ClientSecrets);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.ClientSecrets.Any());
@@ -858,9 +847,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             var original = result.Claims;
 
@@ -874,9 +863,9 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(newClaims);
 
 
-            await adminStore.AddClaimsToClientAsync(insert[0].Record.ClientId, newClaims);
+            await adminStore.AddClaimsToClientAsync(insert[0].ClientId, newClaims);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Claims.Count(), finalList.Count);
 
@@ -890,9 +879,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             var original = result.Claims;
 
@@ -906,17 +895,17 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(newClaims);
 
 
-            await adminStore.AddClaimsToClientAsync(insert[0].Record.ClientId, newClaims);
+            await adminStore.AddClaimsToClientAsync(insert[0].ClientId, newClaims);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Claims.Count(), finalList.Count);
 
             var ff = result.Claims.Except(finalList, ClaimComparer.DeepComparer);
             Assert.IsFalse(ff.Any());
 
-            await adminStore.DeleteClaimsFromClientAsync(insert[0].Record.ClientId, result.Claims);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.DeleteClaimsFromClientAsync(insert[0].ClientId, result.Claims);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.Claims.Any());
@@ -927,9 +916,9 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var adminStore = new IdentityServer3AdminStore();
             var insert = await CassandraTestHelper.InsertTestData_Clients(1);
-            var result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            var result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
-            Assert.AreEqual(insert[0].Record.ClientName, result.ClientName);
+            Assert.AreEqual(insert[0].ClientName, result.ClientName);
 
             var original = result.Claims;
 
@@ -943,9 +932,9 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(newClaims);
 
 
-            await adminStore.AddClaimsToClientAsync(insert[0].Record.ClientId, newClaims);
+            await adminStore.AddClaimsToClientAsync(insert[0].ClientId, newClaims);
 
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Claims.Count(), finalList.Count);
 
@@ -960,8 +949,8 @@ namespace P5.IdentityServer3.Cassandra.Test
             finalList.AddRange(original);
             finalList.AddRange(newClaims);
 
-            await adminStore.UpdateClaimsInClientAsync(insert[0].Record.ClientId, newClaims);
-            result = await adminStore.FindClientByIdAsync(insert[0].Record.ClientId);
+            await adminStore.UpdateClaimsInClientAsync(insert[0].ClientId, newClaims);
+            result = await adminStore.FindClientByIdAsync(insert[0].ClientId);
             Assert.IsNotNull(result);
 
 
@@ -980,9 +969,9 @@ namespace P5.IdentityServer3.Cassandra.Test
             var insert = await CassandraTestHelper.InsertTestData_Clients(nNumber);
             foreach (var item in insert)
             {
-                var result = await adminStore.FindClientByIdAsync(item.Record.ClientId);
+                var result = await adminStore.FindClientByIdAsync(item.ClientId);
                 Assert.IsNotNull(result);
-                Assert.AreEqual(item.Record.ClientName, result.ClientName);
+                Assert.AreEqual(item.ClientName, result.ClientName);
             }
 
 

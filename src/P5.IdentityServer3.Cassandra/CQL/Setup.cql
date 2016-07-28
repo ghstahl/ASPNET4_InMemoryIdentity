@@ -169,8 +169,7 @@ CREATE TABLE IF NOT EXISTS Secret_Value_Hash_Protected_Password (
 );
 
 CREATE TABLE IF NOT EXISTS clients_by_id (
-    id uuid,
-    AbsoluteRefreshTokenLifetime int,
+	AbsoluteRefreshTokenLifetime int,
     AccessTokenLifetime int,
     AccessTokenType int,
     AllowAccessToAllCustomGrantTypes boolean,
@@ -206,7 +205,7 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
     RequireSignOutPrompt boolean,
     SlidingRefreshTokenLifetime int,
     UpdateAccessTokenClaimsOnRefresh boolean,
-    PRIMARY KEY (id)
+    PRIMARY KEY (ClientId)
 );
 
 CREATE TABLE IF NOT EXISTS consent_by_id (

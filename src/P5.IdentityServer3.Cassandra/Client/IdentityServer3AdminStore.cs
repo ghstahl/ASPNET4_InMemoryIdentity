@@ -44,11 +44,6 @@ namespace P5.IdentityServer3.Cassandra
             await ClientStore.DeleteClientAsync(clientId);
         }
 
-        public async Task DeleteClientAsync(Guid id)
-        {
-            await ClientStore.DeleteClientAsync(id);
-        }
-
         public async Task CleanupClientByIdAsync(string clientId)
         {
             await ClientStore.CleanupClientByIdAsync(clientId);

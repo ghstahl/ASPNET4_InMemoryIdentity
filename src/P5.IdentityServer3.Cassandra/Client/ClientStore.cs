@@ -75,7 +75,7 @@ namespace P5.IdentityServer3.Cassandra
                 {
                     await ResilientSessionContainer.EstablishSessionAsync();
                     await ResilientSessionContainer.ResilientSession.UpsertClientAsync(
-                        new FlattenedClientRecord(new FlattenedClientHandle(client)));
+                        new FlattenedClientHandle(client));
                 },
                 async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }
@@ -92,17 +92,6 @@ namespace P5.IdentityServer3.Cassandra
 
         }
 
-        public async Task DeleteClientAsync(Guid id)
-        {
-            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
-                async () =>
-                {
-                    await ResilientSessionContainer.EstablishSessionAsync();
-                    await ResilientSessionContainer.ResilientSession.DeleteClientByIdAsync(id);
-                },
-                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
-
-        }
 
         public async Task CleanupClientByIdAsync(string clientId)
         {

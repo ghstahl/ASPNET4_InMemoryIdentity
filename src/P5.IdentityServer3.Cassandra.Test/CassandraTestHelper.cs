@@ -81,7 +81,7 @@ namespace P5.IdentityServer3.Cassandra.Test
             return result;
         }
 
-        public static async Task<List<FlattenedClientRecord>> InsertTestData_Clients(int count = 1)
+        public static async Task<List<FlattenedClientHandle>> InsertTestData_Clients(int count = 1)
         {
             var dao = new IdentityServer3CassandraDao();
             await dao.EstablishConnectionAsync();
@@ -91,7 +91,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                 let c = item.Record.Name
                 select c).ToList();
 
-            List<FlattenedClientRecord> result = new List<FlattenedClientRecord>();
+            List<FlattenedClientHandle> result = new List<FlattenedClientHandle>();
             for (int i = 0; i < count; ++i)
             {
                 var name = "ClientName:" + Guid.NewGuid();
@@ -163,7 +163,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                         "PostLogoutRedirectUris 2:" + i
                     }
                 };
-                FlattenedClientRecord clientrecord = new FlattenedClientRecord(new FlattenedClientHandle(client));
+                var clientrecord = new FlattenedClientHandle(client);
                 await dao.UpsertClientAsync(clientrecord);
 
                 result.Add(clientrecord);
@@ -276,7 +276,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                     Key = Guid.NewGuid().ToString(),
                     Audience = "Audience:" + i,
                     Claims = JsonConvert.SerializeObject(claims),
-                    ClientId = client.Record.ClientId,
+                    ClientId = client.ClientId,
                     CreationTime = DateTimeOffset.UtcNow,
                     Expires = DateTimeOffset.UtcNow,
                     Issuer = "Issuer:" + i,
@@ -299,7 +299,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             var client = insertClients[0];
             var subject = Guid.NewGuid().ToString();
-            return await InsertTestData_Consents(client.Record.ClientId,subject, count);
+            return await InsertTestData_Consents(client.ClientId,subject, count);
         }
         public static async Task<List<FlattenedConsentHandle>> InsertTestData_Consents(string clientId,string subject,int count = 1)
         {

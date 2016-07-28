@@ -98,7 +98,7 @@ namespace P5.IdentityServer3.Cassandra.Test
                 Key = Guid.NewGuid().ToString(),
                 Audience = "Audience:"+i,
                 Claims = JsonConvert.SerializeObject(claims),
-                ClientId = insert[0].Record.ClientId,
+                ClientId = insert[0].ClientId,
                 CreationTime = DateTimeOffset.UtcNow,
                 Expires = DateTimeOffset.UtcNow,
                 Issuer = "Issuer:"+i,

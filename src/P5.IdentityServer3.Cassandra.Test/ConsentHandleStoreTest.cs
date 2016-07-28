@@ -33,7 +33,7 @@ namespace P5.IdentityServer3.Cassandra.Test
         {
             var store = new ConsentStore();
             var insertClients = await CassandraTestHelper.InsertTestData_Clients(1);
-            var client = insertClients[0].Record;
+            var client = insertClients[0];
             Consent consent = new Consent()
             {
                 ClientId = client.ClientId,
@@ -81,7 +81,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             foreach (var client in insertClients)
             {
-                await CassandraTestHelper.InsertTestData_Consents(client.Record.ClientId, subject, 1);
+                await CassandraTestHelper.InsertTestData_Consents(client.ClientId, subject, 1);
             }
 
             var result = await store.LoadAllAsync(subject);
@@ -98,7 +98,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             foreach (var client in insertClients)
             {
-                await CassandraTestHelper.InsertTestData_Consents(client.Record.ClientId, subject, 1);
+                await CassandraTestHelper.InsertTestData_Consents(client.ClientId, subject, 1);
             }
 
             var result = await store.LoadAllAsync(subject);
@@ -106,7 +106,7 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             foreach (var client in insertClients)
             {
-                await store.RevokeAsync(subject, client.Record.ClientId);
+                await store.RevokeAsync(subject, client.ClientId);
             }
             result = await store.LoadAllAsync(subject);
             Assert.AreEqual(0, result.Count());

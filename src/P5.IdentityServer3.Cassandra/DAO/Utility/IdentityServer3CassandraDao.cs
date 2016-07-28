@@ -49,11 +49,11 @@ namespace P5.IdentityServer3.Cassandra.DAO
 		{
 			#region PREPARED STATEMENTS for Utility
 
-			/*
+            /*
 						 ************************************************
 
 CREATE TABLE IF NOT EXISTS clients_by_id (
-	id uuid,
+	
 	AbsoluteRefreshTokenLifetime int,
 	AccessTokenLifetime int,
 	AccessTokenType int,
@@ -90,17 +90,50 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 	RequireSignOutPrompt boolean,
 	SlidingRefreshTokenLifetime int,
 	UpdateAccessTokenClaimsOnRefresh boolean,
-	PRIMARY KEY (id)
+	PRIMARY KEY (ClientId)
 );
 						 ************************************************
 						 */
-		    CreateTableStatemens = new List<string>()
+            CreateTableStatemens = new List<string>()
 		    {
 		        //////////////////////////////////////////////////////////////////////
+		        //AuthorizationCodeHandle_By_ClientId//////////////////////////////////////////////////////
+		        //////////////////////////////////////////////////////////////////////
+		        @"CREATE TABLE IF NOT EXISTS AuthorizationCodeHandle_By_ClientId (" +
+		        @"ClaimIdentityRecords text," +
+		        @"ClientId text," +
+		        @"CreationTime timestamp," +
+		        @"Expires timestamp," +
+		        @"IsOpenId boolean," +
+		        @"Key text," +
+		        @"Nonce text," +
+		        @"RedirectUri text," +
+		        @"RequestedScopes text," +
+		        @"SubjectId text," +
+		        @"WasConsentShown boolean," +
+		        @"PRIMARY KEY (ClientId,Key))",
+
+                //////////////////////////////////////////////////////////////////////
+		        //AuthorizationCodeHandle_By_Key//////////////////////////////////////////////////////
+		        //////////////////////////////////////////////////////////////////////
+		        @"CREATE TABLE IF NOT EXISTS AuthorizationCodeHandle_By_Key (" +
+		        @"ClaimIdentityRecords text," +
+		        @"ClientId text," +
+		        @"CreationTime timestamp," +
+		        @"Expires timestamp," +
+		        @"IsOpenId boolean," +
+		        @"Key text," +
+		        @"Nonce text," +
+		        @"RedirectUri text," +
+		        @"RequestedScopes text," +
+		        @"SubjectId text," +
+		        @"WasConsentShown boolean," +
+		        @"PRIMARY KEY (Key))",
+                
+                //////////////////////////////////////////////////////////////////////
 		        //clients_by_id//////////////////////////////////////////////////////
 		        //////////////////////////////////////////////////////////////////////
 		        @"CREATE TABLE IF NOT EXISTS clients_by_id (" +
-		        @"Id uuid," +
 		        @"AbsoluteRefreshTokenLifetime int," +
 		        @"AccessTokenLifetime int," +
 		        @"AccessTokenType int," +
@@ -137,26 +170,7 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 		        @"RequireSignOutPrompt boolean," +
 		        @"SlidingRefreshTokenLifetime int," +
 		        @"UpdateAccessTokenClaimsOnRefresh boolean," +
-		        @"PRIMARY KEY (Id))",
-
-		        //////////////////////////////////////////////////////////////////////
-		        //secret_value_hash_protected_password ///////////////////////////////
-		        //////////////////////////////////////////////////////////////////////
-
-		        @"CREATE TABLE IF NOT EXISTS secret_value_hash_protected_password (" +
-		        @"Value text," +
-		        @"ProtectedValue text," +
-		        @"PRIMARY KEY (Value))",
-
-		        //////////////////////////////////////////////////////////////////////
-		        //consent_by_id //////////////////////////////////////////////////////
-		        //////////////////////////////////////////////////////////////////////
-		        @"CREATE TABLE IF NOT EXISTS consent_by_id (" +
-		        @"id uuid," +
-		        @"ClientId text," +
-		        @"Scopes text," +
-		        @"Subject text," +
-		        @"PRIMARY KEY (id,Subject))",
+		        @"PRIMARY KEY (clientid))",
 
 		        //////////////////////////////////////////////////////////////////////
 		        //consent_by_clientid//////////////////////////////////////////////////////
@@ -167,6 +181,25 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 		        @"Scopes text," +
 		        @"Subject text," +
 		        @"PRIMARY KEY (ClientId,Subject))",
+
+                //////////////////////////////////////////////////////////////////////
+		        //consent_by_id //////////////////////////////////////////////////////
+		        //////////////////////////////////////////////////////////////////////
+		        @"CREATE TABLE IF NOT EXISTS consent_by_id (" +
+		        @"id uuid," +
+		        @"ClientId text," +
+		        @"Scopes text," +
+		        @"Subject text," +
+		        @"PRIMARY KEY (id,Subject))",
+
+		        //////////////////////////////////////////////////////////////////////
+		        //secret_value_hash_protected_password ///////////////////////////////
+		        //////////////////////////////////////////////////////////////////////
+
+		        @"CREATE TABLE IF NOT EXISTS secret_value_hash_protected_password (" +
+		        @"Value text," +
+		        @"ProtectedValue text," +
+		        @"PRIMARY KEY (Value))",
 
 		        //////////////////////////////////////////////////////////////////////
 		        //TokenHandle_By_Key//////////////////////////////////////////////////////
@@ -228,40 +261,6 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 		        @"Lifetime int," +
 		        @"SubjectId text," +
 		        @"Version int," +
-		        @"PRIMARY KEY (ClientId,Key))",
-
-		        //////////////////////////////////////////////////////////////////////
-		        //AuthorizationCodeHandle_By_Key//////////////////////////////////////////////////////
-		        //////////////////////////////////////////////////////////////////////
-		        @"CREATE TABLE IF NOT EXISTS AuthorizationCodeHandle_By_Key (" +
-		        @"ClaimIdentityRecords text," +
-		        @"ClientId text," +
-		        @"CreationTime timestamp," +
-		        @"Expires timestamp," +
-		        @"IsOpenId boolean," +
-		        @"Key text," +
-		        @"Nonce text," +
-		        @"RedirectUri text," +
-		        @"RequestedScopes text," +
-		        @"SubjectId text," +
-		        @"WasConsentShown boolean," +
-		        @"PRIMARY KEY (Key))",
-
-		        //////////////////////////////////////////////////////////////////////
-		        //AuthorizationCodeHandle_By_ClientId//////////////////////////////////////////////////////
-		        //////////////////////////////////////////////////////////////////////
-		        @"CREATE TABLE IF NOT EXISTS AuthorizationCodeHandle_By_ClientId (" +
-		        @"ClaimIdentityRecords text," +
-		        @"ClientId text," +
-		        @"CreationTime timestamp," +
-		        @"Expires timestamp," +
-		        @"IsOpenId boolean," +
-		        @"Key text," +
-		        @"Nonce text," +
-		        @"RedirectUri text," +
-		        @"RequestedScopes text," +
-		        @"SubjectId text," +
-		        @"WasConsentShown boolean," +
 		        @"PRIMARY KEY (ClientId,Key))",
 
 		        //////////////////////////////////////////////////////////////////////
@@ -346,14 +345,9 @@ CREATE TABLE IF NOT EXISTS clients_by_id (
 		    };
 
 
-
-
-
-
 			IndexStatements = new List<string>()
 			{
-				@"CREATE INDEX IF NOT EXISTS ON clients_by_id (ClientId)",
-
+				
 				@"CREATE INDEX IF NOT EXISTS ON AuthorizationCodeHandle_By_ClientId (SubjectId)",
 				@"CREATE INDEX IF NOT EXISTS ON AuthorizationCodeHandle_By_ClientId (Key)",
 

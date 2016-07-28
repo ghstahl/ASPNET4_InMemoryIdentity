@@ -48,7 +48,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
             /*
                          ************************************************
-                            id uuid,
+                          
                             AbsoluteRefreshTokenLifetime int,
                             AccessTokenLifetime int,
                             AccessTokenType int,
@@ -91,15 +91,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 new AsyncLazy<PreparedStatement>(
                     () => _cassandraSession.PrepareAsync("SELECT * " +
                                                          "FROM clients_by_id " +
-                                                         "WHERE id = ?"));
+                                                         "WHERE clientid = ?"));
             _CreateClientById =
                 new AsyncLazy<PreparedStatement>(
                     () =>
                     {
                         var result = _cassandraSession.PrepareAsync(
                             @"INSERT INTO " +
-                            @"clients_by_id (id,AbsoluteRefreshTokenLifetime,AccessTokenLifetime,AccessTokenType,AllowAccessToAllCustomGrantTypes,AllowAccessToAllScopes ,AllowAccessTokensViaBrowser ,AllowClientCredentialsOnly ,AllowedCorsOrigins ,AllowedCustomGrantTypes ,AllowedScopes ,AllowRememberConsent ,AlwaysSendClientClaims ,AuthorizationCodeLifetime ,Claims ,ClientId ,ClientName ,ClientSecrets ,ClientUri ,Enabled ,EnableLocalLogin ,Flow ,IdentityProviderRestrictions ,IdentityTokenLifetime ,IncludeJwtId ,LogoUri ,LogoutSessionRequired ,LogoutUri ,PostLogoutRedirectUris ,PrefixClientClaims ,RedirectUris ,RefreshTokenExpiration ,RefreshTokenUsage ,RequireConsent ,RequireSignOutPrompt,SlidingRefreshTokenLifetime,UpdateAccessTokenClaimsOnRefresh) " +
-                            @"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                            @"clients_by_id (AbsoluteRefreshTokenLifetime,AccessTokenLifetime,AccessTokenType,AllowAccessToAllCustomGrantTypes,AllowAccessToAllScopes ,AllowAccessTokensViaBrowser ,AllowClientCredentialsOnly ,AllowedCorsOrigins ,AllowedCustomGrantTypes ,AllowedScopes ,AllowRememberConsent ,AlwaysSendClientClaims ,AuthorizationCodeLifetime ,Claims ,ClientId ,ClientName ,ClientSecrets ,ClientUri ,Enabled ,EnableLocalLogin ,Flow ,IdentityProviderRestrictions ,IdentityTokenLifetime ,IncludeJwtId ,LogoUri ,LogoutSessionRequired ,LogoutUri ,PostLogoutRedirectUris ,PrefixClientClaims ,RedirectUris ,RefreshTokenExpiration ,RefreshTokenUsage ,RequireConsent ,RequireSignOutPrompt,SlidingRefreshTokenLifetime,UpdateAccessTokenClaimsOnRefresh) " +
+                            @"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                         return result;
                     });
             _DeleteClientById =
@@ -108,7 +108,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     {
                         var result = _cassandraSession.PrepareAsync(
                             @"Delete FROM clients_by_id " +
-                            @"WHERE id = ?");
+                            @"WHERE clientid = ?");
                         return result;
                     });
 
@@ -116,18 +116,18 @@ namespace P5.IdentityServer3.Cassandra.DAO
             #endregion
         }
 
-        public async Task<bool> DeleteClientByIdAsync(Guid id,
+        public async Task<bool> DeleteClientByClientIdAsync(string clientId,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
-                if (id == Guid.Empty)
-                    throw new ArgumentNullException("id");
+                if (string.IsNullOrEmpty(clientId))
+                    throw new ArgumentNullException("clientId");
                 var session = CassandraSession;
                 cancellationToken.ThrowIfCancellationRequested();
 
                 PreparedStatement prepared = await _DeleteClientById;
-                BoundStatement bound = prepared.Bind(id);
+                BoundStatement bound = prepared.Bind(clientId);
 
                 await session.ExecuteAsync(bound).ConfigureAwait(false);
                 return true;
@@ -139,34 +139,14 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public async Task<bool> DeleteClientByClientIdAsync(string clientId,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                if (clientId == null)
-                    throw new ArgumentNullException("clientId");
-                var record =
-                    new FlattenedClientRecord(new FlattenedClientHandle(new global::IdentityServer3.Core.Models.Client()
-                    {
-                        ClientId = clientId
-                    }));
-                return await DeleteClientByIdAsync(record.Id);
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-        }
 
-
-        public async Task<bool> UpsertClientAsync(FlattenedClientRecord client,
+        public async Task<bool> UpsertClientAsync(FlattenedClientHandle client,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
                 if (client == null)
-                    throw new ArgumentNullException("clients");
+                    throw new ArgumentNullException("client");
                 var session = CassandraSession;
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -193,7 +173,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                     throw new ArgumentNullException("client");
                 return
                     await
-                        UpsertClientAsync(new FlattenedClientRecord(new FlattenedClientHandle(client)),
+                        UpsertClientAsync(new FlattenedClientHandle(client),
                             cancellationToken);
             }
             catch (Exception e)
@@ -208,12 +188,12 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
-                Guid id = clientId.ClientIdToGuid();
+               
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
                 var record =
-                    await mapper.SingleAsync<FlattenedClientHandle>("SELECT * FROM clients_by_id WHERE id = ?", id);
+                    await mapper.SingleAsync<FlattenedClientHandle>("SELECT * FROM clients_by_id WHERE clientid = ?", clientId);
                 IClientHandle ch = record;
                 var result = await ch.MakeClientAsync();
                 return result;
@@ -224,35 +204,15 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public async Task<global::IdentityServer3.Core.Models.Client> FindClientByIdAsync(Guid id,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                var session = CassandraSession;
-                IMapper mapper = new Mapper(session);
-                cancellationToken.ThrowIfCancellationRequested();
-                var record =
-                    await mapper.SingleAsync<FlattenedClientHandle>("SELECT * FROM clients_by_id WHERE id = ?", id);
-                IClientHandle ch = record;
-                var result = await ch.MakeClientAsync();
-                return result;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
 
         public async Task<List<BoundStatement>> BuildBoundStatements_ForCreate(
-            FlattenedClientRecord record)
+            FlattenedClientHandle record)
         {
             var result = new List<BoundStatement>();
 
-            var client = record.Record;
+            var client = record;
             PreparedStatement prepared = await _CreateClientById;
             BoundStatement bound = prepared.Bind(
-                record.Id,
                 client.AbsoluteRefreshTokenLifetime,
                 client.AccessTokenLifetime,
                 (int) client.AccessTokenType,
@@ -305,7 +265,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             {
                 stored.SetPropertyValue(value.Name, value.Value);
             }
-            await UpsertClientAsync(new FlattenedClientRecord(new FlattenedClientHandle(stored)), cancellationToken);
+            await UpsertClientAsync(new FlattenedClientHandle(stored), cancellationToken);
 
         }
 
