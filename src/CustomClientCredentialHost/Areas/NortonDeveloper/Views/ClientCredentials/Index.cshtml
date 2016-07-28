@@ -4,8 +4,15 @@
     ViewBag.Title = "Norton Developer - Client Credentials";
 }
 <div class="page-header">
-    <h1>Norton Developer - Client Credentials</h1>
+    <h1>@ViewBag.Title</h1>
 </div>
+<br />
+<span>
+    <a href="@Url.Action("New", "ClientCredentials")" class="btn btn-warning">
+        New Client
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+    </a>
+</span>
 
 <table class="table">
     <thead>
@@ -19,10 +26,10 @@
         {
             <tr>
                 <td>@client</td>
-            
+
                 <td>
                     <span>
-                        <a href="@Url.Action("Manage", "Home", new { id = client })" class="btn btn-warning">
+                        <a href="@Url.Action("Manage", "ClientCredentials", new { id = client })" class="btn btn-warning">
                             Manage
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </a>

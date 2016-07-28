@@ -67,8 +67,7 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
             }
 
             var adminStore = new IdentityServer3AdminStore();
-            IdentityServerUser idsUser = new IdentityServerUser() { Enabled = true, UserId = model.UserId };
-            await adminStore.CreateIdentityServerUserAsync(idsUser);
+          
 
             return RedirectToAction("Index");
         }
