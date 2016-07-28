@@ -10,7 +10,7 @@ using IdentityServer3.Core;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.ResponseHandling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using P5.IdentityServer3.Cassandra.Crypto;
 using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Common;
 using P5.IdentityServer3.Common.Extensions;
@@ -1008,9 +1008,14 @@ namespace P5.IdentityServer3.Cassandra.Test
 
             var value = Guid.NewGuid().ToString();
             var valueProtected = Guid.NewGuid().ToString();
-            await dao.AddSecretProtectedValue(value, valueProtected);
+            TripleDesEncryption tde = new TripleDesEncryption("test");
+            var eValueProtected = tde.Encrypt(valueProtected);
 
-            var fetchedValueProtected = await dao.FindSecretProtectedValue(value);
+            await dao.AddSecretProtectedValue(value, eValueProtected);
+
+            var eFetchedValueProtected = await dao.FindSecretProtectedValue(value);
+            var fetchedValueProtected = tde.Decrypt(eFetchedValueProtected);
+
             Assert.AreEqual(valueProtected, fetchedValueProtected);
 
             await dao.DeleteSecretProtectedValue(value);
