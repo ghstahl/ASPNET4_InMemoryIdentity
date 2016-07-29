@@ -103,17 +103,40 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
                     AccessTokenType = AccessTokenType.Reference
                 }
          * */
+        public async Task<ActionResult> Delete(string clientId)
+        {
+            var adminStore = new IdentityServer3AdminStore();
+            var client = await adminStore.FindClientByIdAsync(clientId);
+
+            var clientVM = new ClientViewModel
+            {
+                ClientId = client.ClientId,
+                ClientName = client.ClientName
+            };
+            return View(clientVM);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Delete(ClientViewModel model)
+        {
+            var adminStore = new IdentityServer3AdminStore();
+            await
+                adminStore.DeleteClientIdsByUserIdAsync(User.Identity.GetUserId(), new List<string>() {model.ClientId});
+            await adminStore.DeleteClientAsync(model.ClientId);
+            return RedirectToAction("Index");
+        }
+
         public async Task<ActionResult> New()
         {
             var client = new ClientViewModel
             {
                 ClientId = Guid.NewGuid().ToString(),
                 Enabled = true,
-                Flow = Flows.ClientCredentials,AccessTokenType = AccessTokenType.Jwt
+                Flow = Flows.ClientCredentials,
+                AccessTokenType = AccessTokenType.Jwt
             };
             return View(client);
         }
-
         [HttpPost]
         public async Task<ActionResult> New(ClientViewModel model)
         {

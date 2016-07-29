@@ -14,6 +14,10 @@
         Manage Scopes
         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
     </a>
+    <a href="@Url.Action("Delete", "ClientCredentials", new { clientId = Model.ClientId })" class="btn btn-primary">
+        Delete
+        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </a>
     <a href="@Url.Action("Index", "ClientCredentials")" class="btn btn-primary">
         Cancel
         <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>

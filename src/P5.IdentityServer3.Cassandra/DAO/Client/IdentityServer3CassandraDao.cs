@@ -117,8 +117,12 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
+
                 if (string.IsNullOrEmpty(clientId))
                     throw new ArgumentNullException("clientId");
+
+                await DeleteSecretProtectedValue(new ProtectedSecretQueryValues() { ClientId = clientId });
+                
                 var session = CassandraSession;
                 cancellationToken.ThrowIfCancellationRequested();
 
