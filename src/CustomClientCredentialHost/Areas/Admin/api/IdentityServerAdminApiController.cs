@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -38,7 +40,24 @@ namespace CustomClientCredentialHost.Areas.Admin.api
             var scope = await adminStore.FindScopeByNameAsync(name);
             return scope;
         }
+        [Authorize]
+        [Route("who")]
+        [HttpGet]
+        public async Task<object> WhoMe()
+        {
+            var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
+            var principal = User as ClaimsPrincipal;
+            if (claimsIdentity != null)
+            {
+                 return from c in claimsIdentity.Claims
+                   select new
+                   {
+                       c.Type,
+                       c.Value
+                   };
+            }
+            return new{};
+        }
 
-       
     }
 }

@@ -105,7 +105,12 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
          * */
         public async Task<ActionResult> New()
         {
-            var client = new ClientViewModel { ClientId = Guid.NewGuid().ToString(), Flow = Flows.ClientCredentials,AccessTokenType = AccessTokenType.Jwt};
+            var client = new ClientViewModel
+            {
+                ClientId = Guid.NewGuid().ToString(),
+                Enabled = true,
+                Flow = Flows.ClientCredentials,AccessTokenType = AccessTokenType.Jwt
+            };
             return View(client);
         }
 

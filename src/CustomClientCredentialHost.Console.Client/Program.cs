@@ -80,7 +80,7 @@ namespace CustomClientCredentialHost.Console.Client
             var client = new HttpClient();
             client.SetBearerToken(response.AccessToken);
 
-            var result = client.GetStringAsync(domain_root + "/api/identity");
+            var result = client.GetStringAsync(domain_root + "/api/v1/IDSAdmin/who");
 
             try
             {
@@ -102,7 +102,7 @@ namespace CustomClientCredentialHost.Console.Client
         {
             var client = new HttpClient();
 
-            var result = client.GetStringAsync(domain_root + "/api/test");
+            var result = client.GetStringAsync(domain_root + "/api/v1/IDSAdmin/who");
 
             try
             {
@@ -124,8 +124,8 @@ namespace CustomClientCredentialHost.Console.Client
         {
             var client = new TokenClient(
                 token_endpoint,
-                "silicon",
-                "secret");
+                "9bdd52a6-9762-4493-b3d2-0e17d7603a4a",
+                "8fbf9557-d43b-47d5-b5a7-f423f174c3cd");
             var customParams = new Dictionary<string, string>
             {
                 { "handler", "openid-provider" },
