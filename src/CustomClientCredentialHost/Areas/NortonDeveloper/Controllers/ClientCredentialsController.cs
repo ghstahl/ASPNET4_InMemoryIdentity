@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using CustomClientCredentialHost.Areas.Admin.Controllers;
 using CustomClientCredentialHost.Areas.Admin.Models;
 using CustomClientCredentialHost.Areas.NortonDeveloper.Models;
 using IdentityServer3.Core.Models;
@@ -15,6 +16,18 @@ using P5.IdentityServer3.Common;
 
 namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
 {
+    public class ScopeEnabledRecord
+    {
+        public string Name { get; set; }
+        public bool Enabled { get; set; }
+    }
+    public class ClientScopeModel
+    {
+        public string ClientId { get; set; }
+
+        public List<ScopeEnabledRecord> UserScopes { get; set; }
+        public List<ScopeEnabledRecord> AllowedScopes { get; set; }
+    }
     public class ClientCredentialsController : Controller
     {
         // GET: NortonDeveloper/ClientCredentials
@@ -162,6 +175,72 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
                 new { clientId = model.ClientId,hash = model.Hash, openSecret = model.OpenSecret, passCode = model.PassCode });
 
         }
+
+        public async Task<ActionResult> ManageScopes(string clientId)
+        {
+            var adminStore = new IdentityServer3AdminStore();
+            var userScopes = await adminStore.FindScopesByUserAsync(User.Identity.GetUserId());
+            var queryUserScopes = from item in userScopes
+                let c = new ScopeEnabledRecord()
+                {
+                    Enabled = false,
+                    Name = item
+                }
+                select c;
+
+            var currentClient = await adminStore.FindClientByIdAsync(clientId);
+
+            var queryAllowedScopes = from item in currentClient.AllowedScopes
+                                  let c = new ScopeEnabledRecord()
+                                  {
+                                      Enabled = true,
+                                      Name = item
+                                  }
+                                  select c;
+
+            var model = new ClientScopeModel()
+            {
+                ClientId = clientId,
+                UserScopes = queryUserScopes.ToList(),
+                AllowedScopes = queryAllowedScopes.ToList()
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ManageScopes(ClientScopeModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var adminStore = new IdentityServer3AdminStore();
+            if (model.AllowedScopes != null)
+            {
+                // remove the ones that need to be removed
+                var queryToBeDeleted = (from item in model.AllowedScopes
+                                        where item.Enabled == false
+                                        select item.Name).ToList();
+                if (queryToBeDeleted.Any())
+                {
+                    await adminStore.DeleteScopesFromClientAsync(model.ClientId, queryToBeDeleted);
+                }
+            }
+            if (model.UserScopes != null)
+            {
+                var queryToBeAdded = (from item in model.UserScopes
+                                      where item.Enabled
+                                      select item.Name).ToList();
+                if (queryToBeAdded.Any())
+                {
+                    await adminStore.AddScopesToClientAsync(model.ClientId, queryToBeAdded);
+                }
+            }
+
+
+            return RedirectToAction("ManageScopes", new { clientId = model.ClientId});
+        }
+
         public async Task<ActionResult> Secret(string clientId)
         {
             var model = new SecretViewModel()

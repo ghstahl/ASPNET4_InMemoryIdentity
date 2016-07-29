@@ -7,12 +7,12 @@
 <h2>@ViewBag.Title</h2>
 <span>
     <a href="@Url.Action("Secret", "ClientCredentials", new { clientId = Model.ClientId })" class="btn btn-primary">
-        New Secret
-        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+        Manage Secrets
+        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
     </a>
-    <a href="@Url.Action("Scope", "ClientCredentials", new {clientId = Model.ClientId})" class="btn btn-primary">
-        Add Scope
-        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+    <a href="@Url.Action("ManageScopes", "ClientCredentials", new {clientId = Model.ClientId})" class="btn btn-primary">
+        Manage Scopes
+        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
     </a>
     <a href="@Url.Action("Index", "ClientCredentials")" class="btn btn-primary">
         Cancel
@@ -113,7 +113,7 @@
         <div class="col-md-offset-10 col-md-10">
             <input type="submit" class="btn btn-primary" value="Submit"/>
         </div>
-       
-       
+
+
     </div>
 }
