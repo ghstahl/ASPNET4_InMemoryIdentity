@@ -121,19 +121,21 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
 
             return RedirectToAction("Index");
         }
-        public async Task<ActionResult> ShowSecret(string hash)
+        public async Task<ActionResult> ShowSecret(string clientId,string hash)
         {
             var model = new ShowSecretViewModel()
             {
+                ClientId = clientId,
                 Hash = hash,
                 OpenSecret = "hidden for now"
             };
             return View(model);
         }
-        public async Task<ActionResult> ShowOpenSecret(string hash, string passCode, string openSecret)
+        public async Task<ActionResult> ShowOpenSecret(string clientId, string hash, string passCode, string openSecret)
         {
             var model = new ShowSecretViewModel()
             {
+                ClientId = clientId,
                 Hash = hash,
                 OpenSecret = openSecret,
                 PassCode = passCode
@@ -148,11 +150,16 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
                 return View(model);
             }
             var adminStore = new IdentityServer3AdminStore();
-            var protectedClientSecret = await adminStore.FindSecretProtectedValue(model.Hash);
+            ProtectedSecretQueryValues queryValues = new ProtectedSecretQueryValues()
+            {
+                ClientId = model.ClientId,
+                Value = model.Hash
+            };
+            var record = await adminStore.FindSecretProtectedValue(queryValues);
             var myCrypto = new TripleDesEncryption(model.PassCode);
-            model.OpenSecret = myCrypto.Decrypt(protectedClientSecret);
+            model.OpenSecret = myCrypto.Decrypt(record.ProtectedValue);
             return RedirectToAction("ShowOpenSecret",
-                new {hash = model.Hash, openSecret = model.OpenSecret, passCode = model.PassCode});
+                new { clientId = model.ClientId,hash = model.Hash, openSecret = model.OpenSecret, passCode = model.PassCode });
 
         }
         public async Task<ActionResult> Secret(string clientId)
@@ -178,7 +185,13 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
             var hashedClientSecret = model.OpenClientSecret.Sha256();
             var secret = new Secret(hashedClientSecret);
             var secrets = new List<Secret> {secret};
-            await adminStore.AddSecretProtectedValue(hashedClientSecret, protectedClientSecret);
+            ProtectedSecretHandle protectedSecretHandle = new ProtectedSecretHandle()
+            {
+                ClientId = model.ClientId,
+                Value = hashedClientSecret,
+                ProtectedValue = protectedClientSecret
+            };
+            await adminStore.AddSecretProtectedValue(protectedSecretHandle);
             await adminStore.AddClientSecretsToClientAsync(model.ClientId, secrets);
             return RedirectToAction("Index");
         }

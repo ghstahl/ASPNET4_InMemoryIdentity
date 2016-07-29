@@ -990,7 +990,7 @@ namespace P5.IdentityServer3.Cassandra.Test
         }
 
         [TestMethod]
-        public async Task Test_Add_Protected_SecrAsync()
+        public async Task Test_Add_Protected_Secret_Async()
         {
             var dao = new IdentityServer3CassandraDao();
             await dao.EstablishConnectionAsync();
@@ -1000,16 +1000,91 @@ namespace P5.IdentityServer3.Cassandra.Test
             TripleDesEncryption tde = new TripleDesEncryption("test");
             var eValueProtected = tde.Encrypt(valueProtected);
 
-            await dao.AddSecretProtectedValue(value, eValueProtected);
+            ProtectedSecretHandle handle = new ProtectedSecretHandle()
+            {
+                ClientId = Guid.NewGuid().ToString(),
+                Value = value,
+                ProtectedValue = eValueProtected
+            };
 
-            var eFetchedValueProtected = await dao.FindSecretProtectedValue(value);
-            var fetchedValueProtected = tde.Decrypt(eFetchedValueProtected);
+            await dao.AddSecretProtectedValue(handle);
+
+            ProtectedSecretQueryValues queryValues = new ProtectedSecretQueryValues()
+            {
+                ClientId = handle.ClientId,
+                Value = handle.Value
+            };
+
+            var record = await dao.FindSecretProtectedValue(queryValues);
+            var fetchedValueProtected = tde.Decrypt(record.ProtectedValue);
 
             Assert.AreEqual(valueProtected, fetchedValueProtected);
 
-            await dao.DeleteSecretProtectedValue(value);
-            fetchedValueProtected = await dao.FindSecretProtectedValue(value);
-            Assert.IsNull(fetchedValueProtected);
+            await dao.DeleteSecretProtectedValue(queryValues);
+            record = await dao.FindSecretProtectedValue(queryValues);
+            Assert.IsNull(record);
+        }
+
+        [TestMethod]
+        public async Task Test_Add_Protected_Secret_Delete_Many_Async()
+        {
+            var dao = new IdentityServer3CassandraDao();
+            await dao.EstablishConnectionAsync();
+
+            var value1 = Guid.NewGuid().ToString();
+            var valueProtected1 = Guid.NewGuid().ToString();
+            TripleDesEncryption tde = new TripleDesEncryption("test");
+            var eValueProtected1 = tde.Encrypt(valueProtected1);
+
+            ProtectedSecretHandle handle1 = new ProtectedSecretHandle()
+            {
+                ClientId = Guid.NewGuid().ToString(),
+                Value = value1,
+                ProtectedValue = eValueProtected1
+            };
+
+            var value2 = Guid.NewGuid().ToString();
+            var valueProtected2 = Guid.NewGuid().ToString();
+            var eValueProtected2 = tde.Encrypt(valueProtected2);
+            ProtectedSecretHandle handle2 = new ProtectedSecretHandle()
+            {
+                ClientId = handle1.ClientId,
+                Value = value2,
+                ProtectedValue = eValueProtected2
+            };
+            await dao.AddSecretProtectedValue(handle1);
+            await dao.AddSecretProtectedValue(handle2);
+
+            ProtectedSecretQueryValues queryValues1 = new ProtectedSecretQueryValues()
+            {
+                ClientId = handle1.ClientId,
+                Value = handle1.Value
+            };
+            ProtectedSecretQueryValues queryValues2 = new ProtectedSecretQueryValues()
+            {
+                ClientId = handle2.ClientId,
+                Value = handle2.Value
+            };
+
+            var record = await dao.FindSecretProtectedValue(queryValues1);
+            var fetchedValueProtected = tde.Decrypt(record.ProtectedValue);
+            Assert.AreEqual(valueProtected1, fetchedValueProtected);
+
+            record = await dao.FindSecretProtectedValue(queryValues2);
+            fetchedValueProtected = tde.Decrypt(record.ProtectedValue);
+            Assert.AreEqual(valueProtected2, fetchedValueProtected);
+
+            ProtectedSecretQueryValues queryValuesAll = new ProtectedSecretQueryValues()
+            {
+                ClientId = handle1.ClientId
+            };
+
+            await dao.DeleteSecretProtectedValue(queryValuesAll);
+            record = await dao.FindSecretProtectedValue(queryValues1);
+            Assert.IsNull(record);
+
+            record = await dao.FindSecretProtectedValue(queryValues2);
+            Assert.IsNull(record);
 
 
         }

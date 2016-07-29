@@ -34,36 +34,36 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-        public async Task<string> FindSecretProtectedValue(string secretValue)
+        public async Task<ProtectedSecretHandle> FindSecretProtectedValue(ProtectedSecretQueryValues queryValues)
         {
             var result = await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                   async () =>
                   {
                       await ResilientSessionContainer.EstablishSessionAsync();
-                      return await ResilientSessionContainer.ResilientSession.FindSecretProtectedValue(secretValue);
+                      return await ResilientSessionContainer.ResilientSession.FindSecretProtectedValue(queryValues);
                   },
-                  async (ex) => ResilientSessionContainer.HandleCassandraException<string>(ex));
+                  async (ex) => ResilientSessionContainer.HandleCassandraException<ProtectedSecretHandle>(ex));
             return result; 
         }
-
-        public async Task AddSecretProtectedValue(string secretValue, string protectedValue)
+        
+        public async Task AddSecretProtectedValue(ProtectedSecretHandle protectedSecretHandle)
         {
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                async () =>
                {
                    await ResilientSessionContainer.EstablishSessionAsync();
-                   await ResilientSessionContainer.ResilientSession.AddSecretProtectedValue(secretValue, protectedValue);
+                   await ResilientSessionContainer.ResilientSession.AddSecretProtectedValue(protectedSecretHandle);
                },
                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }
 
-        public async Task DeleteSecretProtectedValue(string secretValue)
+        public async Task DeleteSecretProtectedValue(ProtectedSecretQueryValues queryValues)
         {
             await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
                 async () =>
                 {
                     await ResilientSessionContainer.EstablishSessionAsync();
-                    await ResilientSessionContainer.ResilientSession.DeleteSecretProtectedValue(secretValue);
+                    await ResilientSessionContainer.ResilientSession.DeleteSecretProtectedValue(queryValues);
                 },
                 async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }

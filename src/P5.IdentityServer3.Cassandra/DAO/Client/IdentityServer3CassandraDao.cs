@@ -21,11 +21,7 @@ using StringComparer = System.StringComparer;
 
 namespace P5.IdentityServer3.Cassandra.DAO
 {
-    public class SecretValuePasswordRecord
-    {
-        public string Value { get; set; }
-        public string ProtectedValue { get; set; }
-    }
+
     public partial class IdentityServer3CassandraDao
     {
         //-----------------------------------------------
@@ -48,7 +44,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
             /*
                          ************************************************
-                          
+
                             AbsoluteRefreshTokenLifetime int,
                             AccessTokenLifetime int,
                             AccessTokenType int,
@@ -188,7 +184,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
         {
             try
             {
-               
+
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -543,8 +539,8 @@ namespace P5.IdentityServer3.Cassandra.DAO
             stored.Claims = finalList;
             await UpsertClientAsync(stored, cancellationToken);
         }
-
-        public async Task<string> FindSecretProtectedValue(string secretValue,
+         
+        public async Task<ProtectedSecretHandle> FindSecretProtectedValue(ProtectedSecretQueryValues queryValues,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -553,8 +549,9 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
 
-                var result = await mapper.FirstAsync<SecretValuePasswordRecord>("Where value=?",secretValue);
-                return result.ProtectedValue;
+                var result = await mapper.FirstAsync<ProtectedSecretHandle>("Where clientid = ? AND value=?", 
+                    queryValues.ClientId,queryValues.Value);
+                return result;
             }
             catch (Exception e)
             {
@@ -564,7 +561,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public async Task AddSecretProtectedValue(string secretValue,string protectedValue,
+        public async Task AddSecretProtectedValue(ProtectedSecretHandle protectedSecretHandle,
            CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -572,13 +569,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 cancellationToken.ThrowIfCancellationRequested();
                 var session = CassandraSession;
                 IMapper mapper = new Mapper(session);
-                var svpr = new SecretValuePasswordRecord()
-                {
-                    Value = secretValue,
-                    ProtectedValue = protectedValue
-                };
-               await mapper.InsertAsync(svpr);
-
+                await mapper.InsertAsync(protectedSecretHandle);
             }
             catch (Exception e)
             {
@@ -586,16 +577,26 @@ namespace P5.IdentityServer3.Cassandra.DAO
             }
         }
 
-        public async Task DeleteSecretProtectedValue(string secretValue,
+        public async Task DeleteSecretProtectedValue(ProtectedSecretQueryValues queryValues,
            CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             var session = CassandraSession;
             IMapper mapper = new Mapper(session);
 
-            var record = await
-                mapper.DeleteIfAsync<SecretValuePasswordRecord>(
-                    "WHERE value = ? ", secretValue);
+            AppliedInfo<ProtectedSecretHandle> appliedInfo;
+            if (string.IsNullOrEmpty(queryValues.Value))
+            {
+                appliedInfo = await
+                    mapper.DeleteIfAsync<ProtectedSecretHandle>(
+                        "Where clientid = ?", queryValues.ClientId);
+            }
+            else
+            {
+                appliedInfo = await
+                    mapper.DeleteIfAsync<ProtectedSecretHandle>(
+                        "Where clientid = ? AND value=?", queryValues.ClientId, queryValues.Value);
+            }
         }
 
         public async Task<Store.Core.Models.IPage<FlattenedClientHandle>> PageClientsAsync(int pageSize, byte[] pagingState,

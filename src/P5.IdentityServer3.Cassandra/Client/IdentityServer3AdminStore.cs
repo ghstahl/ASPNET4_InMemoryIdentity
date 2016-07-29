@@ -19,19 +19,19 @@ namespace P5.IdentityServer3.Cassandra
             get { return _ClientStore ?? (_ClientStore = new ClientStore()); }
         }
 
-        public async Task<string> FindSecretProtectedValue(string secretValue)
+        public async Task<ProtectedSecretHandle> FindSecretProtectedValue(ProtectedSecretQueryValues queryValues)
         {
-            return await ClientStore.FindSecretProtectedValue(secretValue);
+            return await ClientStore.FindSecretProtectedValue(queryValues);
         }
 
-        public async Task AddSecretProtectedValue(string secretValue, string protectedValue)
+        public async Task AddSecretProtectedValue(ProtectedSecretHandle handle)
         {
-            await ClientStore.AddSecretProtectedValue(secretValue, protectedValue);
+            await ClientStore.AddSecretProtectedValue(handle);
         }
 
-        public async Task DeleteSecretProtectedValue(string secretValue)
+        public async Task DeleteSecretProtectedValue(ProtectedSecretQueryValues queryValues)
         {
-            await ClientStore.DeleteSecretProtectedValue(secretValue);
+            await ClientStore.DeleteSecretProtectedValue(queryValues);
         }
 
         public async Task CreateClientAsync(global::IdentityServer3.Core.Models.Client client)
