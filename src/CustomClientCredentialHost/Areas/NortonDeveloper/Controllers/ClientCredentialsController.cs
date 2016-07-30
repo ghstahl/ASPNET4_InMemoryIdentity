@@ -65,17 +65,11 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
                 return View(model);
             }
 
-            Client client = new Client()
-            {
-                AccessTokenType = model.AccessTokenType,
-                Enabled = model.Enabled,
-                AllowedScopes = model.AllowedScopes,
-                ClientId = model.ClientId,
-                ClientName = model.ClientName,
-                ClientSecrets = model.ClientSecrets,
-                Flow = model.Flow
-            };
             var adminStore = new IdentityServer3AdminStore();
+            var client = await adminStore.FindClientByIdAsync(model.ClientId);
+            client.ClientName = model.ClientName;
+            client.Enabled = model.Enabled;
+
             await adminStore.CreateClientAsync(client);
             var clients = new List<string> { client.ClientId };
             await adminStore.AddClientIdToIdentityServerUserAsync(User.Identity.GetUserId(), clients);
