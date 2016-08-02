@@ -37,7 +37,7 @@ namespace P5.AspNet.Identity.Cassandra
                async () =>
                {
                    await ResilientSessionContainer.EstablishSessionAsync();
-                   await ResilientSessionContainer.ResilientSession.DeleteClaimHandleByUserIdAndTypeAsync(user.Id,claim.Type);
+                   await ResilientSessionContainer.ResilientSession.DeleteClaimHandleByUserIdTypeAndValueAsync(user.Id, claim.Type,claim.Value);
                },
                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
         }
