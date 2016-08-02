@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Http;
 using CustomClientCredentialHost.Areas.Admin.Models;
 using IdentityServer3.Core.Models;
+using Microsoft.AspNet.Identity.Owin;
 using P5.IdentityServer3.Cassandra;
 
 namespace CustomClientCredentialHost.Areas.Admin.api
@@ -12,7 +13,14 @@ namespace CustomClientCredentialHost.Areas.Admin.api
     [RoutePrefix("api/v1/IDSAdmin")]
     public partial class IdentityServerAdminApiController : ApiController
     {
-       
+        private ApplicationUserManager _userManager;
+
+        public ApplicationUserManager UserManager
+        {
+            get { return _userManager ?? HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>(); }
+            private set { _userManager = value; }
+        }
+
         [Authorize]
         [Route("who")]
         [HttpGet]
