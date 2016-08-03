@@ -27,10 +27,12 @@ namespace CustomClientCredentialHost.Areas.Admin.api
         // GET api/<controller>
         [Route("users/page/{pageSize:int}")]
         [HttpGet]
-        public async Task<PageRecord> PageUsersAsync(int pageSize,string pagingState)
+        public async Task<PageRecord> PageUsersAsync(int pageSize,string pagingState=null)
         {
+            var ps = string.IsNullOrEmpty(pagingState) ? null : Convert.FromBase64String(pagingState);
+
             var fullUserStore = UserManager.FullUserStore;
-            var page = await fullUserStore.PageUsersAsync(pageSize, null);
+            var page = await fullUserStore.PageUsersAsync(pageSize, ps);
             var state = HttpUtility.UrlEncode(page.PagingState);
             var record = new PageRecord()
             {

@@ -11,7 +11,7 @@ namespace CustomClientCredentialHost.Console.Client
 {
     class Program
     {
-        const string domain_root = "http://localhost:55970";
+        const string domain_root = "http://localhost:55979";
         const string identity_server_route = "/idsrv3core";
         const string identity_server_authority = domain_root + identity_server_route;
         const string token_endpoint = identity_server_authority + "/connect/token";
@@ -124,8 +124,8 @@ namespace CustomClientCredentialHost.Console.Client
         {
             var client = new TokenClient(
                 token_endpoint,
-                "9bdd52a6-9762-4493-b3d2-0e17d7603a4a",
-                "8fbf9557-d43b-47d5-b5a7-f423f174c3cd");
+                "122f6283-6980-4bf1-b2f0-10bdaa6c6d5b",
+                "7a1b3887-9fb8-451d-b86a-5fd9a0a86ed7");
             var customParams = new Dictionary<string, string>
             {
                 { "handler", "openid-provider" },

@@ -17,7 +17,11 @@ namespace CustomClientCredentialHost
 
             config
                 .EnableSwagger(c => c.SingleApiVersion("v1", "A title for your API"))
-                .EnableSwaggerUi();
+                .EnableSwaggerUi(c =>
+                {
+                    c.InjectJavaScript(typeof (Startup).Assembly,
+                        "CustomClientCredentialHost.SwaggerExtensions.onComplete.js");
+                });
         }
     }
 }

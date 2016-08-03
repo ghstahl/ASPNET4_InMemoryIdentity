@@ -21,3 +21,4 @@
 /// <reference path="../areas/identityadmin/react/src/actions/posts.js" />
 /// <reference path="bootstrap.min.js" />
 /// <reference path="jquery.validate.js" />
+/// <reference path="../swaggerextensions/oncomplete.js" />
