@@ -56,7 +56,7 @@ namespace CustomClientCredentialHost.Areas.Admin.api
             if (user != null)
             {
                 user.Enabled = enabled;
-                await adminStore.CreateIdentityServerUserAsync(user);
+                await adminStore.UpdateIdentityServerUserAsync(user);
             }
         }
 

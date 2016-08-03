@@ -23,10 +23,22 @@ namespace P5.IdentityServer3.Cassandra
                 async () =>
                 {
                     await ResilientSessionContainer.EstablishSessionAsync();
-                    return await ResilientSessionContainer.ResilientSession.UpsertIdentityServerUserAsync(user);
+                    return await ResilientSessionContainer.ResilientSession.CreateIdentityServerUserAsync(user);
                 },
                 async (ex) => ResilientSessionContainer.HandleCassandraException<IdentityServerStoreAppliedInfo>(ex));
             return result;
+        }
+
+        public async Task UpdateIdentityServerUserAsync(IdentityServerUser user)
+        {
+            await TryWithAwaitInCatch.ExecuteAndHandleErrorAsync(
+                async () =>
+                {
+                    await ResilientSessionContainer.EstablishSessionAsync();
+                    await ResilientSessionContainer.ResilientSession.UpdateIdentityServerUserAsync(user);
+                },
+                async (ex) => ResilientSessionContainer.HandleCassandraException<Task>(ex));
+
         }
 
         public async Task<bool> FindDoesUserExistByUserIdAsync(string userId)
@@ -95,7 +107,7 @@ namespace P5.IdentityServer3.Cassandra
             return result;
         }
 
-       
+
         public async Task<IdentityServerStoreAppliedInfo> AddScopesToIdentityServerUserAsync(
             string userId, IEnumerable<string> scopes)
         {

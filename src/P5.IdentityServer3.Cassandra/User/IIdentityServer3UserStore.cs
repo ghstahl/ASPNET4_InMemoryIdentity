@@ -16,6 +16,7 @@ namespace P5.IdentityServer3.Cassandra
         /// <param name="user"></param>
         /// <returns></returns>
         Task<IdentityServerStoreAppliedInfo> CreateIdentityServerUserAsync(IdentityServerUser user);
+        Task UpdateIdentityServerUserAsync(IdentityServerUser user);
 
         Task<bool> FindDoesUserExistByUserIdAsync(string userId);
         Task<IdentityServerUser> FindIdentityServerUserByUserIdAsync(string userId);

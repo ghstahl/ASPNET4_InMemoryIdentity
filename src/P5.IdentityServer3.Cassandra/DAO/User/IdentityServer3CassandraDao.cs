@@ -190,7 +190,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
 
 
-        public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUserModel user,
+        public async Task<IdentityServerStoreAppliedInfo> CreateIdentityServerUserAsync(IdentityServerUserModel user,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (user == null)
@@ -218,7 +218,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
 
         }
 
-        public async Task<IdentityServerStoreAppliedInfo> UpsertIdentityServerUserAsync(IdentityServerUser user,
+        public async Task<IdentityServerStoreAppliedInfo> CreateIdentityServerUserAsync(IdentityServerUser user,
             CancellationToken cancellationToken = default(CancellationToken))
         {
 
@@ -230,7 +230,7 @@ namespace P5.IdentityServer3.Cassandra.DAO
                 UserId = user.UserId,
                 UserName = user.UserName
             };
-            return await UpsertIdentityServerUserAsync(model,
+            return await CreateIdentityServerUserAsync(model,
                 cancellationToken);
         }
 
@@ -250,7 +250,42 @@ namespace P5.IdentityServer3.Cassandra.DAO
             await session.ExecuteAsync(batch).ConfigureAwait(false);
             return new IdentityServerStoreAppliedInfo(true);
         }
+        public async Task UpdateIdentityServerUserAsync(IdentityServerUserModel user,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (user == null)
+                throw new ArgumentNullException("user");
+            var session = CassandraSession;
+            IMapper mapper = new Mapper(session);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                await mapper.UpdateAsync(user);
+                 
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+             
+
+        }
 
 
+        public async Task UpdateIdentityServerUserAsync(IdentityServerUser user,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (user == null)
+                throw new ArgumentNullException("user");
+            var model = new IdentityServerUserModel()
+            {
+                Enabled = user.Enabled,
+                UserId = user.UserId,
+                UserName = user.UserName
+            };
+            await UpdateIdentityServerUserAsync(model,
+                cancellationToken);
+        }
     }
 }
