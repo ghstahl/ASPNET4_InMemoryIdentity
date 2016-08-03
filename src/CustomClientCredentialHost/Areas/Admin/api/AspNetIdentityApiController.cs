@@ -42,7 +42,7 @@ namespace CustomClientCredentialHost.Areas.Admin.api
             return record;
         }
         // GET api/<controller>
-        [Route("users")]
+        [Route("users/email")]
         [HttpGet]
         public async Task<CassandraUser> GetUserByEmailAsync(string email)
         {
@@ -52,7 +52,7 @@ namespace CustomClientCredentialHost.Areas.Admin.api
         }
 
         // GET api/<controller>
-        [Route("users")]
+        [Route("users/id")]
         [HttpGet]
         public async Task<CassandraUser> GetUserByIdAsync(string id)
         {
