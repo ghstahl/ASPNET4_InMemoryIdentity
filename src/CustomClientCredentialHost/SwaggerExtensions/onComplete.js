@@ -1,4 +1,8 @@
-﻿$('#input_apiKey').change(function () {
+﻿$(function () {
+    console.log("my custom load");
+});
+
+$('#input_apiKey').change(function () {
     var key = $('#input_apiKey')[0].value;
     var credentials = key.split(':'); //clientid:clientsecret:scope expected
     console.log(credentials);
