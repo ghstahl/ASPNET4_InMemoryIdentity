@@ -18,9 +18,11 @@ using P5.CassandraStore;
 using P5.CassandraStore.Settings;
 using P5.IdentityServer3.Cassandra;
 using P5.IdentityServer3.Cassandra.DAO;
+using P5.IdentityServer3.Cassandra.UserService;
 using P5.IdentityServer3.Common;
 using P5.IdentityServerCore.IdSrv;
 using P5.WebApi2.Hub;
+using Serilog;
 
 [assembly: OwinStartupAttribute(typeof(CustomClientCredentialHost.Startup))]
 
@@ -30,15 +32,19 @@ namespace CustomClientCredentialHost
     {
         public void Configuration(IAppBuilder app)
         {
-           
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Trace()
+                .CreateLogger();
 
             var builder = new ContainerBuilder();
 
             ConfigureAuth(app);
 
             var path = HostingEnvironment.MapPath("~/App_Data");
-
-            var userService = new Registration<IUserService>(new UserServiceBase());
+            var cassandraUserStore = new CassandraUserStore(CassandraAspNetIdentityOptions.CassandraConfig,
+                CassandraAspNetApplicationConstants.TenantGuid);
+            var userService = new Registration<IUserService>(new AspNetIdentityServerService(cassandraUserStore));
             IdentityServerServiceFactory identityServerServiceFactory;
 
           

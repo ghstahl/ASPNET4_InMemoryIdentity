@@ -45,6 +45,11 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Models
                 {
                     Name = "Client Credentials",
                     Flows = Flows.ClientCredentials
+                },
+                 new FlowsElement()
+                {
+                    Name = "Resource Owner",
+                    Flows = Flows.ResourceOwner
                 }
             };
         }

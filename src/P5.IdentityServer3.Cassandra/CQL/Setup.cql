@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS user_profile_by_id (
     PRIMARY KEY (id)
 );
 
+
 CREATE TABLE IF NOT EXISTS user_clientid (
     ClientId text,
    	UserId text,

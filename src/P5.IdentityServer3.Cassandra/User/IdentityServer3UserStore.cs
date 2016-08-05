@@ -8,7 +8,7 @@ using P5.IdentityServer3.Common;
 
 namespace P5.IdentityServer3.Cassandra
 {
-    public class IdentityServer3UserStore : IIdentityServer3UserStore
+    public  class IdentityServer3UserStore : IIdentityServer3UserStore
     {
         private ResilientSessionContainer _resilientSessionContainer;
 
