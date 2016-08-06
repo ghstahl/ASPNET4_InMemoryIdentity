@@ -18,6 +18,7 @@ namespace CustomClientCredentialHost.Console.Client
 
         static void Main(string[] args)
         {
+
             string m1 = "Type a string of text then press Enter. " +
                        "Type 'x' anywhere in the text to quit:\n";
             System.Console.WriteLine(m1);

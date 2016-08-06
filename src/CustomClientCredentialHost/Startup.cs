@@ -1,5 +1,7 @@
 ﻿#define CASSANDRA_STORE
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Reflection;
 using System.Web.Hosting;
 using System.Web.Http;
@@ -18,6 +20,7 @@ using P5.CassandraStore;
 using P5.CassandraStore.Settings;
 using P5.IdentityServer3.Cassandra;
 using P5.IdentityServer3.Cassandra.DAO;
+using P5.IdentityServer3.Cassandra.Settings;
 using P5.IdentityServer3.Cassandra.UserService;
 using P5.IdentityServer3.Common;
 using P5.IdentityServerCore.IdSrv;
@@ -28,10 +31,14 @@ using Serilog;
 
 namespace CustomClientCredentialHost
 {
+
     public partial class Startup
     {
         public void Configuration(IAppBuilder app)
         {
+            string _domain_root = ConfigurationManager.AppSettings["IdentityServer:Domain"];
+            IdentityServerSettings.DomainRoot = _domain_root;
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Trace()
@@ -47,7 +54,7 @@ namespace CustomClientCredentialHost
             var userService = new Registration<IUserService>(new AspNetIdentityServerService(cassandraUserStore));
             IdentityServerServiceFactory identityServerServiceFactory;
 
-          
+
 
 #if CASSANDRA_STORE
 
@@ -107,6 +114,9 @@ namespace CustomClientCredentialHost
                     },
                     {
                         "openid-provider",new CustomOpenIdClaimsProvider(resolver.Resolve<IUserService>())
+                    },
+                    {
+                        "arbritary-provider",new ArbritaryClaimsProvider(resolver.Resolve<IUserService>())
                     }
 
                 };
