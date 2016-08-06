@@ -83,7 +83,10 @@
     <Compile Include="Consent\FlattenedConsentHandle.cs" />
     <Compile Include="Consent\FlattenedConsentRecord.cs" />
     <Compile Include="Consent\IConsentHandle.cs" />
+    <Compile Include="Constants\ClaimTypes.cs" />
+    <Compile Include="Extensions\NameValueCollectionExtensions.cs" />
     <Compile Include="Extensions\PropertyExtension.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Helpers\GuidGenerator.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Models\DocumentMetaData.cs" />
@@ -92,6 +95,8 @@
     <Compile Include="Models\IDocumentRecord.cs" />
     <Compile Include="Models\ISimpleDocument.cs" />
     <Compile Include="Models\SimpleDocument.cs" />
+    <Compile Include="Providers\ArbritaryClaimsProvider.cs" />
+    <Compile Include="Providers\IOptionalParams.cs" />
     <Compile Include="RefreshToken\AbstractRefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenConstants.cs" />
     <Compile Include="RefreshToken\FlattenedRefreshTokenHandle.cs" />

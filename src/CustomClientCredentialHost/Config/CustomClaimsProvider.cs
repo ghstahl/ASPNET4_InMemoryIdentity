@@ -12,25 +12,13 @@ using IdentityServer3.Core.Services.Default;
 using IdentityServer3.Core.Validation;
 using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
-using P5.IdentityServerCore.Extensions;
+using P5.IdentityServer3.Common.Extensions;
+using P5.IdentityServer3.Common.Providers;
 
 namespace CustomClientCredentialHost.Config
 {
-    public interface IOptionalParams
-    {
-        void SetOptionalParams(IDictionary<string, string> optionalParams);
-    }
-    public static class CustomClaimsProviderHubExtension
-    {
-        public static bool Validate(this NameValueCollection nvc, IList<string> againstList)
-        {
-            if (againstList.Any(item => nvc[item] == null))
-            {
-                return false;
-            }
-            return true;
-        }
-    }
+
+
 
     public class CustomClaimsProviderHub : DefaultClaimsProvider
     {
@@ -51,81 +39,6 @@ namespace CustomClientCredentialHost.Config
         }
     }
 
-    class ArbritaryClaimsProvider : DefaultClaimsProvider, IOptionalParams
-    {
-        private static List<string> _requiredArguments;
-
-        private static List<string> RequiredArgument
-        {
-            get
-            {
-                return _requiredArguments ?? (_requiredArguments = new List<string>
-                {
-                    "arbritary-data"
-                });
-            }
-        }
-
-        private static List<string> _p5ClaimTypes;
-
-        private static List<string> P5ClaimTypes
-        {
-            get
-            {
-                if (_p5ClaimTypes == null)
-                {
-                    var myConstants = typeof (P5.IdentityServerCore.Constants.ClaimTypes).GetConstants<System.String>();
-                    var values = myConstants.GetConstantsValues<System.String>();
-                    _p5ClaimTypes = values.ToList();
-                }
-                return _p5ClaimTypes;
-            }
-        }
-
-        private static readonly ILog Logger = LogProvider.For<CustomOpenIdClaimsProvider>();
-
-        public ArbritaryClaimsProvider(IUserService users)
-            : base(users)
-        {
-        }
-
-        public override Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, Client client,
-            IEnumerable<Scope> scopes, ValidatedRequest request)
-        {
-            if (!request.Raw.Validate(RequiredArgument))
-            {
-                throw new Exception(string.Format("RequiredArgument failed need the following [{0}]",
-                    string.Join(",", RequiredArgument.ToArray())));
-            }
-
-            var result = base.GetAccessTokenClaimsAsync(subject, client, scopes, request);
-            var rr = request.Raw.AllKeys.ToDictionary(k => k, k => request.Raw[k]);
-            List<Claim> finalClaims = new List<Claim>(result.Result);
-            var arbData = rr["arbritary-data"];
-
-            finalClaims.Add(new Claim(P5.IdentityServerCore.Constants.ClaimTypes.ArbritaryData, arbData));
-
-            if (subject != null)
-            {
-                finalClaims.AddRange(subject.Claims.Where(p2 =>
-                    finalClaims.All(p1 => p1.Type != p2.Type)));
-            }
-
-            // if we find any, than add them to the original and send that back.
-            IEnumerable<Claim> claimresults = finalClaims;
-            var taskResult = Task.FromResult(claimresults);
-            return taskResult;
-
-        }
-
-        private IDictionary<string, string> _optionalParams;
-
-        public void SetOptionalParams(IDictionary<string, string> optionalParams)
-        {
-            _optionalParams = optionalParams;
-        }
-
-    }
 
     class CustomOpenIdClaimsProvider : DefaultClaimsProvider, IOptionalParams
     {
@@ -148,7 +61,7 @@ namespace CustomClientCredentialHost.Config
             {
                 if (_p5ClaimTypes == null)
                 {
-                    var myConstants = typeof(P5.IdentityServerCore.Constants.ClaimTypes).GetConstants<System.String>();
+                    var myConstants = typeof(P5.IdentityServer3.Common.Constants.ClaimTypes).GetConstants<System.String>();
                     var values = myConstants.GetConstantsValues<System.String>();
                     _p5ClaimTypes = values.ToList();
                 }
@@ -174,7 +87,7 @@ namespace CustomClientCredentialHost.Config
             var rr = request.Raw.AllKeys.ToDictionary(k => k, k => request.Raw[k]);
             List<Claim> finalClaims = new List<Claim>(result.Result);
             string output = JsonConvert.SerializeObject(rr);
-            finalClaims.Add(new Claim(P5.IdentityServerCore.Constants.ClaimTypes.ClientRequestNameValueCollection,output));
+            finalClaims.Add(new Claim(P5.IdentityServer3.Common.Constants.ClaimTypes.ClientRequestNameValueCollection, output));
 
             if (subject != null)
             {

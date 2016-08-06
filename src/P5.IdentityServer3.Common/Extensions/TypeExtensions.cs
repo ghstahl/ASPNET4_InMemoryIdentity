@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace P5.IdentityServerCore.Extensions
+namespace P5.IdentityServer3.Common.Extensions
 {
     public static class TypeExtensions
     {

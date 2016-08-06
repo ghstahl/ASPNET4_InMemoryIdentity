@@ -9,7 +9,7 @@ using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
 using IdentityServer3.Core.Validation;
 using Newtonsoft.Json;
-using P5.IdentityServerCore.Extensions;
+using P5.IdentityServer3.Common.Extensions;
 
 namespace P5.IdentityServer3AllInOne.App.Config
 {

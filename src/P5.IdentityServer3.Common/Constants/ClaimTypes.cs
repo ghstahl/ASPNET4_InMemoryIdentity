@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace P5.IdentityServerCore.Constants
+﻿namespace P5.IdentityServer3.Common.Constants
 {
     public static class P5_Constants
     {

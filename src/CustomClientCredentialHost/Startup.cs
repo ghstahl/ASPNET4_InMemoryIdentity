@@ -23,6 +23,7 @@ using P5.IdentityServer3.Cassandra.DAO;
 using P5.IdentityServer3.Cassandra.Settings;
 using P5.IdentityServer3.Cassandra.UserService;
 using P5.IdentityServer3.Common;
+using P5.IdentityServer3.Common.Providers;
 using P5.IdentityServerCore.IdSrv;
 using P5.WebApi2.Hub;
 using Serilog;
