@@ -11,7 +11,7 @@ namespace CustomClientCredentialHost.Console.Client
 {
     class Program
     {
-        const string domain_root = "http://localhost:55979";
+        const string domain_root = "http://localhost:55970";
         const string identity_server_route = "/idsrv3core";
         const string identity_server_authority = domain_root + identity_server_route;
         const string token_endpoint = identity_server_authority + "/connect/token";
@@ -70,6 +70,21 @@ namespace CustomClientCredentialHost.Console.Client
                     }
 
                 }
+                response = RequestResourceOwnerToken();
+                if (response.IsError)
+                {
+                    response.HttpErrorReason.ConsoleRed();
+                }
+                else
+                {
+                    System.Console.WriteLine(response.Json);
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        CallApi(response);
+                    }
+
+                }
+
             }
             catch (Exception e)
             {
@@ -120,13 +135,14 @@ namespace CustomClientCredentialHost.Console.Client
 
             }
 
+
         }
         static TokenResponse GetClientToken()
         {
             var client = new TokenClient(
                 token_endpoint,
-                "122f6283-6980-4bf1-b2f0-10bdaa6c6d5b",
-                "7a1b3887-9fb8-451d-b86a-5fd9a0a86ed7");
+                "9bdd52a6-9762-4493-b3d2-0e17d7603a4a",
+                "8fbf9557-d43b-47d5-b5a7-f423f174c3cd");
             var customParams = new Dictionary<string, string>
             {
                 { "handler", "openid-provider" },
@@ -134,6 +150,26 @@ namespace CustomClientCredentialHost.Console.Client
             };
             return client.RequestClientCredentialsAsync("api1", customParams).Result;
         }
+
+        static TokenResponse RequestResourceOwnerToken()
+        {
+            var client = new TokenClient(
+                token_endpoint,
+                "1369e607-9c2e-44c5-986a-b94a36c2ef3f",
+                "4ba17f8c-0aed-4f33-9537-bfa2452b1f64");
+
+            // idsrv supports additional non-standard parameters
+            // that get passed through to the user service
+            var customParams = new Dictionary<string, string>
+            {
+                { "handler", "arbritary-provider" },
+                { "dictionary-data", "{\"naguid\":\"1234abcd\",\"In\":\"Flames\"}" }
+            };
+
+            return client.RequestResourceOwnerPasswordAsync("service@internal.io", "Password1234@", "api1 offline_access", customParams).Result;
+        }
+
+
         static TokenResponse GetClientToken_error()
         {
             var client = new TokenClient(
