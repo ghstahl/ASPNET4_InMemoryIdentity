@@ -53,6 +53,7 @@ namespace CustomClientCredentialHost
             var cassandraUserStore = new CassandraUserStore(CassandraAspNetIdentityOptions.CassandraConfig,
                 CassandraAspNetApplicationConstants.TenantGuid);
             var userService = new Registration<IUserService>(new AspNetIdentityServerService(cassandraUserStore));
+            userService = new Registration<IUserService>(new ArbritraryUserService());
             IdentityServerServiceFactory identityServerServiceFactory;
 
 

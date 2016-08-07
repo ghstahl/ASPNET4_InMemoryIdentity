@@ -10,6 +10,16 @@ using P5.AspNet.Identity.Cassandra;
 
 namespace P5.IdentityServer3.Cassandra.UserService
 {
+    public class ArbritraryUserService : UserServiceBase
+    {
+        public override async Task AuthenticateLocalAsync(LocalAuthenticationContext context)
+        {
+            if (!string.IsNullOrEmpty(context.UserName))
+            {
+                context.AuthenticateResult = new AuthenticateResult(context.UserName, context.UserName);
+            }
+        }
+    }
     public class AspNetIdentityServerService: UserServiceBase
     {
         private CassandraUserStore _userStore;
