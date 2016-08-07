@@ -10,7 +10,7 @@ using P5.AspNet.Identity.Cassandra;
 
 namespace P5.IdentityServer3.Cassandra.UserService
 {
-    public class ArbritraryUserService : UserServiceBase
+    public class ArbitraryUserService : UserServiceBase
     {
         public override async Task AuthenticateLocalAsync(LocalAuthenticationContext context)
         {

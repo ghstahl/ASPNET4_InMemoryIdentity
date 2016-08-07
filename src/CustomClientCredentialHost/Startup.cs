@@ -53,7 +53,7 @@ namespace CustomClientCredentialHost
             var cassandraUserStore = new CassandraUserStore(CassandraAspNetIdentityOptions.CassandraConfig,
                 CassandraAspNetApplicationConstants.TenantGuid);
             var userService = new Registration<IUserService>(new AspNetIdentityServerService(cassandraUserStore));
-            userService = new Registration<IUserService>(new ArbritraryUserService());
+            userService = new Registration<IUserService>(new ArbitraryUserService());
             IdentityServerServiceFactory identityServerServiceFactory;
 
 
@@ -118,7 +118,7 @@ namespace CustomClientCredentialHost
                         "openid-provider",new CustomOpenIdClaimsProvider(resolver.Resolve<IUserService>())
                     },
                     {
-                        "arbritary-provider",new ArbritaryClaimsProvider(resolver.Resolve<IUserService>())
+                        "arbitrary-provider",new ArbitraryClaimsProvider(resolver.Resolve<IUserService>())
                     }
 
                 };

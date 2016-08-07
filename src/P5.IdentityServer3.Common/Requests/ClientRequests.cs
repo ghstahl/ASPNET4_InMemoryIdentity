@@ -21,7 +21,7 @@ namespace P5.IdentityServer3.Common
             // that get passed through to the user service
             var customParams = new Dictionary<string, string>
             {
-                { "handler", "arbritary-provider" },
+                { "handler", "arbitrary-provider" },
                 { "dictionary-data", dictionaryData }
             };
 

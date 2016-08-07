@@ -101,7 +101,7 @@
     <Compile Include="Models\IDocumentRecord.cs" />
     <Compile Include="Models\ISimpleDocument.cs" />
     <Compile Include="Models\SimpleDocument.cs" />
-    <Compile Include="Providers\ArbritaryClaimsProvider.cs" />
+    <Compile Include="Providers\ArbitraryClaimsProvider.cs" />
     <Compile Include="Providers\IOptionalParams.cs" />
     <Compile Include="RefreshToken\AbstractRefreshTokenHandle.cs" />
     <Compile Include="RefreshToken\RefreshTokenConstants.cs" />

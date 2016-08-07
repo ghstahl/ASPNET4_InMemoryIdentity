@@ -15,32 +15,34 @@ using ClaimTypes = P5.IdentityServer3.Common.Constants.ClaimTypes;
 
 namespace P5.IdentityServer3.Common.Providers
 {
-    public class ArbritaryClaimsProvider : DefaultClaimsProvider, IOptionalParams
+    public class ArbitraryClaimsProvider : DefaultClaimsProvider, IOptionalParams
     {
-        private static List<string> _requiredArguments;
+        private static List<string> _requiredArbitraryClaimsArguments;
 
-        private static List<string> RequiredArgument
+        private static List<string> RequiredArbitraryClaimsArgument
         {
             get
             {
-                return _requiredArguments ?? (_requiredArguments = new List<string>
+                return _requiredArbitraryClaimsArguments ?? (_requiredArbitraryClaimsArguments = new List<string>
                 {
-                    "arbritary-data"
+                    "arbitrary-claims"
                 });
             }
         }
-        private static List<string> _requiredDictionaryArguments;
 
-        private static List<string> RequiredDictionaryArgument
+        private static List<string> _requiredArbitraryScopesArguments;
+
+        private static List<string> RequiredArbitraryScopes
         {
             get
             {
-                return _requiredDictionaryArguments ?? (_requiredDictionaryArguments = new List<string>
+                return _requiredArbitraryScopesArguments ?? (_requiredArbitraryScopesArguments = new List<string>
                 {
-                    "dictionary-data"
+                    "arbitrary-scopes"
                 });
             }
         }
+
         private static List<string> _p5ClaimTypes;
 
         private static List<string> P5ClaimTypes
@@ -57,9 +59,9 @@ namespace P5.IdentityServer3.Common.Providers
             }
         }
 
-        private static readonly ILog Logger = LogProvider.For<ArbritaryClaimsProvider>();
+        private static readonly ILog Logger = LogProvider.For<ArbitraryClaimsProvider>();
 
-        public ArbritaryClaimsProvider(IUserService users)
+        public ArbitraryClaimsProvider(IUserService users)
             : base(users)
         {
         }
@@ -67,13 +69,14 @@ namespace P5.IdentityServer3.Common.Providers
         public override Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, Client client,
             IEnumerable<Scope> scopes, ValidatedRequest request)
         {
-            var arbritraryCheck = request.Raw.Validate(RequiredArgument);
-            var arbritraryDictionaryCheck = request.Raw.Validate(RequiredDictionaryArgument);
-            if (!arbritraryCheck && !arbritraryDictionaryCheck)
+
+            var arbitraryClaimsCheck = request.Raw.Validate(RequiredArbitraryClaimsArgument);
+            var arbitraryScopesCheck = request.Raw.Validate(RequiredArbitraryScopes);
+            if (  !arbitraryClaimsCheck && !arbitraryScopesCheck)
             {
-                var missing = string.Join(",", RequiredArgument.ToArray());
+                var missing = string.Join(",", RequiredArbitraryClaimsArgument.ToArray());
                 missing += ",";
-                missing += string.Join(",", RequiredDictionaryArgument.ToArray());
+                missing += string.Join(",", RequiredArbitraryScopes.ToArray());
                 throw new Exception(string.Format("RequiredArgument failed need the following [{0}]", missing));
             }
 
@@ -82,21 +85,27 @@ namespace P5.IdentityServer3.Common.Providers
             var result = base.GetAccessTokenClaimsAsync(subject, client, scopes, request);
             var rr = request.Raw.AllKeys.ToDictionary(k => k, k => request.Raw[k]);
             List<Claim> finalClaims = new List<Claim>(result.Result);
-            Dictionary<string, string> values;
-            if (arbritraryDictionaryCheck)
+
+
+            if (arbitraryScopesCheck)
             {
-                values =
-                    JsonConvert.DeserializeObject<Dictionary<string, string>>(rr["dictionary-data"]);
-            }
-            else
-            {
-                values = new Dictionary<string, string>
+                var newScopes = rr["arbitrary-scopes"].Split(new char[] {' ', '\t'},
+                    StringSplitOptions.RemoveEmptyEntries);
+                foreach (var scope in newScopes)
                 {
-                    {ClaimTypes.ArbritaryData, rr["arbritary-data"]}
-                };
+                    finalClaims.Add(new Claim("scope", scope));
+                }
             }
 
-            finalClaims.AddRange(values.Select(value => new Claim(value.Key, value.Value)));
+            Dictionary<string, string> values;
+            if (arbitraryClaimsCheck)
+            {
+                values =
+                    JsonConvert.DeserializeObject<Dictionary<string, string>>(rr["arbitrary-claims"]);
+                finalClaims.AddRange(values.Select(value => new Claim(value.Key, value.Value)));
+            }
+
+
 
             if (subject != null)
             {

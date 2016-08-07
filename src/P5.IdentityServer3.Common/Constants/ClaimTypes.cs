@@ -9,6 +9,5 @@
         public const string AccountGuid = P5_Constants.@namespace + "accountguid";
         public const string UserGuid = P5_Constants.@namespace + "userguid";
         public const string ClientRequestNameValueCollection = P5_Constants.@namespace + "crnvc";
-        public const string ArbritaryData = P5_Constants.@namespace + "arb";
     }
 }
