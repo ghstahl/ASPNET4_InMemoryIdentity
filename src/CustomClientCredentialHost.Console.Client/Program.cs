@@ -6,18 +6,20 @@ using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using IdentityModel.Extensions;
+using P5.IdentityServer3.Common;
+using P5.IdentityServer3.Common.Settings;
 
 namespace CustomClientCredentialHost.Console.Client
 {
     class Program
     {
         const string domain_root = "http://localhost:55970";
-        const string identity_server_route = "/idsrv3core";
-        const string identity_server_authority = domain_root + identity_server_route;
-        const string token_endpoint = identity_server_authority + "/connect/token";
+        const string identity_server_route = "idsrv3core";
 
         static void Main(string[] args)
         {
+            IdentityServerSettings.DomainRoot = domain_root;
+            IdentityServerSettings.IdentityServerBaseRoute = identity_server_route;
 
             string m1 = "Type a string of text then press Enter. " +
                        "Type 'x' anywhere in the text to quit:\n";
@@ -56,7 +58,7 @@ namespace CustomClientCredentialHost.Console.Client
                     response.HttpErrorReason.ConsoleRed();
                 }
 
-                response = GetClientToken();
+                response = await GetClientTokenAsync();
                 if (response.IsError)
                 {
                     response.HttpErrorReason.ConsoleRed();
@@ -70,7 +72,7 @@ namespace CustomClientCredentialHost.Console.Client
                     }
 
                 }
-                response = RequestResourceOwnerToken();
+                response = await RequestResourceOwnerTokenAsync();
                 if (response.IsError)
                 {
                     response.HttpErrorReason.ConsoleRed();
@@ -137,10 +139,10 @@ namespace CustomClientCredentialHost.Console.Client
 
 
         }
-        static TokenResponse GetClientToken()
+        static async Task<TokenResponse> GetClientTokenAsync()
         {
             var client = new TokenClient(
-                token_endpoint,
+                IdentityServerSettings.TokenEndpoint,
                 "9bdd52a6-9762-4493-b3d2-0e17d7603a4a",
                 "8fbf9557-d43b-47d5-b5a7-f423f174c3cd");
             var customParams = new Dictionary<string, string>
@@ -148,32 +150,31 @@ namespace CustomClientCredentialHost.Console.Client
                 { "handler", "openid-provider" },
                 { "openid-connect-token", "myOpenId" }
             };
-            return client.RequestClientCredentialsAsync("api1", customParams).Result;
+            return await client.RequestClientCredentialsAsync("api1", customParams);
         }
 
-        static TokenResponse RequestResourceOwnerToken()
+        static async Task<TokenResponse> RequestResourceOwnerTokenAsync()
         {
-            var client = new TokenClient(
-                token_endpoint,
-                "1369e607-9c2e-44c5-986a-b94a36c2ef3f",
-                "4ba17f8c-0aed-4f33-9537-bfa2452b1f64");
-
-            // idsrv supports additional non-standard parameters
-            // that get passed through to the user service
-            var customParams = new Dictionary<string, string>
+            var customClaims = new Dictionary<string, string>
             {
-                { "handler", "arbritary-provider" },
-                { "dictionary-data", "{\"naguid\":\"1234abcd\",\"In\":\"Flames\"}" }
+                {"naGuid", "1234abcd"},
+                {"In", "Flames"}
             };
 
-            return client.RequestResourceOwnerPasswordAsync("service@internal.io", "Password1234@", "api1 offline_access", customParams).Result;
+            return await ClientRequests.RequestResourceOwnerTokenAsync(
+                "1369e607-9c2e-44c5-986a-b94a36c2ef3f",
+                "4ba17f8c-0aed-4f33-9537-bfa2452b1f64",
+                "service@internal.io",
+                "Password1234@",
+                "api1 offline_access", customClaims
+                );
         }
 
 
         static TokenResponse GetClientToken_error()
         {
             var client = new TokenClient(
-                token_endpoint,
+                IdentityServerSettings.TokenEndpoint,
                 "sdfdsf",
                 "secsdfdsfret");
             var customParams = new Dictionary<string, string>

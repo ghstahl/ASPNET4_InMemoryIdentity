@@ -118,7 +118,6 @@
     <Compile Include="Scope\ScopeMappedRecord.cs" />
     <Compile Include="Scope\ScopeStore.cs" />
     <Compile Include="RefreshToken\RefreshTokenHandleStore.cs" />
-    <Compile Include="Settings\IdentityServerSettings.cs" />
     <Compile Include="Token\TokenHandleStore.cs" />
     <Compile Include="UserService\AspNetIdentityServerService.cs" />
     <Compile Include="User\IdentityServer3AdminStore.cs" />
