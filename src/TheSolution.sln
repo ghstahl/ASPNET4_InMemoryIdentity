@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AA.Reference.App", "AA.Refe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.InMemoryIdenity.ForSingleExternalAuthOnly", "P5.InMemoryIdenity.ForSingleExternalAuthOnly\P5.InMemoryIdenity.ForSingleExternalAuthOnly.csproj", "{345DFDBC-4287-440D-945B-121B6736F390}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServer3AllInOne.App", "P5.IdentityServer3AllInOne.App\P5.IdentityServer3AllInOne.App.csproj", "{5AEF6D87-6B82-4718-A556-FECF6AFCE76C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.IdentityServerCore", "P5.IdentityServerCore\P5.IdentityServerCore.csproj", "{BD903BD0-8285-4C97-95E8-68F646432604}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P5.AspNet.Identity.Biggy", "P5.AspNet.Identity.Biggy\P5.AspNet.Identity.Biggy.csproj", "{EC8C86FF-227C-493A-81EB-C3CDAA7741D2}"
@@ -105,10 +103,6 @@ Global
 		{345DFDBC-4287-440D-945B-121B6736F390}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{345DFDBC-4287-440D-945B-121B6736F390}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{345DFDBC-4287-440D-945B-121B6736F390}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5AEF6D87-6B82-4718-A556-FECF6AFCE76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AEF6D87-6B82-4718-A556-FECF6AFCE76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5AEF6D87-6B82-4718-A556-FECF6AFCE76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5AEF6D87-6B82-4718-A556-FECF6AFCE76C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BD903BD0-8285-4C97-95E8-68F646432604}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD903BD0-8285-4C97-95E8-68F646432604}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD903BD0-8285-4C97-95E8-68F646432604}.Release|Any CPU.ActiveCfg = Release|Any CPU
