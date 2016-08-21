@@ -21,4 +21,15 @@
 		CREATE KEYSPACE IF NOT EXISTS identityserver3
 		WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
 
-3. Run the unit tests.
+3. Configure conf/cassandra.yaml so you can connect to it from outside the VM  
+
+		# listen_address: localhost
+		listen_interface: eth0
+		# listen_interface_prefer_ipv6: false
+
+		# rpc_address: localhost
+		rpc_interface: eth1
+		# rpc_interface_prefer_ipv6: false
+
+
+4. Run the unit tests.
