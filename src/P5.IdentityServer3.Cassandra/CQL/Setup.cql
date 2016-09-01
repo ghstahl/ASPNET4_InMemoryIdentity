@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS user_profile_by_id (
     UserId text,
     Enabled boolean,
     UserName text,
-    PRIMARY KEY (id)
+    PRIMARY KEY (UserId)
 );
 
 
@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS TokenHandle_By_ClientId (
 
 CREATE TABLE IF NOT EXISTS Secret_Value_Hash_Protected_Password (
     Value text,
-    ProtectedValue text
+    ProtectedValue text,
     PRIMARY KEY (Value)
 );
 
@@ -256,6 +256,5 @@ CREATE INDEX IF NOT EXISTS
 ON scopes_by_id (ShowInDiscoveryDocument);
 
 CREATE INDEX IF NOT EXISTS
-ON user_profile_by_id (UserId);
-
+ON scopes_by_id (Name);
 

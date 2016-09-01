@@ -136,15 +136,21 @@ namespace CustomClientCredentialHost.Console.Client
                 "--------------------------------\n".ConsoleRed();
 
             }
-
-
         }
+
+        /*
+clientId: 2e6a2bb2-f8d7-4d72-b4c1-41b3015654f2
+client.pfx ThumbPrint: 61B754C541BBCFC6A45A9E9EC5E47D8702B78C29
+ids3client.se thumbprint: 584A8E2BCAE8F10C115628E2B8A6FD1D21288AB6
+secret: 1f718d3c-a77b-4ee0-91e9-aa66cc7a0588
+         * */
+
         static async Task<TokenResponse> GetClientTokenAsync()
         {
             var client = new TokenClient(
                 IdentityServerSettings.TokenEndpoint,
-                "9bdd52a6-9762-4493-b3d2-0e17d7603a4a",
-                "8fbf9557-d43b-47d5-b5a7-f423f174c3cd");
+                "2e6a2bb2-f8d7-4d72-b4c1-41b3015654f2",
+                "1f718d3c-a77b-4ee0-91e9-aa66cc7a0588");
             var customParams = new Dictionary<string, string>
             {
                 { "handler", "openid-provider" },
@@ -153,6 +159,13 @@ namespace CustomClientCredentialHost.Console.Client
             return await client.RequestClientCredentialsAsync("api1", customParams);
         }
 
+        /*
+         * clientId: 75b4508c-01d4-4a8a-914b-d745ba80a092
+secrete: 3ff88385-4a4f-412f-a5ba-9d00f7424f39
+username: service@internal.io
+pass: anything
+
+         */
         static async Task<TokenResponse> RequestResourceOwnerTokenAsync()
         {
             var customClaims = new Dictionary<string, string>
@@ -162,8 +175,8 @@ namespace CustomClientCredentialHost.Console.Client
             };
 
             return await ClientRequests.RequestResourceOwnerTokenAsync(
-                "1369e607-9c2e-44c5-986a-b94a36c2ef3f",
-                "4ba17f8c-0aed-4f33-9537-bfa2452b1f64",
+                "75b4508c-01d4-4a8a-914b-d745ba80a092",
+                "3ff88385-4a4f-412f-a5ba-9d00f7424f39",
                 "service@internal.io",
                 "Password1234@",
                 "api1 offline_access", customClaims

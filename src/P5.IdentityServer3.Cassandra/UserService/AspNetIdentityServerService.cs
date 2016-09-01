@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using IdentityServer3.Core.Models;
@@ -18,6 +19,44 @@ namespace P5.IdentityServer3.Cassandra.UserService
             {
                 context.AuthenticateResult = new AuthenticateResult(context.UserName, context.UserName);
             }
+        }
+        public override async Task IsActiveAsync(IsActiveContext ctx)
+        {
+            ctx.IsActive = true;
+//            return base.IsActiveAsync(context);
+        }
+
+        public override async Task AuthenticateExternalAsync(ExternalAuthenticationContext context)
+        {
+            base.AuthenticateExternalAsync(context);
+        }
+
+        public override async Task GetProfileDataAsync(ProfileDataRequestContext ctx)
+        {
+            var subject = ctx.Subject;
+            var requestedClaimTypes = ctx.RequestedClaimTypes;
+
+            if (subject == null)
+                throw new ArgumentNullException("subject");
+
+            ctx.IssuedClaims = subject.Claims;
+
+            // return base.GetProfileDataAsync(context);
+        }
+
+        public override async Task PostAuthenticateAsync(PostAuthenticationContext context)
+        {
+            base.PostAuthenticateAsync(context);
+        }
+
+        public override async Task PreAuthenticateAsync(PreAuthenticationContext context)
+        {
+            base.PreAuthenticateAsync(context);
+        }
+
+        public override async Task SignOutAsync(SignOutContext context)
+        {
+            base.SignOutAsync(context);
         }
     }
     public class AspNetIdentityServerService: UserServiceBase
