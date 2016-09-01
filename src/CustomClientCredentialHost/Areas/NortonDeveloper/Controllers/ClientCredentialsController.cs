@@ -283,16 +283,25 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Controllers
             var adminStore = new IdentityServer3AdminStore();
             var myCrypto = new TripleDesEncryption(model.PassCode);
             var protectedClientSecret = myCrypto.Encrypt(model.OpenClientSecret);
-            var hashedClientSecret = model.OpenClientSecret.Sha256();
-            var secret = new Secret(hashedClientSecret);
-            var secrets = new List<Secret> {secret};
-            ProtectedSecretHandle protectedSecretHandle = new ProtectedSecretHandle()
+            Secret secret = null;
+            if (string.Compare(model.SecretType, "SharedSecret", StringComparison.OrdinalIgnoreCase) == 0)
             {
-                ClientId = model.ClientId,
-                Value = hashedClientSecret,
-                ProtectedValue = protectedClientSecret
-            };
-            await adminStore.AddSecretProtectedValue(protectedSecretHandle);
+                var hashedClientSecret = model.OpenClientSecret.Sha256();
+                secret = new Secret(hashedClientSecret) { Type = model.SecretType };
+                ProtectedSecretHandle protectedSecretHandle = new ProtectedSecretHandle()
+                {
+                    ClientId = model.ClientId,
+                    Value = hashedClientSecret,
+                    ProtectedValue = protectedClientSecret
+                };
+                await adminStore.AddSecretProtectedValue(protectedSecretHandle);
+            }
+            if (string.Compare(model.SecretType, "X509Thumbprint", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                secret = new Secret(model.ThumbPrint) { Type = model.SecretType };
+            }
+
+            var secrets = new List<Secret> {secret};
             await adminStore.AddClientSecretsToClientAsync(model.ClientId, secrets);
             return RedirectToAction("Index");
         }
