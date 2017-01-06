@@ -100,6 +100,32 @@ namespace CustomClientCredentialHost.Areas.NortonDeveloper.Models
         //     Specifies allowed flow for client (either AuthorizationCode, Implicit, Hybrid,
         //     ResourceOwner, ClientCredentials or Custom). Defaults to Implicit.
         [Required]
-        public Flows Flow { get; set; }
+        public Flows Flow
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Lifetime of access token in seconds (defaults to 3600 seconds / 1 hour)
+        /// </summary>
+        [Required]
+        public int AccessTokenLifetime { get; set; }
+
+        /// <summary>
+        /// Lifetime of authorization code in seconds (defaults to 300 seconds / 5 minutes)
+        /// </summary>
+        public int AuthorizationCodeLifetime { get; set; }
+
+        /// <summary>
+        /// Maximum lifetime of a refresh token in seconds. Defaults to 2592000 seconds / 30 days
+        /// </summary>
+        [Required]
+        public int AbsoluteRefreshTokenLifetime { get; set; }
+
+        /// <summary>
+        /// Sliding lifetime of a refresh token in seconds. Defaults to 1296000 seconds / 15 days
+        /// </summary>
+        [Required]
+        public int SlidingRefreshTokenLifetime { get; set; }
     }
 }
